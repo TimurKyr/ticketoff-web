@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ticketoff – Events in Astana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #FB923C;
+      --brand-deep: #C2410C;
+      --on-brand: #1B2338;
+      --navy: #1B2338;
+      --tint: #FFF1E3;
+      --ink: #1B2338;
+      --muted: #5F6577;
+      --bg: #F7F6F4;
+      --surface: #FFFFFF;
+      --line: #E7E4DF;
+      --free-bg: #E3F5EA;
+      --free: #0F7B45;
+      --link: #C2410C;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    :root[data-theme="dark"] {
+      --tint: #2A1C12;
+      --ink: #F1EFEA;
+      --muted: #A9AEBD;
+      --bg: #12141C;
+      --surface: #1B1F2B;
+      --line: #2C3242;
+      --free-bg: #12351F;
+      --free: #7EE2A5;
+      --link: #FDBA74
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    * {
+      box-sizing: inherit
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 16px/1.5 Onest, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      color: inherit
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--link);
+      outline-offset: 2px
+    }
+
+    .wrap {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 0 32px
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: env(safe-area-inset-top, 0px);
+      z-index: 5
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      flex-wrap: wrap
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .logo i {
+      width: 30px;
+      height: 22px;
+      border-radius: 6px;
+      background: radial-gradient(circle at 0 50%, var(--surface) 4px, transparent 4.5px), radial-gradient(circle at 100% 50%, var(--surface) 4px, transparent 4.5px), var(--brand)
+    }
+
+    .pill {
+      background: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 6px 14px
+    }
+
+    .city,
+    .lang {
+      color: var(--muted);
+      font-weight: 500
+    }
+
+    .search {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 18px;
+      background: var(--bg)
+    }
+
+    .search:focus-within {
+      border-color: var(--brand)
+    }
+
+    .search input {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 12px 0;
+      width: 100%;
+      font: inherit;
+      outline: 0
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px
+    }
+
+    .actions a {
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 500
+    }
+
+    .actions a:hover {
+      background: var(--tint)
+    }
+
+    .actions .cta {
+      background: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600
+    }
+
+    .actions .theme {
+      background: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 18px
+    }
+
+    .actions .theme:hover {
+      background: var(--tint)
+    }
+
+    .cats {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none
+    }
+
+    .cats button {
+      background: none;
+      border: 0;
+      padding: 12px 14px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent
+    }
+
+    .cats .on {
+      border-bottom-color: var(--brand);
+      font-weight: 600
+    }
+
+    h1 {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -.02em;
+      margin: 28px 0 20px
+    }
+
+    .herowrap {
+      position: relative
+    }
+
+    .hero {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none
+    }
+
+    .slide {
+      flex: 0 0 100%;
+      height: clamp(300px, 52vh, 560px);
+      border-radius: 26px;
+      position: relative;
+      overflow: hidden;
+      scroll-snap-align: start;
+      background: linear-gradient(135deg, var(--a), var(--b));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(24px, 4vw, 56px);
+      color: #fff
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(27, 35, 56, .9), rgba(27, 35, 56, 0) 65%)
+    }
+
+    .slide>* {
+      position: relative
+    }
+
+    .slide h2 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      max-width: 20ch
+    }
+
+    .slide p {
+      margin: 0 0 20px;
+      font-size: clamp(16px, 1.6vw, 20px)
+    }
+
+    .slide .btn {
+      padding: 14px 28px;
+      font-size: 17px
+    }
+
+    .btn {
+      display: inline-block;
+      align-self: flex-start;
+      background: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 12px 22px
+    }
+
+    .btn.sm {
+      padding: 8px 14px;
+      font-size: 15px
+    }
+
+    .next,
+    .prev {
+      position: absolute;
+      top: 50%;
+      translate: 0 -50%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--surface);
+      font-size: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .25)
+    }
+
+    .next {
+      right: 16px
+    }
+
+    .prev {
+      left: 16px
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      margin-top: 10px
+    }
+
+    .dots button {
+      background: none;
+      border: 0;
+      padding: 8px 5px
+    }
+
+    .dots button::before {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--line);
+      transition: width .25s, background .25s
+    }
+
+    .dots button.on::before {
+      width: 32px;
+      background: var(--brand)
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .dots button::before {
+        transition: none
+      }
+    }
+
+    .head {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px
+    }
+
+    .head h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -.01em
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px
+    }
+
+    .chips button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 6px 16px
+    }
+
+    .chips .on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 20px
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden
+    }
+
+    .card[hidden] {
+      display: none
+    }
+
+    .poster {
+      display: block;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, var(--a), var(--b));
+      position: relative
+    }
+
+    .date {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 2px 10px;
+      font-weight: 600;
+      font-size: 14px
+    }
+
+    .body {
+      padding: 14px 16px 16px
+    }
+
+    .body h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      line-height: 1.25
+    }
+
+    .body p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .price {
+      font-weight: 600
+    }
+
+    .free {
+      background: var(--free-bg);
+      color: var(--free);
+      padding: 2px 12px;
+      border-radius: 999px
+    }
+
+    footer {
+      background: var(--navy);
+      color: #B4B9C9;
+      margin-top: 56px;
+      padding: 36px 0
+    }
+
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap
+    }
+
+    footer .logo {
+      color: #fff;
+      margin-bottom: 6px
+    }
+
+    footer p {
+      margin: 0;
+      max-width: 36ch
+    }
+
+    footer nav {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: flex-start
+    }
+
+    footer a:hover {
+      color: #fff
+    }
+
+    @media(max-width:640px) {
+
+      .city,
+      .lang {
+        display: none
+      }
+
+      .slide {
+        height: 340px
+      }
+
+      .wrap {
+        padding: 0 16px
+      }
+    }
+
+    /* hover effects */
+    @media(hover:hover) {
+      .card:hover {
+        border-color: var(--brand)
+      }
+
+      .btn:hover,
+      .pill:hover {
+        filter: brightness(1.06)
+      }
+
+      .actions .cta:hover {
+        background: var(--brand);
+        filter: brightness(.95)
+      }
+
+      .cats button:not(.on):hover {
+        border-bottom-color: var(--brand)
+      }
+
+      .chips button:not(.on):hover {
+        border-color: var(--brand);
+        background: var(--tint)
+      }
+
+      .search:hover:not(:focus-within) {
+        border-color: var(--muted)
+      }
+
+      .next:hover,
+      .prev:hover {
+        scale: 1.08
+      }
+
+      .dots button:not(.on):hover::before {
+        background: var(--muted)
+      }
+
+      footer nav a:hover {
+        text-decoration: underline
+      }
+    }
+
+    @media(hover:hover) and (prefers-reduced-motion:no-preference) {
+
+      .btn,
+      .pill,
+      .actions a,
+      .actions .theme,
+      .cats button,
+      .chips button,
+      .search,
+      .next,
+      .prev,
+      .card,
+      .logo i {
+        transition: transform .2s, translate .2s, scale .2s, box-shadow .2s, background-color .2s, border-color .2s, filter .2s
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 28px rgba(27, 35, 56, .14)
+      }
+
+      .btn:hover {
+        transform: translateY(-1px)
+      }
+
+      .btn:active {
+        transform: none
+      }
+
+      .logo:hover i {
+        transform: rotate(-8deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap top">
+      <a class="logo" href="#"><i></i>Ticketoff</a>
+      <a class="pill" href="#">Events</a>
+      <span class="city">Astana</span>
+      <span class="lang">EN</span>
+      <label class="search"><input type="search" placeholder="Search events" aria-label="Search events"></label>
+      <div class="actions"><a href="#">My tickets</a><a class="cta" href="#">Create event</a><a
+          href="authorization.html">Sign in</a><button class="theme"
+          aria-label="Switch between light and dark theme">◐</button></div>
+    </div>
+    <nav class="wrap cats" aria-label="Categories">
+      <button class="on">All
+        events</button><button>Concerts</button><button>Theatre</button><button>Comedy</button><button>Sports</button><button>Workshops</button><button>Student
+        events</button><button>Festivals</button><button>Kids</button>
+    </nav>
+  </header>
+  <main class="wrap">
+    <h1>Events in Astana</h1>
+    <div class="herowrap">
+      <div class="hero">
+        <div class="slide" style="--a:#FB923C;--b:#C2410C">
+          <h2>Autumn concert season</h2>
+          <p>Live music across the city, from 3 500 ₸</p><a class="btn" href="#">Get tickets</a>
+        </div>
+        <div class="slide" style="--a:#3B4A7A;--b:#F97316">
+          <h2>Startup pitch evening</h2>
+          <p>Free entry, register in one tap</p><a class="btn" href="#">Register free</a>
+        </div>
+        <div class="slide" style="--a:#FDBA74;--b:#9A3412">
+          <h2>Charity run 5K</h2>
+          <p>Sunday morning on the Left Bank</p><a class="btn" href="#">Get tickets</a>
+        </div>
+      </div>
+      <button class="prev" aria-label="Previous featured event">‹</button>
+      <button class="next" aria-label="Next featured event">›</button>
+    </div>
+    <div class="dots" aria-label="Featured events"></div>
+    <div class="head">
+      <h2>Happening this week</h2>
+      <div class="chips"><button class="on" data-f="all">All</button><button data-f="1">Free</button><button
+          data-f="0">Paid</button></div>
+    </div>
+    <section class="grid">
+      <article class="card" data-free="0" style="--a:#FB923C;--b:#C2410C"><a class="poster" href="#"><span
+            class="date">Oct 3</span></a>
+        <div class="body">
+          <h3>Open-air jazz night</h3>
+          <p>Sat, 19:00<br>Central Park stage</p>
+          <div class="row"><span class="price">from 3 500 ₸</span><a class="btn sm" href="#">Get tickets</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="1" style="--a:#3B4A7A;--b:#F97316"><a class="poster" href="#"><span
+            class="date">Sep 29</span></a>
+        <div class="body">
+          <h3>Startup pitch evening</h3>
+          <p>Tue, 18:30<br>Innovation Hub</p>
+          <div class="row"><span class="price free">Free</span><a class="btn sm" href="#">Register</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="0" style="--a:#FDBA74;--b:#7C2D12"><a class="poster" href="#"><span
+            class="date">Oct 4</span></a>
+        <div class="body">
+          <h3>Kazakh folk ensemble</h3>
+          <p>Sun, 17:00<br>Philharmonic hall</p>
+          <div class="row"><span class="price">from 6 000 ₸</span><a class="btn sm" href="#">Get tickets</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="1" style="--a:#1B2338;--b:#EA580C"><a class="poster" href="#"><span
+            class="date">Sep 30</span></a>
+        <div class="body">
+          <h3>Chess club open tournament</h3>
+          <p>Wed, 15:00<br>University library</p>
+          <div class="row"><span class="price free">Free</span><a class="btn sm" href="#">Register</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="0" style="--a:#F97316;--b:#4A2A5C"><a class="poster" href="#"><span
+            class="date">Oct 2</span></a>
+        <div class="body">
+          <h3>Stand-up night</h3>
+          <p>Fri, 20:00<br>Comedy club</p>
+          <div class="row"><span class="price">from 4 000 ₸</span><a class="btn sm" href="#">Get tickets</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="1" style="--a:#FDBA74;--b:#3B4A7A"><a class="poster" href="#"><span
+            class="date">Oct 3</span></a>
+        <div class="body">
+          <h3>Robotics workshop for kids</h3>
+          <p>Sat, 11:00<br>Tech Park</p>
+          <div class="row"><span class="price free">Free</span><a class="btn sm" href="#">Register</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="0" style="--a:#EA580C;--b:#1B2338"><a class="poster" href="#"><span
+            class="date">Oct 4</span></a>
+        <div class="body">
+          <h3>Charity run 5K</h3>
+          <p>Sun, 09:00<br>Left Bank embankment</p>
+          <div class="row"><span class="price">from 2 000 ₸</span><a class="btn sm" href="#">Get tickets</a></div>
+        </div>
+      </article>
+      <article class="card" data-free="0" style="--a:#9A3412;--b:#FB923C"><a class="poster" href="#"><span
+            class="date">Oct 1</span></a>
+        <div class="body">
+          <h3>Indie film screening</h3>
+          <p>Thu, 19:30<br>Arthouse cinema</p>
+          <div class="row"><span class="price">from 2 500 ₸</span><a class="btn sm" href="#">Get tickets</a></div>
+        </div>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      <div>
+        <div class="logo"><i></i>Ticketoff</div>
+        <p>Create events and sell tickets. Free events cost nothing.</p>
+      </div>
+      <nav aria-label="Footer"><a href="#">Create an event</a><a href="#">Help</a><a href="#">Terms</a><a
+          href="#">Privacy</a></nav>
+    </div>
+  </footer>
+  <script>
+    const $$ = s => [...document.querySelectorAll(s)];
+    function pick(sel, cb) { const sync = b => $$(sel).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b) }); $$(sel).forEach(b => b.onclick = () => { sync(b); cb && cb(b) }); sync($$(sel + '.on')[0]) }
+    pick('.cats button');
+    pick('.chips button', b => $$('.card').forEach(c => c.hidden = b.dataset.f !== 'all' && c.dataset.free !== b.dataset.f));
+    const hero = document.querySelector('.hero'), slides = [...hero.children], still = matchMedia('(prefers-reduced-motion:reduce)').matches, beh = still ? 'auto' : 'smooth', dots = document.querySelector('.dots');
+    const gap = () => hero.clientWidth + 20, cur = () => Math.min(slides.length - 1, Math.round(hero.scrollLeft / gap()));
+    const goTo = i => hero.scrollTo({ left: ((i % slides.length) + slides.length) % slides.length * gap(), behavior: beh });
+    slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', 'Show featured event ' + (i + 1) + ' of ' + slides.length); b.onclick = () => { goTo(i); play() }; dots.append(b) });
+    const mark = () => [...dots.children].forEach((b, i) => { b.classList.toggle('on', i === cur()); b.setAttribute('aria-current', i === cur()) });
+    hero.addEventListener('scroll', mark, { passive: true }); mark();
+    let t, paused = false; const play = () => { clearInterval(t); if (!still) t = setInterval(() => { if (!paused && !document.hidden) goTo(cur() + 1) }, 5000) };
+    const box = document.querySelector('.herowrap');
+    ['mouseenter', 'focusin'].forEach(e => box.addEventListener(e, () => paused = true));['mouseleave', 'focusout'].forEach(e => box.addEventListener(e, () => paused = false));
+    document.querySelector('.next').onclick = () => { goTo(cur() + 1); play() };
+    document.querySelector('.prev').onclick = () => { goTo(cur() - 1); play() };
+    play();
+    document.querySelector('.theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark' };
+  </script>
+</body>
+
+</html>

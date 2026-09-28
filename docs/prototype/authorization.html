@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ticketoff – Sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #FB923C;
+      --on-brand: #1B2338;
+      --navy: #1B2338;
+      --tint: #FFF1E3;
+      --ink: #1B2338;
+      --muted: #5F6577;
+      --bg: #F7F6F4;
+      --surface: #FFFFFF;
+      --line: #E7E4DF;
+      --err: #B42318;
+      --err-bg: #FDECEA;
+      --link: #C2410C;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    :root[data-theme="dark"] {
+      --tint: #2A1C12;
+      --ink: #F1EFEA;
+      --muted: #A9AEBD;
+      --bg: #12141C;
+      --surface: #1B1F2B;
+      --line: #2C3242;
+      --err: #FDA29B;
+      --err-bg: #3A1A17;
+      --link: #FDBA74
+    }
+
+    html {
+      height: 100%
+    }
+
+    * {
+      box-sizing: inherit
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 16px/1.5 Onest, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    button,
+    input {
+      font: inherit;
+      color: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--link);
+      outline-offset: 2px
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .logo i {
+      width: 30px;
+      height: 22px;
+      border-radius: 6px;
+      background: radial-gradient(circle at 0 50%, var(--surface) 4px, transparent 4.5px), radial-gradient(circle at 100% 50%, var(--surface) 4px, transparent 4.5px), var(--brand)
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100vh
+    }
+
+    .side {
+      display: none
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      padding: 20px 24px 32px
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px
+    }
+
+    .bar .back {
+      color: var(--muted);
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 10px
+    }
+
+    .bar .back:hover {
+      background: var(--tint)
+    }
+
+    .theme {
+      background: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 18px
+    }
+
+    .theme:hover {
+      background: var(--tint)
+    }
+
+    .center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .box {
+      width: 100%;
+      max-width: 440px
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(28px, 4vw, 36px);
+      letter-spacing: -.02em;
+      line-height: 1.15
+    }
+
+    .sub {
+      margin: 0 0 24px;
+      color: var(--muted)
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 24px
+    }
+
+    .tabs button {
+      border: 0;
+      background: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 500
+    }
+
+    .tabs .on {
+      background: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600
+    }
+
+    .field {
+      margin-bottom: 16px
+    }
+
+    .field[hidden] {
+      display: none
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px
+    }
+
+    .inp {
+      display: flex;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 12px
+    }
+
+    .inp:focus-within {
+      border-color: var(--brand);
+      outline: 2px solid var(--brand);
+      outline-offset: 0
+    }
+
+    .inp.bad {
+      border-color: var(--err)
+    }
+
+    .inp input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      padding: 13px 14px;
+      outline: 0
+    }
+
+    .inp button {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      padding: 0 14px;
+      font-weight: 500
+    }
+
+    .msg {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: var(--err)
+    }
+
+    .msg:empty {
+      display: none
+    }
+
+    .hint {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .hint[hidden] {
+      display: none
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: -4px 0 20px;
+      font-size: 15px
+    }
+
+    .row a,
+    .terms a {
+      color: var(--link);
+      font-weight: 500
+    }
+
+    .terms {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 20px
+    }
+
+    .terms input {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand)
+    }
+
+    .terms[hidden] {
+      display: none
+    }
+
+    .submit {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: var(--brand);
+      color: var(--on-brand);
+      font-weight: 600;
+      padding: 14px;
+      font-size: 17px
+    }
+
+    .submit:hover {
+      filter: brightness(.96)
+    }
+
+    .submit:disabled {
+      opacity: .6;
+      cursor: default
+    }
+
+    .or {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      margin: 20px 0;
+      font-size: 14px
+    }
+
+    .or::before,
+    .or::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line)
+    }
+
+    .alt {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 13px;
+      font-weight: 500
+    }
+
+    .alt:hover {
+      background: var(--tint)
+    }
+
+    .status {
+      margin: 0 0 16px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--err-bg);
+      color: var(--err);
+      font-size: 15px
+    }
+
+    .status:empty {
+      display: none
+    }
+
+    .switch {
+      text-align: center;
+      color: var(--muted);
+      margin: 24px 0 0
+    }
+
+    .switch button {
+      border: 0;
+      background: none;
+      color: var(--link);
+      font-weight: 600;
+      padding: 0
+    }
+
+    @media(min-width:900px) {
+      .split {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px;
+        gap: 64px;
+        grid-template-columns: 1fr 1fr
+      }
+
+      .main {
+        padding: 0
+      }
+
+      .main .bar .logo {
+        display: none
+      }
+
+      .side {
+        display: flex;
+        position: relative;
+        overflow: hidden;
+        flex-direction: column;
+        border-radius: 28px;
+        padding: 40px;
+        background: linear-gradient(180deg, #FFF1E3 0%, #FDBA74 62%, #FB923C 100%);
+        color: #1B2338
+      }
+
+      .side>* {
+        position: relative
+      }
+
+      .side h2 {
+        margin: 24px 0 10px;
+        font-size: clamp(30px, 3vw, 44px);
+        line-height: 1.08;
+        letter-spacing: -.02em;
+        max-width: 13ch
+      }
+
+      .side p {
+        margin: 0;
+        color: #5F6577;
+        max-width: 32ch
+      }
+
+      .side .sky {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 58%
+      }
+
+      .far {
+        fill: #C2410C;
+        opacity: .35
+      }
+
+      .near {
+        fill: #1B2338
+      }
+    }
+
+    /* hover effects */
+    @media(hover:hover) {
+      .tabs button:not(.on):hover {
+        background: var(--tint)
+      }
+
+      .alt:hover {
+        border-color: var(--brand)
+      }
+
+      .inp:not(.bad):hover:not(:focus-within) {
+        border-color: var(--muted)
+      }
+
+      .inp button:hover {
+        color: var(--ink)
+      }
+
+      .row a:hover,
+      .terms a:hover,
+      .switch button:hover {
+        text-decoration: underline
+      }
+    }
+
+    @media(hover:hover) and (prefers-reduced-motion:no-preference) {
+
+      .tabs button,
+      .submit,
+      .alt,
+      .inp,
+      .inp button,
+      .logo i,
+      .bar .back,
+      .theme {
+        transition: transform .2s, background-color .2s, border-color .2s, filter .2s, color .2s
+      }
+
+      .submit:hover:not(:disabled) {
+        transform: translateY(-1px)
+      }
+
+      .submit:active {
+        transform: none
+      }
+
+      .logo:hover i {
+        transform: rotate(-8deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="split">
+    <aside class="side"><a class="logo" href="index.html"><i></i>Ticketoff</a>
+      <div>
+        <h2>See what's on near you</h2>
+        <p>Sign in to save events and keep your tickets in one place.</p>
+      </div>
+      <svg class="sky" viewBox="0 0 600 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <circle cx="440" cy="170" r="78" fill="#FFF7ED" opacity=".85" />
+        <g class="far">
+          <rect x="20" y="200" width="50" height="120" />
+          <rect x="80" y="170" width="36" height="150" />
+          <rect x="200" y="210" width="60" height="110" />
+          <rect x="345" y="190" width="44" height="130" />
+          <rect x="525" y="180" width="50" height="140" />
+        </g>
+        <g class="near">
+          <rect x="0" y="250" width="70" height="70" />
+          <rect x="60" y="225" width="46" height="95" />
+          <rect x="112" y="260" width="60" height="60" />
+          <rect x="176" y="235" width="52" height="85" />
+          <rect x="352" y="265" width="40" height="55" />
+          <path d="M400 320 Q450 250 466 110 L470 70 L474 110 Q490 250 560 320Z" />
+          <rect x="560" y="240" width="40" height="80" />
+          <path d="M270 320 Q298 262 298 172 L306 172 Q306 262 334 320Z" />
+          <path d="M282 136 Q282 174 302 176 Q322 174 322 136 L316 136 Q316 166 302 168 Q288 166 288 136Z" />
+        </g>
+        <circle cx="302" cy="132" r="20" fill="#FBBF24" />
+      </svg>
+    </aside>
+    <div class="main">
+      <div class="bar">
+        <a class="logo" href="index.html"><i></i>Ticketoff</a>
+        <a class="back" href="index.html">Back to events</a>
+        <button class="theme" aria-label="Switch between light and dark theme">◐</button>
+      </div>
+      <div class="center">
+        <div class="box">
+          <h1 id="title">Sign in</h1>
+          <p class="sub" id="sub">Welcome back. Enter your details to continue.</p>
+          <div class="tabs" role="group" aria-label="Sign in or create account">
+            <button type="button" class="on" data-mode="in">Sign in</button>
+            <button type="button" data-mode="up">Create account</button>
+          </div>
+          <form id="form" novalidate>
+            <p class="status" id="status" role="alert"></p>
+            <div class="field" data-only="up" hidden>
+              <label for="name">Name</label>
+              <div class="inp"><input id="name" name="name" autocomplete="name"></div>
+              <p class="msg" id="name-msg"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <div class="inp"><input id="email" name="email" type="email" autocomplete="email"
+                  placeholder="you@example.com"></div>
+              <p class="msg" id="email-msg"></p>
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <div class="inp"><input id="password" name="password" type="password"
+                  autocomplete="current-password"><button type="button" id="show" aria-pressed="false">Show</button>
+              </div>
+              <p class="msg" id="password-msg"></p>
+              <p class="hint" data-only="up" hidden>8+ characters, a capital letter and a symbol.</p>
+            </div>
+            <div class="field" data-only="up" hidden>
+              <label for="password2">Confirm password</label>
+              <div class="inp"><input id="password2" name="password2" type="password" autocomplete="new-password"></div>
+              <p class="msg" id="password2-msg"></p>
+            </div>
+            <div class="row" data-only="in"><span></span><a href="#">Forgot password?</a></div>
+            <label class="terms" data-only="up" hidden><input type="checkbox" id="agree"><span>I agree to the <a
+                  href="#">Terms</a> and <a href="#">Privacy policy</a></span></label>
+            <p class="msg" id="agree-msg" style="margin:-12px 0 16px"></p>
+            <button class="submit" id="submit" type="submit">Sign in</button>
+          </form>
+          <div class="or">or</div>
+          <button class="alt" type="button" id="google">Continue with Google</button>
+          <p class="switch" id="switch">New to Ticketoff? <button type="button" data-mode="up">Create an
+              account</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+    let mode = 'in';
+    const TEXT = {
+      in: { h: 'Sign in', s: 'Welcome back. Enter your details to continue.', b: 'Sign in', sw: 'New to Ticketoff? <button type="button" data-mode="up">Create an account</button>' },
+      up: { h: 'Create account', s: 'Buy tickets faster and create events for free.', b: 'Create account', sw: 'Already have an account? <button type="button" data-mode="in">Sign in</button>' }
+    };
+    function setMode(m) {
+      mode = m; const t = TEXT[m];
+      $('#title').textContent = t.h; $('#sub').textContent = t.s; $('#submit').textContent = t.b; $('#switch').innerHTML = t.sw; document.title = 'Ticketoff – ' + t.h;
+      $$('.tabs button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on) });
+      $$('[data-only]').forEach(e => e.hidden = e.dataset.only !== m);
+      $('#password').autocomplete = m === 'in' ? 'current-password' : 'new-password';
+      clearErrors();
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b) setMode(b.dataset.mode) });
+    $('#show').onclick = () => { const p = $('#password'), v = p.type === 'password'; p.type = $('#password2').type = v ? 'text' : 'password'; $('#show').textContent = v ? 'Hide' : 'Show'; $('#show').setAttribute('aria-pressed', v) };
+    function fail(id, text) { $('#' + id + '-msg').textContent = text; const f = $('#' + id); if (f && f.parentElement.classList.contains('inp')) f.parentElement.classList.add('bad'); f && f.setAttribute('aria-invalid', 'true') }
+    function clearErrors() { $$('.msg').forEach(m => m.textContent = ''); $$('.inp').forEach(i => i.classList.remove('bad')); $$('input').forEach(i => i.removeAttribute('aria-invalid')); $('#status').textContent = '' }
+    $('#form').addEventListener('submit', async e => {
+      e.preventDefault(); clearErrors();
+      const data = { name: $('#name').value.trim(), email: $('#email').value.trim(), password: $('#password').value };
+      let ok = true;
+      if (mode === 'up' && !data.name) { fail('name', 'Enter your name.'); ok = false }
+      if (!/^\S+@\S+\.\S+$/.test(data.email)) { fail('email', 'Enter a valid email, like you@example.com.'); ok = false }
+      const weak = p => p.length < 8 ? 'Use at least 8 characters.' : !/[A-Z]/.test(p) ? 'Add a capital letter.' : !/[^A-Za-z0-9]/.test(p) ? 'Add a symbol, like ! or #.' : '';
+      const pwErr = mode === 'up' ? weak(data.password) : (!data.password ? 'Enter your password.' : '');
+      if (pwErr) { fail('password', pwErr); ok = false }
+      if (mode === 'up') { const p2 = $('#password2').value; if (!p2) { fail('password2', 'Repeat your password.'); ok = false } else if (p2 !== data.password) { fail('password2', 'Passwords do not match.'); ok = false } }
+      if (mode === 'up' && !$('#agree').checked) { $('#agree-msg').textContent = 'Accept the terms to create an account.'; ok = false }
+      if (!ok) return;
+      const btn = $('#submit'); btn.disabled = true;
+      try {
+        // TODO backend: replace with your real endpoint, e.g.
+        // const r=await fetch(mode==='in'?'/api/auth/login':'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+        // if(!r.ok)throw new Error((await r.json()).message);
+        await new Promise(r => setTimeout(r, 600));
+        location.href = 'index.html';
+      } catch (err) { $('#status').textContent = err.message || 'Something went wrong. Try again.' }
+      finally { btn.disabled = false }
+    });
+    $('#google').onclick = () => {/* TODO backend: start Google OAuth here */ };
+    $('.theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark' };
+    if (location.hash === '#signup') setMode('up');
+  </script>
+</body>
+
+</html>
