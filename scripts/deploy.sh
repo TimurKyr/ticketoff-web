@@ -22,6 +22,7 @@ test -f dist/index.html
 SSH="ssh -i $DEPLOY_KEY -o IdentitiesOnly=yes"
 $SSH "$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
 # --delay-updates: files are swapped in at the end, so visitors do not get a half-uploaded app.
-rsync -az --delete --delay-updates -e "$SSH" dist/ "$DEPLOY_HOST:$DEPLOY_PATH/"
+# 'P /assets/**': old hashed chunks are kept, so tabs opened before this deploy can still load them.
+rsync -az --delete --filter='P /assets/**' --delay-updates -e "$SSH" dist/ "$DEPLOY_HOST:$DEPLOY_PATH/"
 
 echo "Deployed $(git rev-parse --short HEAD) to https://ticketoff.store"
