@@ -10,17 +10,28 @@ Web app for ticketoff — organizer + attendee + admin portal (academic MVP).
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in VITE_API_BASE_URL
-npm run dev
+echo 'VITE_API_BASE_URL=/api' > .env.local   # dev: Vite proxies /api to the API
+npm run dev                                   # http://localhost:5173
 ```
 
-Once the backend is running locally and exposes `/openapi.json`:
+The proxy target is `https://api.ticketoff.store` by default (CORS there allows only
+`ticketoff.store`, so the browser must not call it from localhost directly). For a local
+backend: `API_PROXY_TARGET=http://localhost:8000 npm run dev`.
+
+Regenerate API types (from production by default, or set `OPENAPI_URL`):
 
 ```bash
 npm run gen:api-types
+OPENAPI_URL=http://localhost:8000/openapi.json npm run gen:api-types
 ```
 
 This regenerates `src/lib/api/schema.d.ts`. Never edit that file by hand.
+
+## Deploy
+
+`scripts/deploy.sh` builds with `VITE_API_BASE_URL=https://api.ticketoff.store` and uploads
+`dist/` to the server (`/opt/ticketoff/web`), where Caddy serves it on https://ticketoff.store
+(config in `ticketoff-backend/deploy/Caddyfile`). Needs the SSH key `~/.ssh/ticketoff_ed25519`.
 
 ## Structure
 

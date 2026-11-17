@@ -13,8 +13,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // TODO (Frontend): point this at the backend during local dev
-      // "/api": "http://localhost:8000",
+      // The API allows CORS only from ticketoff.store, so in dev point
+      // VITE_API_BASE_URL at /api and let Vite forward the requests.
+      "/api": {
+        target: process.env.API_PROXY_TARGET ?? "https://api.ticketoff.store",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api/, ""),
+      },
     },
   },
 });
