@@ -1,12 +1,14 @@
 import { QueryClient } from "@tanstack/react-query";
 
-// TODO (Frontend): tune defaults (staleTime, retry, refetchOnWindowFocus)
-// once real API latency/rate limits are known.
+import { ApiError } from "@/lib/api/client";
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000,
-      retry: 1,
+      // 4xx (not found, forbidden, validation) will not change on retry; network and 5xx may.
+      retry: (failureCount, error) =>
+        !(error instanceof ApiError && error.status < 500) && failureCount < 1,
       refetchOnWindowFocus: false,
     },
   },
