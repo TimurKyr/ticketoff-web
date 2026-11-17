@@ -17,10 +17,18 @@ export function PageLoader() {
 
 /** Logged-in users only; others go to /login and come back after it. */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, sessionExpired } = useAuth();
   const location = useLocation();
   if (isLoading) return <PageLoader />;
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname, expired: sessionExpired }}
+      />
+    );
+  }
   return <>{children}</>;
 }
 

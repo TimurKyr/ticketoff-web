@@ -7,6 +7,8 @@ export interface AuthValue {
   user: MeOut | null;
   /** True while the stored token is being checked. */
   isLoading: boolean;
+  /** The API rejected the stored token (expired); cleared on the next login. */
+  sessionExpired: boolean;
   login: (email: string, password: string) => Promise<MeOut>;
   register: (email: string, password: string) => Promise<MeOut>;
   logout: () => void;

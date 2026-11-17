@@ -43,11 +43,13 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   /** Form body, sent as application/x-www-form-urlencoded (e.g. POST /auth/login). */
   form?: Record<string, string>;
+  /** "blob" for files (e.g. GET /tickets/{id}/pdf); default "json". */
+  responseType?: "json" | "blob";
 }
 
 async function request<TResponse>(
   path: string,
-  { body, form, headers, ...options }: RequestOptions = {}
+  { body, form, headers, responseType = "json", ...options }: RequestOptions = {}
 ): Promise<TResponse> {
   const token = getAuthToken();
 
@@ -64,7 +66,7 @@ async function request<TResponse>(
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      Accept: "application/json",
+      ...(responseType === "json" ? { Accept: "application/json" } : {}),
       ...contentType,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
@@ -86,6 +88,10 @@ async function request<TResponse>(
     throw new ApiError(res.status, errorBody);
   }
 
+  if (responseType === "blob") {
+    return (await res.blob()) as TResponse;
+  }
+
   if (res.status === 204) {
     return undefined as TResponse;
   }
@@ -98,6 +104,9 @@ export const apiClient = {
     request<TResponse>(path, { ...options, method: "GET" }),
   post: <TResponse>(path: string, body?: unknown, options?: RequestOptions) =>
     request<TResponse>(path, { ...options, method: "POST", body }),
+  /** File download with the same auth and 401 handling, e.g. the ticket PDF. */
+  getBlob: (path: string, options?: RequestOptions) =>
+    request<Blob>(path, { ...options, method: "GET", responseType: "blob" }),
   postForm: <TResponse>(
     path: string,
     form: Record<string, string>,
