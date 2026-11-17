@@ -9,6 +9,17 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Deploy only committed code, so the site always matches a commit.
+# CLAUDE.md is a local, untracked helper file and does not affect the build.
+if [ -n "$(git status --porcelain -- . ':(exclude)CLAUDE.md')" ]; then
+  echo "Working tree not clean; commit or stash first." >&2
+  exit 1
+fi
+git fetch -q origin main || echo "Warning: could not fetch origin/main." >&2
+if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
+  echo "Warning: HEAD $(git rev-parse --short HEAD) is not in origin/main (deploying an unmerged branch)." >&2
+fi
+
 DEPLOY_HOST="${DEPLOY_HOST:-ubuntu@84.235.162.78}"
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/ticketoff_ed25519}"
 DEPLOY_PATH="${DEPLOY_PATH:-/opt/ticketoff/web}"
