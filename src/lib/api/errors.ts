@@ -11,6 +11,20 @@ const KNOWN_DETAILS: Record<string, MessageKey> = {
   "Registration has not opened yet": "err.regNotOpen",
   "Registration is closed": "err.regClosed",
   "Not enough capacity left": "err.noCapacity",
+  "Only a draft event can be published": "err.publishNotDraft",
+  "Add at least one visible ticket type before publishing": "err.publishNoTickets",
+  "An event that has already ended cannot be published": "err.publishEnded",
+  "Only a published event can be unpublished": "err.unpublishNotPublished",
+  "An event with orders cannot be unpublished; cancel it instead": "err.unpublishHasOrders",
+  "Venue does not exist": "err.venueMissing",
+  "Cannot change kind after tickets have been sold": "err.kindLocked",
+  "end_at must be later than start_at": "err.endBeforeStart",
+  "registration_closes_at must not be later than start_at": "err.regClosesAfterStart",
+  "registration_closes_at must not be earlier than registration_opens_at": "err.regClosesBeforeOpens",
+  "max_per_order cannot exceed quantity_total": "err.maxPerOrderOverQuantity",
+  "sales_start_at must be before sales_end_at": "err.salesOrder",
+  "Free ticket types must have price_kzt = 0": "err.freePrice",
+  "Paid ticket types must have price_kzt > 0": "err.paidPrice",
   "Event not found": "events.notFound",
 };
 
@@ -19,6 +33,14 @@ const PATTERNS: [RegExp, MessageKey][] = [
   [/^Not enough tickets left for (.+)$/, "err.notEnoughTickets"],
   [/^Sales for (.+) have not started$/, "err.salesNotStarted"],
   [/^Sales for (.+) have ended$/, "err.salesEnded"],
+  [/^A (\w+) event cannot be cancelled$/, "err.cannotCancel"],
+  [/^Event is (\w+) and can no longer be changed$/, "err.eventClosed"],
+  [/^Capacity \((\d+)\) is below the total ticket quantity \((\d+)\)$/, "err.capacityBelowTypes"],
+  [/^Capacity \((\d+)\) is below tickets already sold \((\d+)\)$/, "err.capacityBelowSold"],
+  [/^(.+) cannot be changed once the event has orders$/, "err.fieldsLocked"],
+  [/^Ticket types cannot be changed on a (\w+) event$/, "err.ticketTypesClosed"],
+  [/^Paid sales cannot be activated on a (\w+) event$/, "err.activationClosed"],
+  [/^quantity_total cannot be lower than tickets already sold \((\d+)\)$/, "err.quantityBelowSold"],
 ];
 
 function translateDetail(detail: string, t: (key: MessageKey) => string): string {
@@ -47,8 +69,10 @@ export function errorMessage(error: unknown, t: (key: MessageKey) => string): st
     if (Array.isArray(detail)) {
       const parts = (detail as ValidationIssue[])
         .map((issue) => {
+          // Pydantic prefixes model-level errors with "Value error, ".
+          const msg = translateDetail((issue.msg ?? "").replace(/^Value error, /, ""), t);
           const field = issue.loc?.filter((p) => p !== "body").join(".");
-          return field ? `${field}: ${issue.msg ?? ""}` : (issue.msg ?? "");
+          return field ? `${field}: ${msg}` : msg;
         })
         .filter(Boolean);
       if (parts.length) return parts.join("; ");

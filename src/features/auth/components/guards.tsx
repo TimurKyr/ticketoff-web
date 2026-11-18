@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 
 import type { MeOut } from "@/lib/api/types";
 import { useI18n, type MessageKey } from "@/lib/i18n";
@@ -56,6 +56,11 @@ export function RequireRole({ role, children }: { role: Role; children: ReactNod
         <section className="max-w-lg">
           <h1 className="text-xl font-semibold mb-2">{t("guard.forbidden.title")}</h1>
           <p className="text-gray-700">{t(forbiddenText[role])}</p>
+          {role === "organizer" && (
+            <Link to="/account" className="mt-3 inline-block underline">
+              {t("guard.toAccount")}
+            </Link>
+          )}
         </section>
       )}
     </RequireAuth>

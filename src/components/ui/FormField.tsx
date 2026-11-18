@@ -1,4 +1,9 @@
-import { InputHTMLAttributes, useId } from "react";
+import {
+  InputHTMLAttributes,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+  useId,
+} from "react";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -35,6 +40,49 @@ export function FormField({ label, error, hint, className = "", ...props }: Form
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+const controlClass =
+  "rounded-md border border-gray-400 bg-white px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-black";
+
+interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  hint?: string;
+}
+
+export function SelectField({ label, hint, children, ...props }: SelectFieldProps) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium text-gray-900">
+        {label}
+      </label>
+      <select id={id} aria-describedby={hint ? `${id}-hint` : undefined} className={controlClass} {...props}>
+        {children}
+      </select>
+      {hint && (
+        <p id={`${id}-hint`} className="text-xs text-gray-600">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string;
+}
+
+export function TextAreaField({ label, ...props }: TextAreaFieldProps) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium text-gray-900">
+        {label}
+      </label>
+      <textarea id={id} rows={4} className={controlClass} {...props} />
     </div>
   );
 }

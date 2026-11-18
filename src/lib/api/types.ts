@@ -22,3 +22,15 @@ export type OrderOut = Schemas["OrderOut"];
 export type OrderStatus = Schemas["OrderStatus"];
 export type TicketOut = Schemas["TicketOut"];
 export type TicketStatus = Schemas["TicketStatus"];
+
+export type EventCreate = Schemas["EventCreate"];
+export type EventUpdate = Schemas["EventUpdate"];
+export type EventStatus = Schemas["EventStatus"];
+export type EventVisibility = Schemas["EventVisibility"];
+export type EventBucket = Schemas["EventBucket"];
+export type TicketKind = Schemas["TicketKind"];
+export type TicketTypeOut = Schemas["TicketTypeOut"];
+export type TicketTypeCreate = Schemas["TicketTypeCreate"];
+export type TicketTypeUpdate = Schemas["TicketTypeUpdate"];
+export type EventInventoryOut = Schemas["EventInventoryOut"];
+export type ActivationChecklistOut = Schemas["ActivationChecklistOut"];
