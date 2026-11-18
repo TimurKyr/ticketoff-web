@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/Button";
@@ -6,6 +6,7 @@ import { FormField } from "@/components/ui/FormField";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { dayEndIso, dayStartIso } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { pageCount, parsePage } from "@/lib/pagination";
 
 import { EVENTS_PAGE_SIZE, useEvents, useVenues } from "../api";
 import { EventCard } from "../components/EventCard";
@@ -19,7 +20,7 @@ export function EventsListPage() {
   const category = params.get("category") ?? "";
   const from = params.get("from") ?? "";
   const to = params.get("to") ?? "";
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = parsePage(params.get("page"));
 
   const events = useEvents({
     q,
@@ -51,7 +52,17 @@ export function EventsListPage() {
   }
 
   const total = events.data?.total ?? 0;
-  const pages = Math.max(1, Math.ceil(total / EVENTS_PAGE_SIZE));
+  const pages = pageCount(total, EVENTS_PAGE_SIZE);
+
+  // A page past the end (?page=999, or the list shrank) moves to the last page.
+  const loaded = events.isSuccess && !events.isPlaceholderData;
+  useEffect(() => {
+    if (!loaded || page <= pages) return;
+    const copy = new URLSearchParams(params);
+    if (pages > 1) copy.set("page", String(pages));
+    else copy.delete("page");
+    setParams(copy, { replace: true });
+  }, [loaded, page, pages, params, setParams]);
 
   return (
     <section className="flex flex-col gap-6">
