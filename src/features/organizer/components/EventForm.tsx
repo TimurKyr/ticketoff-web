@@ -6,6 +6,7 @@ import { FormField, SelectField, TextAreaField } from "@/components/ui/FormField
 import { errorMessage } from "@/lib/api/errors";
 import type { EventCreate, EventOut, EventVisibility, VenueOut } from "@/lib/api/types";
 import { DEFAULT_TIME_ZONE, isoToLocalInput, localInputToIso } from "@/lib/format";
+import { isWholeInRange, MAX_QUANTITY, useSyncedValues } from "@/lib/forms";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 
 const VISIBILITIES: EventVisibility[] = ["public", "unlisted", "private"];
@@ -61,8 +62,7 @@ function toPayload(values: Values, tz: string): EventCreate {
 /** Client-side checks that mirror the API's date rules (it checks them again). */
 function validate(v: Values): MessageKey | null {
   if (!v.title.trim() || !v.venue_id || !v.start_at) return "org.form.required";
-  if (v.capacity.trim() && !(/^\d+$/.test(v.capacity.trim()) && Number(v.capacity) > 0))
-    return "org.form.capacityInvalid";
+  if (v.capacity.trim() && !isWholeInRange(v.capacity, 1, MAX_QUANTITY)) return "org.form.capacityInvalid";
   // Same zone for all fields, so the wall-clock strings compare correctly.
   if (v.end_at && v.end_at <= v.start_at) return "err.endBeforeStart";
   if (v.registration_closes_at && v.registration_closes_at > v.start_at)
@@ -90,7 +90,8 @@ interface Props {
 export function EventForm({ venues, event, submitLabel, disabled, onSubmit, savedText }: Props) {
   const { t } = useI18n();
   const initialTz = venues.find((v) => v.id === event?.venue_id)?.timezone ?? DEFAULT_TIME_ZONE;
-  const [values, setValues] = useState<Values>(() => toValues(event, initialTz));
+  // Untouched fields follow the latest event from the server (after a save or a refetch).
+  const [values, setValues] = useSyncedValues<Values>(toValues(event, initialTz));
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);

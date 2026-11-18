@@ -7,6 +7,7 @@ import { ErrorState, Loading } from "@/components/ui/States";
 import { errorMessage } from "@/lib/api/errors";
 import type { TicketKind, TicketTypeCreate, TicketTypeOut } from "@/lib/api/types";
 import { formatKzt, isoToLocalInput, localInputToIso } from "@/lib/format";
+import { isWholeInRange, MAX_PRICE_KZT, MAX_QUANTITY, useSyncedValues } from "@/lib/forms";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 
 import { useCreateTicketType, useTicketTypes, useUpdateTicketType } from "../api";
@@ -39,7 +40,6 @@ function toValues(type: TicketTypeOut | undefined, tz: string): Values {
 
 // The API's default when max_per_order is omitted; an explicit null would mean "no limit".
 const DEFAULT_MAX_PER_ORDER = 10;
-const isWhole = (value: string) => /^\d+$/.test(value.trim());
 
 function toPayload(v: Values, tz: string): TicketTypeCreate {
   const quantity = Number(v.quantity_total);
@@ -61,13 +61,10 @@ function toPayload(v: Values, tz: string): TicketTypeCreate {
 
 /** Same rules as the API (ticket_type_rule_error), checked before sending. */
 function validate(v: Values): MessageKey | null {
-  const quantity = Number(v.quantity_total);
-  if (!v.name.trim() || !isWhole(v.quantity_total) || quantity < 1) return "org.tt.invalid";
-  if (v.kind === "paid" && !(isWhole(v.price_kzt) && Number(v.price_kzt) > 0)) return "org.tt.invalid";
-  if (v.max_per_order.trim()) {
-    const max = Number(v.max_per_order);
-    if (!isWhole(v.max_per_order) || max < 1 || max > quantity) return "org.tt.maxInvalid";
-  }
+  if (!v.name.trim() || !isWholeInRange(v.quantity_total, 1, MAX_QUANTITY)) return "org.tt.invalid";
+  if (v.kind === "paid" && !isWholeInRange(v.price_kzt, 1, MAX_PRICE_KZT)) return "org.tt.invalid";
+  if (v.max_per_order.trim() && !isWholeInRange(v.max_per_order, 1, Number(v.quantity_total)))
+    return "org.tt.maxInvalid";
   // Same zone for both fields, so the wall-clock strings compare correctly.
   if (v.sales_start_at && v.sales_end_at && v.sales_end_at <= v.sales_start_at) return "org.tt.salesOrder";
   return null;
@@ -87,7 +84,8 @@ function TicketTypeForm({
   const { t } = useI18n();
   const create = useCreateTicketType(eventId);
   const update = useUpdateTicketType(eventId);
-  const [values, setValues] = useState<Values>(() => toValues(type, tz));
+  // Untouched fields follow the latest ticket type from the server while the form is open.
+  const [values, setValues] = useSyncedValues<Values>(toValues(type, tz));
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<Values>) => setValues((prev) => ({ ...prev, ...patch }));
   const busy = create.isPending || update.isPending;

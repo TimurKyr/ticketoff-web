@@ -26,8 +26,16 @@ const ACTIONS: Record<EventStatus, EventAction[]> = {
   completed: ["duplicate"],
 };
 
+/**
+ * Keyed by the event id: opening another event (e.g. the copy after "Дублировать", or Back
+ * from it) starts with a fresh page, so no notice, error or form state carries over.
+ */
 export function ManageEventPage() {
   const { eventId = "" } = useParams();
+  return <ManageEvent key={eventId} eventId={eventId} />;
+}
+
+function ManageEvent({ eventId }: { eventId: string }) {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,9 +84,8 @@ export function ManageEventPage() {
     try {
       const result = await action.mutateAsync(name);
       if (name === "duplicate") {
-        // Same route, same component: set the notice here, not via navigation state.
-        setNotice(t("org.actions.done.duplicate"));
-        navigate(`/organizer/events/${result.id}`);
+        // The copy's page shows the notice, like a newly created event.
+        navigate(`/organizer/events/${result.id}`, { state: { notice: "org.actions.done.duplicate" } });
       } else {
         setNotice(t(`org.actions.done.${name}`));
       }
@@ -88,8 +95,7 @@ export function ManageEventPage() {
   }
 
   return (
-    // key: the edit form re-reads the event after a duplicate opens another one
-    <article key={data.id} className="mx-auto flex max-w-4xl flex-col gap-5">
+    <article className="mx-auto flex max-w-4xl flex-col gap-5">
       <Link to="/organizer" className="text-sm underline">
         ← {t("org.back")}
       </Link>
