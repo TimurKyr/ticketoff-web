@@ -7,7 +7,29 @@ const KNOWN_DETAILS: Record<string, MessageKey> = {
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",
+  "Event has already started": "err.eventStarted",
+  "Registration has not opened yet": "err.regNotOpen",
+  "Registration is closed": "err.regClosed",
+  "Not enough capacity left": "err.noCapacity",
+  "Event not found": "events.notFound",
 };
+
+/** Backend messages with values inside: pattern → translated text with $1, $2. */
+const PATTERNS: [RegExp, MessageKey][] = [
+  [/^Not enough tickets left for (.+)$/, "err.notEnoughTickets"],
+  [/^Sales for (.+) have not started$/, "err.salesNotStarted"],
+  [/^Sales for (.+) have ended$/, "err.salesEnded"],
+];
+
+function translateDetail(detail: string, t: (key: MessageKey) => string): string {
+  const key = KNOWN_DETAILS[detail];
+  if (key) return t(key);
+  for (const [pattern, patternKey] of PATTERNS) {
+    const match = detail.match(pattern);
+    if (match) return t(patternKey).replace(/\$(\d)/g, (_, n) => match[Number(n)] ?? "");
+  }
+  return detail;
+}
 
 interface ValidationIssue {
   loc?: (string | number)[];
@@ -21,10 +43,7 @@ interface ValidationIssue {
 export function errorMessage(error: unknown, t: (key: MessageKey) => string): string {
   if (error instanceof ApiError) {
     const detail = error.detail;
-    if (typeof detail === "string") {
-      const key = KNOWN_DETAILS[detail];
-      return key ? t(key) : detail;
-    }
+    if (typeof detail === "string") return translateDetail(detail, t);
     if (Array.isArray(detail)) {
       const parts = (detail as ValidationIssue[])
         .map((issue) => {
