@@ -190,7 +190,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cancel an event */
+        /**
+         * Cancel an event: its orders are cancelled and paid ones refunded
+         * @description One transaction: free and pending orders cancelled, paid orders fully refunded.
+         */
         post: operations["cancel_event_events__event_id__cancel_post"];
         delete?: never;
         options?: never;
@@ -373,6 +376,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{event_id}/inventory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inventory of my event: sold, reserved, available and ticket statuses */
+        get: operations["get_inventory_events__event_id__inventory_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/ticket-types/public": {
         parameters: {
             query?: never;
@@ -469,6 +489,26 @@ export interface paths {
         get: operations["get_my_order_orders__order_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a free registration (buyer or organizer) or my pending checkout
+         * @description Paid orders are refunded by the organizer instead (409 here).
+         */
+        post: operations["cancel_order_orders__order_id__cancel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -597,6 +637,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{order_id}/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fully refund a paid order of my event (simulated)
+         * @description Event organizer only; anyone else, the buyer included, gets 404.
+         */
+        post: operations["refund_order_orders__order_id__refund_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/payments/summary": {
         parameters: {
             query?: never;
@@ -606,6 +666,23 @@ export interface paths {
         };
         /** Simulated revenue summary for the organizer */
         get: operations["get_summary_events__event_id__payments_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit log of my event, oldest first */
+        get: operations["get_timeline_events__event_id__timeline_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -677,6 +754,17 @@ export interface components {
             /** Email */
             email: string | null;
         };
+        /** AttendeePage */
+        AttendeePage: {
+            /** Items */
+            items: components["schemas"]["AttendeeRow"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
         /** AttendeeRow */
         AttendeeRow: {
             /**
@@ -741,6 +829,8 @@ export interface components {
             title: string;
             /** Description */
             description?: string | null;
+            /** Refund Policy */
+            refund_policy?: string | null;
             /** Category */
             category?: string | null;
             /**
@@ -766,6 +856,36 @@ export interface components {
             /** Registration Closes At */
             registration_closes_at?: string | null;
         };
+        /**
+         * EventInventoryOut
+         * @description Inventory of one event: per ticket type (hidden ones included) and event totals.
+         */
+        EventInventoryOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Capacity */
+            capacity: number | null;
+            /** Sold */
+            sold: number;
+            /** Reserved */
+            reserved: number;
+            /**
+             * Available
+             * @description Sum of the ticket types' available, capped at capacity - (sold + reserved) when the event has a capacity; never below 0.
+             */
+            available: number;
+            /** Checked In */
+            checked_in: number;
+            /** Refunded */
+            refunded: number;
+            /** Cancelled */
+            cancelled: number;
+            /** Ticket Types */
+            ticket_types: components["schemas"]["InventoryTicketTypeOut"][];
+        };
         /** EventOut */
         EventOut: {
             /**
@@ -787,6 +907,8 @@ export interface components {
             title: string;
             /** Description */
             description: string | null;
+            /** Refund Policy */
+            refund_policy: string | null;
             /** Category */
             category: string | null;
             status: components["schemas"]["EventStatus"];
@@ -833,6 +955,8 @@ export interface components {
             title?: string | null;
             /** Description */
             description?: string | null;
+            /** Refund Policy */
+            refund_policy?: string | null;
             /** Category */
             category?: string | null;
             /** Venue Id */
@@ -859,6 +983,51 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * InventoryTicketTypeOut
+         * @description One ticket type in the organizer's inventory summary.
+         */
+        InventoryTicketTypeOut: {
+            /**
+             * Ticket Type Id
+             * Format: uuid
+             */
+            ticket_type_id: string;
+            /** Name */
+            name: string;
+            /** Quantity Total */
+            quantity_total: number;
+            /**
+             * Sold
+             * @description Paid and free-confirmed orders (order quantities).
+             */
+            sold: number;
+            /**
+             * Reserved
+             * @description Pending checkouts still inside their hold.
+             */
+            reserved: number;
+            /**
+             * Available
+             * @description max(0, quantity_total - sold - reserved)
+             */
+            available: number;
+            /**
+             * Checked In
+             * @description Tickets with status checked_in (a subset of sold).
+             */
+            checked_in: number;
+            /**
+             * Refunded
+             * @description Tickets with status refunded.
+             */
+            refunded: number;
+            /**
+             * Cancelled
+             * @description Tickets with status cancelled.
+             */
+            cancelled: number;
         };
         /**
          * MeOut
@@ -902,6 +1071,12 @@ export interface components {
             start_at: string;
             /** End At */
             end_at: string | null;
+            /** Venue Name */
+            venue_name: string;
+            /** Venue Address */
+            venue_address: string | null;
+            /** Timezone */
+            timezone: string;
             /** Is Owner */
             is_owner: boolean;
         };
@@ -1009,7 +1184,10 @@ export interface components {
             fees_kzt: number;
             /** Refunds Kzt */
             refunds_kzt: number;
-            /** Estimated Payout Kzt */
+            /**
+             * Estimated Payout Kzt
+             * @description gross_kzt - fees_kzt - refunds_kzt. Can be negative (minus the fee) after full refunds: processing fees on refunded sales are not returned.
+             */
             estimated_payout_kzt: number;
             /** Fee Percent */
             fee_percent: number;
@@ -1052,6 +1230,39 @@ export interface components {
             /** Available */
             available: number;
         };
+        /**
+         * RefundIn
+         * @description Full refund of a paid order by the event's organizer; the reason is optional.
+         */
+        RefundIn: {
+            /** Reason */
+            reason?: string | null;
+        };
+        /** RefundOut */
+        RefundOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Amount Kzt */
+            amount_kzt: number;
+            status: components["schemas"]["RefundStatus"];
+            /** Reason */
+            reason: string | null;
+            /** Is Simulated */
+            is_simulated: boolean;
+        };
+        /** RefundResultOut */
+        RefundResultOut: {
+            refund: components["schemas"]["RefundOut"];
+            order: components["schemas"]["OrderOut"];
+        };
+        /**
+         * RefundStatus
+         * @enum {string}
+         */
+        RefundStatus: "pending" | "succeeded" | "failed";
         /**
          * RegistrationCreate
          * @description Free registration: one attendee per ticket, matched to tickets in item order.
@@ -1097,7 +1308,7 @@ export interface components {
          * ScanResult
          * @enum {string}
          */
-        ScanResult: "checked_in" | "already_used" | "invalid" | "cancelled" | "refunded" | "wrong_event" | "campaign_qr_rejected";
+        ScanResult: "checked_in" | "already_used" | "invalid" | "cancelled" | "refunded" | "wrong_event" | "campaign_qr_rejected" | "event_cancelled";
         /** ScannedTicket */
         ScannedTicket: {
             /**
@@ -1244,7 +1455,10 @@ export interface components {
             sales_end_at: string | null;
             /** Is Hidden */
             is_hidden: boolean;
-            /** Sold */
+            /**
+             * Sold
+             * @description Tickets held: paid and free-confirmed orders plus pending checkouts still inside their hold (reservations included). GET /events/{event_id}/inventory splits it into sold and reserved.
+             */
             sold: number;
             /** Available */
             available: number;
@@ -1273,6 +1487,45 @@ export interface components {
             sales_end_at?: string | null;
             /** Is Hidden */
             is_hidden?: boolean | null;
+        };
+        /** TimelineItemOut */
+        TimelineItemOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Action Type */
+            action_type: string;
+            /** Entity Type */
+            entity_type: string;
+            /** Entity Id */
+            entity_id: string | null;
+            /** Actor User Id */
+            actor_user_id: string | null;
+            /** Details */
+            details: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
+         * TimelinePage
+         * @description One page of an event's audit log, oldest first. total counts every matching row.
+         */
+        TimelinePage: {
+            /** Items */
+            items: components["schemas"]["TimelineItemOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
         };
         /** TokenOut */
         TokenOut: {
@@ -2051,6 +2304,7 @@ export interface operations {
             query?: {
                 q?: string | null;
                 limit?: number;
+                offset?: number;
             };
             header?: never;
             path: {
@@ -2066,7 +2320,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AttendeeRow"][];
+                    "application/json": components["schemas"]["AttendeePage"];
                 };
             };
             /** @description Validation Error */
@@ -2164,6 +2418,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TicketTypeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_inventory_events__event_id__inventory_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInventoryOut"];
                 };
             };
             /** @description Validation Error */
@@ -2335,6 +2620,37 @@ export interface operations {
         };
     };
     get_my_order_orders__order_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_order_orders__order_id__cancel_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -2600,6 +2916,41 @@ export interface operations {
             };
         };
     };
+    refund_order_orders__order_id__refund_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_summary_events__event_id__payments_summary_get: {
         parameters: {
             query?: never;
@@ -2618,6 +2969,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_timeline_events__event_id__timeline_get: {
+        parameters: {
+            query?: {
+                from_date?: string | null;
+                to_date?: string | null;
+                /** @description Exact action type, or a prefix ending in "." (e.g. "order.") */
+                action_type?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelinePage"];
                 };
             };
             /** @description Validation Error */
