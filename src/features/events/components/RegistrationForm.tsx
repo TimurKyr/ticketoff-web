@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -42,6 +42,30 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // When availability drops (others registered, a type sold out or left the list), the
+  // stored quantity is lowered too, so it never jumps back up if stock returns later.
+  // Names typed for tickets that no longer fit are dropped with them.
+  const limits = ticketTypes.map((type) => `${type.id}:${maxFor(type)}`).join(",");
+  useEffect(() => {
+    const max = new Map(ticketTypes.map((type) => [type.id, maxFor(type)]));
+    const clamp = (id: string, n: number) => Math.min(n, max.get(id) ?? 0);
+    setSelected((prev) => {
+      const over = Object.entries(prev).filter(([id, n]) => clamp(id, n) !== n);
+      if (over.length === 0) return prev;
+      const next = { ...prev };
+      for (const [id, n] of over) next[id] = clamp(id, n);
+      return next;
+    });
+    setAttendees((prev) => {
+      const over = Object.entries(prev).filter(([id, rows]) => rows.length > clamp(id, rows.length));
+      if (over.length === 0) return prev;
+      const next = { ...prev };
+      for (const [id, rows] of over) next[id] = rows.slice(0, clamp(id, rows.length));
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `limits` captures what matters in ticketTypes
+  }, [limits]);
+
   if (!user) {
     return (
       <Link
@@ -54,7 +78,7 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
     );
   }
 
-  // Availability is refetched after other people register: never ask for more than is left.
+  // Also clamped here, for the one render before the effect above has run.
   const quantity = (type: PublicTicketTypeOut) => Math.min(selected[type.id] ?? 0, maxFor(type));
   const chosen = ticketTypes.filter((type) => quantity(type) > 0);
   const totalTickets = chosen.reduce((sum, type) => sum + quantity(type), 0);
