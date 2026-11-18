@@ -24,8 +24,9 @@ export function EventsListPage() {
   const events = useEvents({
     q,
     category,
-    from_date: from ? dayStartIso(from) : undefined,
-    to_date: to ? dayEndIso(to) : undefined,
+    // Invalid days in the URL (?from=abc) are ignored, not sent.
+    from_date: dayStartIso(from),
+    to_date: dayEndIso(to),
     offset: (page - 1) * EVENTS_PAGE_SIZE,
   });
   const venues = useVenues();
@@ -92,9 +93,15 @@ export function EventsListPage() {
       ) : (
         <>
           <p className="text-sm text-gray-700" aria-live="polite">
-            {t("events.found")}: {total}
+            {events.isPlaceholderData ? t("common.loading") : `${t("events.found")}: ${total}`}
           </p>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* While the next page loads, the previous results stay but are dimmed and marked busy. */}
+          <ul
+            aria-busy={events.isPlaceholderData}
+            className={`grid gap-4 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${
+              events.isPlaceholderData ? "pointer-events-none opacity-50" : ""
+            }`}
+          >
             {events.data.items.map((event) => (
               <EventCard
                 key={event.id}
@@ -105,7 +112,11 @@ export function EventsListPage() {
           </ul>
           {pages > 1 && (
             <nav aria-label={t("events.page")} className="flex items-center gap-3">
-              <Button variant="secondary" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+              <Button
+                variant="secondary"
+                disabled={page <= 1 || events.isPlaceholderData}
+                onClick={() => goToPage(page - 1)}
+              >
                 {t("events.prev")}
               </Button>
               <span className="text-sm">
@@ -113,7 +124,7 @@ export function EventsListPage() {
               </span>
               <Button
                 variant="secondary"
-                disabled={page >= pages}
+                disabled={page >= pages || events.isPlaceholderData}
                 onClick={() => goToPage(page + 1)}
               >
                 {t("events.next")}

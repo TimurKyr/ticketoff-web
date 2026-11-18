@@ -2,11 +2,13 @@
 // in the API yet, so the token is only kept here for the checkout to pick up later.
 const key = (eventId: string) => `ticketoff.promo.${eventId}`;
 
-export function savePromoToken(eventId: string, token: string): void {
+/** Returns false when the token could not be stored (storage blocked or full). */
+export function savePromoToken(eventId: string, token: string): boolean {
   try {
     sessionStorage.setItem(key(eventId), token);
+    return sessionStorage.getItem(key(eventId)) === token;
   } catch {
-    // storage blocked
+    return false;
   }
 }
 

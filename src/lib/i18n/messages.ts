@@ -89,11 +89,12 @@ export const ru = {
   "events.free": "Бесплатно",
   "events.available": "Осталось",
   "events.soldOut": "Распродано",
+  "events.freeSoldOut": "Бесплатные билеты закончились.",
   "events.maxPerOrder": "не больше",
   "events.perOrder": "в заказе",
   "events.quantity": "Количество",
   "events.paidSoon": "Покупка платных билетов появится скоро.",
-  "events.promoSaved": "Промокод из ссылки сохранён и будет применён при покупке.",
+  "events.promoSaved": "Промокод из ссылки запомнили. Проверим его при покупке.",
 
   "register.title": "Регистрация на событие",
   "register.loginFirst": "Войдите, чтобы зарегистрироваться",
@@ -105,6 +106,14 @@ export const ru = {
   "register.submit": "Зарегистрироваться",
   "register.pickTickets": "Выберите хотя бы один билет",
   "register.nameRequired": "Укажите имя каждого участника",
+
+  "err.eventStarted": "Событие уже началось.",
+  "err.regNotOpen": "Регистрация ещё не открылась.",
+  "err.regClosed": "Регистрация закрыта.",
+  "err.noCapacity": "Мест больше нет.",
+  "err.notEnoughTickets": "Билетов «$1» осталось меньше, чем вы выбрали. Остаток обновлён, выберите снова.",
+  "err.salesNotStarted": "Продажа билетов «$1» ещё не началась.",
+  "err.salesEnded": "Продажа билетов «$1» закончилась.",
 
   "order.title": "Заказ",
   "order.success": "Готово! Ваши билеты ниже. Покажите QR-код на входе.",

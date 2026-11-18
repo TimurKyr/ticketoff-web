@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Alert } from "@/components/ui/Alert";
@@ -51,9 +51,12 @@ export function EventDetailsPage() {
   const ticketTypes = usePublicTicketTypes(eventId);
   const venue = useVenue(event.data?.venue_id);
 
-  const promo = params.get("promo");
+  const promo = params.get("promo")?.trim() || null;
+  // Shown only once the token is really stored. It is not checked here: promo codes
+  // (BE-16) are validated by the API at checkout.
+  const [promoSaved, setPromoSaved] = useState(false);
   useEffect(() => {
-    if (promo) savePromoToken(eventId, promo);
+    setPromoSaved(promo ? savePromoToken(eventId, promo) : false);
   }, [eventId, promo]);
 
   if (event.isPending) return <Loading />;
@@ -92,7 +95,7 @@ export function EventDetailsPage() {
       </header>
 
       {cancelled && <Alert tone="error">{t("events.cancelled")}</Alert>}
-      {promo && <Alert tone="info">{t("events.promoSaved")}</Alert>}
+      {promoSaved && <Alert tone="info">{t("events.promoSaved")}</Alert>}
 
       <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
         <dt className="text-gray-600">{t("events.when")}</dt>
@@ -142,6 +145,9 @@ export function EventDetailsPage() {
             {hasPaid && <p className="text-sm text-gray-700">{t("events.paidSoon")}</p>}
             {!cancelled && freeOpen.length > 0 && (
               <RegistrationForm eventId={eventId} ticketTypes={freeOpen} />
+            )}
+            {!cancelled && freeOpen.length === 0 && types.some((type) => type.kind === "free") && (
+              <p className="font-medium">{t("events.freeSoldOut")}</p>
             )}
           </>
         )}

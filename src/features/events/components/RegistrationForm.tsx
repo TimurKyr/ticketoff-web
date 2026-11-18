@@ -14,6 +14,11 @@ import { registerFree } from "../api";
 
 const MAX_PER_TYPE = 10;
 
+/** Most tickets of this type one order may take right now. */
+function maxFor(type: PublicTicketTypeOut): number {
+  return Math.max(0, Math.min(type.max_per_order ?? MAX_PER_TYPE, type.available, MAX_PER_TYPE));
+}
+
 interface Props {
   eventId: string;
   /** Free ticket types that can be taken now (available > 0). */
@@ -28,10 +33,12 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
+  const [selected, setSelected] = useState<Record<string, number>>(() =>
     ticketTypes.length === 1 ? { [ticketTypes[0].id]: 1 } : {}
   );
-  const [attendees, setAttendees] = useState<AttendeeIn[]>([]);
+  // Attendees are kept per ticket type, so changing one type's quantity never moves
+  // someone's name onto a ticket of another type.
+  const [attendees, setAttendees] = useState<Record<string, AttendeeIn[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,18 +54,34 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
     );
   }
 
-  // One attendee row per ticket, in ticket type order (the API matches them the same way).
-  const totalTickets = ticketTypes.reduce((sum, type) => sum + (quantities[type.id] ?? 0), 0);
-  const rows: AttendeeIn[] = Array.from({ length: totalTickets }, (_, i) => ({
-    name: attendees[i]?.name ?? "",
-    email: attendees[i]?.email ?? (i === 0 ? user.email : ""),
-  }));
+  // Availability is refetched after other people register: never ask for more than is left.
+  const quantity = (type: PublicTicketTypeOut) => Math.min(selected[type.id] ?? 0, maxFor(type));
+  const chosen = ticketTypes.filter((type) => quantity(type) > 0);
+  const totalTickets = chosen.reduce((sum, type) => sum + quantity(type), 0);
 
-  function setRow(index: number, patch: Partial<AttendeeIn>) {
-    setAttendees(() => {
-      const next = [...rows];
-      next[index] = { ...next[index], ...patch };
-      return next;
+  // One row per ticket, grouped by type in the same order as `items` (the API matches
+  // attendees to tickets in item order). The first row defaults to the user's email.
+  let first = true;
+  const groups = chosen.map((type) => ({
+    type,
+    rows: Array.from({ length: quantity(type) }, (_, i): AttendeeIn => {
+      const saved = attendees[type.id]?.[i];
+      const row = {
+        name: saved?.name ?? "",
+        email: saved?.email ?? (first ? user.email : ""),
+      };
+      first = false;
+      return row;
+    }),
+  }));
+  const rows = groups.flatMap((group) => group.rows);
+
+  function setRow(typeId: string, index: number, patch: Partial<AttendeeIn>) {
+    const current = groups.find((group) => group.type.id === typeId)?.rows ?? [];
+    setAttendees((prev) => {
+      const next = [...(prev[typeId] ?? [])];
+      next[index] = { ...current[index], ...patch };
+      return { ...prev, [typeId]: next };
     });
   }
 
@@ -71,9 +94,7 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
     setSubmitting(true);
     try {
       const order = await registerFree(eventId, {
-        items: ticketTypes
-          .filter((type) => (quantities[type.id] ?? 0) > 0)
-          .map((type) => ({ ticket_type_id: type.id, quantity: quantities[type.id] })),
+        items: chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) })),
         attendees: rows.map((row) => ({
           name: row.name.trim(),
           email: row.email?.trim() || null,
@@ -85,61 +106,65 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
     } catch (err) {
       setError(errorMessage(err, t));
       setSubmitting(false);
+      // Stock may have changed under us (e.g. "Not enough tickets left").
+      void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
     }
   }
+
+  let rowNumber = 0;
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold">{t("register.title")}</h2>
       {error && <Alert tone="error">{error}</Alert>}
 
-      {ticketTypes.map((type) => {
-        const max = Math.min(type.max_per_order ?? MAX_PER_TYPE, type.available, MAX_PER_TYPE);
-        return (
-          <div key={type.id} className="flex items-center justify-between gap-3 text-sm">
-            <label htmlFor={`qty-${type.id}`}>
-              {type.name} · {t("events.quantity")}
-            </label>
-            <select
-              id={`qty-${type.id}`}
-              value={quantities[type.id] ?? 0}
-              onChange={(e) =>
-                setQuantities({ ...quantities, [type.id]: Number(e.target.value) })
-              }
-              className="rounded border border-gray-400 bg-white px-2 py-1"
-            >
-              {Array.from({ length: max + 1 }, (_, n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-      })}
+      {ticketTypes.map((type) => (
+        <div key={type.id} className="flex items-center justify-between gap-3 text-sm">
+          <label htmlFor={`qty-${type.id}`}>
+            {type.name} · {t("events.quantity")}
+          </label>
+          <select
+            id={`qty-${type.id}`}
+            value={quantity(type)}
+            onChange={(e) => setSelected({ ...selected, [type.id]: Number(e.target.value) })}
+            className="rounded border border-gray-400 bg-white px-2 py-1"
+          >
+            {Array.from({ length: maxFor(type) + 1 }, (_, n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+      ))}
 
       {rows.length > 0 && (
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-1 font-medium">{t("register.attendees")}</legend>
           <p className="text-xs text-gray-600">{t("register.attendeesHint")}</p>
-          {rows.map((row, i) => (
-            <div key={i} className="grid gap-2 rounded-md bg-gray-50 p-3 sm:grid-cols-2">
-              <FormField
-                label={`${t("register.attendee")} ${i + 1}: ${t("register.name")}`}
-                autoComplete={i === 0 ? "name" : "off"}
-                required
-                value={row.name}
-                onChange={(e) => setRow(i, { name: e.target.value })}
-              />
-              <FormField
-                label={t("register.email")}
-                type="email"
-                autoComplete={i === 0 ? "email" : "off"}
-                value={row.email ?? ""}
-                onChange={(e) => setRow(i, { email: e.target.value })}
-              />
-            </div>
-          ))}
+          {groups.map(({ type, rows: typeRows }) =>
+            typeRows.map((row, i) => {
+              rowNumber += 1;
+              return (
+                <div key={`${type.id}-${i}`} className="grid gap-2 rounded-md bg-gray-50 p-3 sm:grid-cols-2">
+                  <FormField
+                    label={`${t("register.attendee")} ${rowNumber} (${type.name}): ${t("register.name")}`}
+                    autoComplete={rowNumber === 1 ? "name" : "off"}
+                    required
+                    value={row.name}
+                    onChange={(e) => setRow(type.id, i, { name: e.target.value })}
+                  />
+                  <FormField
+                    label={t("register.email")}
+                    type="email"
+                    autoComplete={rowNumber === 1 ? "email" : "off"}
+                    value={row.email ?? ""}
+                    onChange={(e) => setRow(type.id, i, { email: e.target.value })}
+                  />
+                </div>
+              );
+            })
+          )}
         </fieldset>
       )}
 
