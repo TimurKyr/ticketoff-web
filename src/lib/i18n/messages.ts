@@ -274,6 +274,19 @@ export const ru = {
   "org.act.todo": "не сделано",
 
   "guard.toAccount": "Перейти в профиль",
+  "admin.title": "Администрирование",
+  "admin.tab.search": "Поиск",
+  "admin.tab.failedPayments": "Неудачные платежи",
+  "admin.tab.refunds": "Возвраты",
+  "admin.tab.activations": "Активации",
+  "admin.tab.escalations": "Обращения",
+  "admin.tab.activationFee": "Стоимость активации",
+  "admin.pendingBackend": "Раздел появится после выхода админских эндпоинтов бэкенда (BE-22).",
+  "admin.suspend": "Приостановить",
+  "admin.resume": "Возобновить",
+  "admin.confirm.reason": "Причина (необязательно)",
+  "admin.confirm.cancel": "Отмена",
+
 } as const;
 
 export type MessageKey = keyof typeof ru;
