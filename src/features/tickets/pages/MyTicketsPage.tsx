@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
-import { amountDue, isExpired, timeLeft } from "@/features/checkout";
+import { amountDue, isExpired, timeLeft, useHoldExpiry } from "@/features/checkout";
 import { useEvent } from "@/features/events/api";
 import type { OrderOut } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
@@ -40,6 +40,7 @@ export function MyTicketsPage() {
   // Pending checkouts show a countdown; otherwise a slow tick is enough.
   const holding = orders.data?.some((order) => order.status === "pending") ?? false;
   const now = useNow(holding ? 1000 : 30_000);
+  useHoldExpiry(orders.data);
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-5">

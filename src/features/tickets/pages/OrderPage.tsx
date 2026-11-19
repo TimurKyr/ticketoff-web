@@ -10,6 +10,7 @@ import {
   PaymentPanel,
   RefundPolicy,
   timeLeft,
+  useHoldExpiry,
 } from "@/features/checkout";
 import { useEvent, usePublicTicketTypes } from "@/features/events/api";
 import { HelpButton } from "@/features/support";
@@ -92,6 +93,7 @@ export function OrderPage() {
   const ticketTypes = usePublicTicketTypes(eventId);
   // Every second only while a hold is running.
   const now = useNow(order.data?.status === "pending" ? 1000 : 30_000);
+  useHoldExpiry(order.data ? [order.data] : undefined);
 
   if (order.isPending) return <Loading />;
   if (order.isError) {

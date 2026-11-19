@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -25,17 +25,21 @@ export function PromoCodeField({ eventId, value, onChange }: Props) {
   // The result belongs to the code it was checked for: typing something else hides it.
   const [result, setResult] = useState<{ code: string; ok?: PromoCheckOut; error?: string } | null>(null);
   const shown = result && result.code === value.trim() ? result : null;
+  // Answers can arrive out of order (SAVE10, then SAVE20): only the latest check may set the result.
+  const lastCheck = useRef(0);
 
   async function onCheck() {
     const code = value.trim();
     if (!code) return;
+    const id = ++lastCheck.current;
     setChecking(true);
     try {
-      setResult({ code, ok: await checkPromoCode(eventId, code) });
+      const ok = await checkPromoCode(eventId, code);
+      if (id === lastCheck.current) setResult({ code, ok });
     } catch (err) {
-      setResult({ code, error: errorMessage(err, t) });
+      if (id === lastCheck.current) setResult({ code, error: errorMessage(err, t) });
     } finally {
-      setChecking(false);
+      if (id === lastCheck.current) setChecking(false);
     }
   }
 
