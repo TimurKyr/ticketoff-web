@@ -6,8 +6,9 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { useAuth } from "@/features/auth";
+import { PromoCodeField, RefundPolicy, startCheckout } from "@/features/checkout";
 import { errorMessage } from "@/lib/api/errors";
-import type { AttendeeIn, PublicTicketTypeOut } from "@/lib/api/types";
+import type { AttendeeIn, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 
 import { registerFree } from "../api";
@@ -21,12 +22,21 @@ function maxFor(type: PublicTicketTypeOut): number {
 
 interface Props {
   eventId: string;
-  /** Free ticket types that can be taken now (available > 0). */
+  /** Free: registration, tickets at once. Paid: checkout, a pending order to pay. */
+  kind: TicketKind;
+  /** Ticket types of this kind that can be taken now (available > 0). */
   ticketTypes: PublicTicketTypeOut[];
+  /** Paid only: shown before the buyer commits. */
+  refundPolicy?: string | null;
+  /** Paid only: code from a campaign QR link, filled in unless the buyer typed one. */
+  linkPromoCode?: string | null;
 }
 
-/** Free registration: pick quantities, give a name per ticket, get the order with tickets. */
-export function RegistrationForm({ eventId, ticketTypes }: Props) {
+/**
+ * Pick quantities and give a name per ticket. Free types are registered right away;
+ * paid types start a checkout (tickets held for a while, then the simulated payment).
+ */
+export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, linkPromoCode }: Props) {
   const { t } = useI18n();
   const { user } = useAuth();
   const location = useLocation();
@@ -41,6 +51,12 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
   const [attendees, setAttendees] = useState<Record<string, AttendeeIn[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [promo, setPromo] = useState("");
+  const paid = kind === "paid";
+
+  useEffect(() => {
+    if (linkPromoCode) setPromo((typed) => typed || linkPromoCode);
+  }, [linkPromoCode]);
 
   // When availability drops (others registered, a type sold out or left the list), the
   // stored quantity is lowered too, so it never jumps back up if stock returns later.
@@ -73,7 +89,7 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
         state={{ from: location.pathname + location.search }}
         className="inline-block rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
       >
-        {t("register.loginFirst")}
+        {paid ? t("checkout.loginFirst") : t("register.loginFirst")}
       </Link>
     );
   }
@@ -117,16 +133,19 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
 
     setSubmitting(true);
     try {
-      const order = await registerFree(eventId, {
+      const payload = {
         items: chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) })),
         attendees: rows.map((row) => ({
           name: row.name.trim(),
           email: row.email?.trim() || null,
         })),
-      });
+      };
+      const order = paid
+        ? await startCheckout(eventId, { ...payload, promo_code: promo.trim() || null })
+        : await registerFree(eventId, payload);
       await queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
-      navigate(`/orders/${order.id}`, { state: { justRegistered: true } });
+      navigate(`/orders/${order.id}`, { state: { justCreated: true } });
     } catch (err) {
       setError(errorMessage(err, t));
       setSubmitting(false);
@@ -139,7 +158,7 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">{t("register.title")}</h2>
+      <h3 className="text-lg font-semibold">{paid ? t("checkout.title") : t("register.title")}</h3>
       {error && <Alert tone="error">{error}</Alert>}
 
       {ticketTypes.map((type) => (
@@ -192,8 +211,16 @@ export function RegistrationForm({ eventId, ticketTypes }: Props) {
         </fieldset>
       )}
 
+      {paid && (
+        <>
+          <PromoCodeField eventId={eventId} value={promo} onChange={setPromo} />
+          <RefundPolicy policy={refundPolicy} />
+          <p className="text-xs text-gray-600">{t("checkout.holdNote")}</p>
+        </>
+      )}
+
       <Button type="submit" disabled={submitting || totalTickets === 0} className="self-start">
-        {submitting ? t("common.loading") : t("register.submit")}
+        {submitting ? t("common.loading") : paid ? t("checkout.submit") : t("register.submit")}
       </Button>
     </form>
   );
