@@ -1,5 +1,6 @@
-// Campaign QR links open /events/{id}?promo=<token>. Promo codes (BE-16, FE-8) are not
-// in the API yet, so the token is only kept here for the checkout to pick up later.
+// Campaign QR links open /events/{id}?promo=<token>. The token is kept for the tab's
+// session (it survives the trip to /login and back) and turned into a promo code with
+// GET /promo-qr/{token} before checkout.
 const key = (eventId: string) => `ticketoff.promo.${eventId}`;
 
 /** Returns false when the token could not be stored (storage blocked or full). */

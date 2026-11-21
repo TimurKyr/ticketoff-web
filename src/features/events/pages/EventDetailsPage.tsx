@@ -1,19 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Alert } from "@/components/ui/Alert";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { usePromoQr } from "@/features/checkout";
 import { HelpButton } from "@/features/support";
 import { ApiError } from "@/lib/api/client";
-import type { PublicTicketTypeOut } from "@/lib/api/types";
+import { errorMessage } from "@/lib/api/errors";
+import type { EventOut, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
 
 import { useEvent, usePublicTicketTypes, useVenue } from "../api";
 import { registrationState, salesState } from "../availability";
-import { RegistrationForm } from "../components/RegistrationForm";
-import { savePromoToken } from "../promo";
+import { TicketOrderForm } from "../components/TicketOrderForm";
+import { getPromoToken, savePromoToken } from "../promo";
 
 function isNotFound(error: unknown): boolean {
   // 422: the id in the URL is not a UUID
@@ -52,6 +54,49 @@ function TicketTypeRow({ type, now, timeZone }: { type: PublicTicketTypeOut; now
   );
 }
 
+/** The order form for one kind of ticket, or why it cannot be used right now. */
+function KindOrder({
+  event,
+  kind,
+  types,
+  now,
+  linkPromoCode,
+}: {
+  event: EventOut;
+  kind: TicketKind;
+  types: PublicTicketTypeOut[];
+  now: number;
+  linkPromoCode?: string | null;
+}) {
+  const { t } = useI18n();
+  const ofKind = types.filter((type) => type.kind === kind);
+  const onSale = ofKind.filter((type) => salesState(type, now) === "open");
+  const open = onSale.filter((type) => type.available > 0);
+  if (ofKind.length === 0) return null;
+
+  // Same order as the API checks: paid sales switched on, then sales windows, then stock.
+  let reason: string | null = null;
+  if (kind === "paid" && !event.paid_sales_active) reason = t("events.paidNotActive");
+  else if (open.length === 0)
+    reason =
+      onSale.length > 0
+        ? t(kind === "free" ? "events.freeSoldOut" : "events.paidSoldOut")
+        : t(kind === "free" ? "events.freeNotOnSale" : "events.paidNotOnSale");
+
+  return reason ? (
+    <p className="font-medium">{reason}</p>
+  ) : (
+    <TicketOrderForm
+      key={kind}
+      eventId={event.id}
+      kind={kind}
+      ticketTypes={open}
+      refundPolicy={event.refund_policy}
+      linkPromoCode={kind === "paid" ? linkPromoCode : undefined}
+    />
+  );
+}
+
 export function EventDetailsPage() {
   const { eventId = "" } = useParams();
   const [params] = useSearchParams();
@@ -63,12 +108,14 @@ export function EventDetailsPage() {
   const now = useNow();
 
   const promo = params.get("promo")?.trim() || null;
-  // Shown only once the token is really stored. It is not checked here: promo codes
-  // (BE-16) are validated by the API at checkout.
-  const [promoSaved, setPromoSaved] = useState(false);
+  // The token from the link, or one saved earlier in this tab (before a login, say).
+  const promoToken = promo ?? getPromoToken(eventId);
   useEffect(() => {
-    setPromoSaved(promo ? savePromoToken(eventId, promo) : false);
+    if (promo) savePromoToken(eventId, promo);
   }, [eventId, promo]);
+  const promoQr = usePromoQr(promoToken);
+  // A code of another event is not offered here.
+  const linkPromoCode = promoQr.data?.event_id === eventId ? promoQr.data.code : null;
 
   if (event.isPending) return <Loading />;
   if (event.isError) {
@@ -89,10 +136,6 @@ export function EventDetailsPage() {
   const types = ticketTypes.data ?? [];
   // Same checks as the API: event-level registration window, then per-type sales window and stock.
   const registration = registrationState(data, now);
-  const free = types.filter((type) => type.kind === "free");
-  const freeOnSale = free.filter((type) => salesState(type, now) === "open");
-  const freeOpen = freeOnSale.filter((type) => type.available > 0);
-  const hasPaid = types.some((type) => type.kind === "paid");
 
   return (
     <article className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -112,7 +155,17 @@ export function EventDetailsPage() {
       </header>
 
       {cancelled && <Alert tone="error">{t("events.cancelled")}</Alert>}
-      {promoSaved && <Alert tone="info">{t("events.promoSaved")}</Alert>}
+      {linkPromoCode && (
+        <Alert tone="info">
+          {t("events.promoFromLink")} <strong className="font-mono">{linkPromoCode}</strong>
+        </Alert>
+      )}
+      {/* Only for the link just opened, not for a token remembered from earlier. */}
+      {promo && promoQr.isError && (
+        <Alert tone="error">
+          {t("events.promoLinkInvalid")} {errorMessage(promoQr.error, t)}
+        </Alert>
+      )}
 
       <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
         <dt className="text-gray-600">{t("events.when")}</dt>
@@ -159,9 +212,8 @@ export function EventDetailsPage() {
                 <TicketTypeRow key={type.id} type={type} now={now} timeZone={venue?.timezone} />
               ))}
             </ul>
-            {hasPaid && <p className="text-sm text-gray-700">{t("events.paidSoon")}</p>}
-            {!cancelled && free.length > 0 && (
-              registration === "started" ? (
+            {!cancelled &&
+              (registration === "started" ? (
                 <p className="font-medium">{t("events.regStarted")}</p>
               ) : registration === "closed" ? (
                 <p className="font-medium">{t("events.regClosed")}</p>
@@ -169,14 +221,18 @@ export function EventDetailsPage() {
                 <p className="font-medium">
                   {t("events.regNotOpen")} {formatDateTime(data.registration_opens_at, lang, venue?.timezone)}
                 </p>
-              ) : freeOpen.length > 0 ? (
-                <RegistrationForm eventId={eventId} ticketTypes={freeOpen} />
-              ) : freeOnSale.length > 0 ? (
-                <p className="font-medium">{t("events.freeSoldOut")}</p>
               ) : (
-                <p className="font-medium">{t("events.freeNotOnSale")}</p>
-              )
-            )}
+                <div className="flex flex-col gap-6">
+                  <KindOrder event={data} kind="free" types={types} now={now} />
+                  <KindOrder
+                    event={data}
+                    kind="paid"
+                    types={types}
+                    now={now}
+                    linkPromoCode={linkPromoCode}
+                  />
+                </div>
+              ))}
           </>
         )}
       </section>

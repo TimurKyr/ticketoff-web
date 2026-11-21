@@ -35,6 +35,13 @@ export type TicketTypeUpdate = Schemas["TicketTypeUpdate"];
 export type EventInventoryOut = Schemas["EventInventoryOut"];
 export type ActivationChecklistOut = Schemas["ActivationChecklistOut"];
 
+// FE-6: checkout and payment
+export type CheckoutCreate = Schemas["CheckoutCreate"];
+export type PayOrderIn = Schemas["PayOrderIn"];
+export type PaymentResultOut = Schemas["PaymentResultOut"];
+export type PromoCheckOut = Schemas["PromoCheckOut"];
+export type PromoQrOut = Schemas["PromoQrOut"];
+
 // FE-8: promo campaigns and codes (organizer side)
 export type DiscountType = Schemas["DiscountType"];
 export type CampaignCreate = Schemas["CampaignCreate"];

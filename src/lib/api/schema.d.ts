@@ -1289,6 +1289,12 @@ export interface components {
             ticket_type: string;
             status: components["schemas"]["TicketStatus"];
         };
+        /**
+         * Availability
+         * @description How much is left to buy, over the ticket types on sale (for event cards).
+         * @enum {string}
+         */
+        Availability: "available" | "few_left" | "sold_out";
         /** Body_login_auth_login_post */
         Body_login_auth_login_post: {
             /** Grant Type */
@@ -1624,6 +1630,13 @@ export interface components {
             registration_opens_at: string | null;
             /** Registration Closes At */
             registration_closes_at: string | null;
+            /**
+             * Price From
+             * @description Lowest price_kzt on sale; 0 if a free type is on sale
+             */
+            price_from?: number | null;
+            /** @description sold_out: nothing left; few_left: at most 10 left or at most 10% of the on-sale quantity */
+            availability?: components["schemas"]["Availability"] | null;
         };
         /** EventPage */
         EventPage: {
@@ -2786,6 +2799,8 @@ export interface operations {
             query?: {
                 q?: string | null;
                 category?: string | null;
+                /** @description Exact venues.city, e.g. Алматы */
+                city?: string | null;
                 from_date?: string | null;
                 to_date?: string | null;
                 include_past?: boolean;

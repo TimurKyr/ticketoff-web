@@ -1,27 +1,36 @@
 import { Link } from "react-router-dom";
 
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { amountDue, holdState, timeLeft, useHoldExpiry } from "@/features/checkout";
 import { useEvent } from "@/features/events/api";
 import type { OrderOut } from "@/lib/api/types";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
+import { useNow } from "@/lib/useNow";
 
 import { useMyOrders } from "../api";
 
-function OrderRow({ order }: { order: OrderOut }) {
+function OrderRow({ order, now }: { order: OrderOut; now: number }) {
   const { t, lang } = useI18n();
   const event = useEvent(order.event_id);
+  const hold = holdState(order, now);
+  const expired = hold === "expired";
+  const holding = hold === "active" || hold === "ending";
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-300 p-4">
       <div>
         <p className="font-semibold">{event.data?.title ?? "…"}</p>
         <p className="text-sm text-gray-700">
           {event.data && `${formatDateTime(event.data.start_at, lang)} · `}
-          {t("myTickets.tickets")}: {order.tickets.length} · {t(`order.status.${order.status}`)}
+          {order.tickets.length > 0 && `${t("myTickets.tickets")}: ${order.tickets.length} · `}
+          {order.total_kzt > 0 && `${formatKzt(amountDue(order), lang)} · `}
+          <strong>{expired ? t("order.status.expired") : t(`order.status.${order.status}`)}</strong>
+          {hold === "active" && ` · ${t("order.holdLeft")} ${timeLeft(order.expires_at!, now)}`}
+          {hold === "ending" && ` · ${t("order.holdEndingShort")}`}
         </p>
       </div>
       <Link to={`/orders/${order.id}`} className="text-sm font-medium underline">
-        {t("myTickets.open")}
+        {holding ? t("myTickets.pay") : t("myTickets.open")}
       </Link>
     </li>
   );
@@ -30,6 +39,10 @@ function OrderRow({ order }: { order: OrderOut }) {
 export function MyTicketsPage() {
   const { t } = useI18n();
   const orders = useMyOrders();
+  // Pending checkouts show a countdown; otherwise a slow tick is enough.
+  const holding = orders.data?.some((order) => order.status === "pending") ?? false;
+  const now = useNow(holding ? 1000 : 30_000);
+  useHoldExpiry(orders.data);
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-5">
@@ -48,7 +61,7 @@ export function MyTicketsPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {orders.data.map((order) => (
-            <OrderRow key={order.id} order={order} />
+            <OrderRow key={order.id} order={order} now={now} />
           ))}
         </ul>
       )}
