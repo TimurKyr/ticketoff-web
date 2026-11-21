@@ -1,40 +1,44 @@
 import { Link } from "react-router-dom";
 
 import type { EventOut, VenueOut } from "@/lib/api/types";
-import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
-export function EventCard({ event, venue }: { event: EventOut; venue?: VenueOut }) {
-  const { t, lang } = useI18n();
+import { formatCardDate } from "../cardDate";
+
+// The whole card is one link (no separate "Подробнее"); white on the grey page, no border,
+// a border on hover and the focus ring on keyboard focus (design brief §6, §7a).
+export function EventCard({
+  event,
+  venue,
+  className = "",
+  headingLevel = "h2",
+}: {
+  event: EventOut;
+  venue?: VenueOut;
+  className?: string;
+  /** h3 inside a titled row on the home page */
+  headingLevel?: "h2" | "h3";
+}) {
+  const { lang } = useI18n();
+  const Heading = headingLevel;
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-gray-300 p-4">
-      {event.category && (
-        <span className="self-start rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-800">
-          {event.category}
-        </span>
-      )}
-      <h2 className="text-lg font-semibold">
-        <Link to={`/events/${event.id}`} className="hover:underline">
-          {event.title}
-        </Link>
-      </h2>
-      <p className="text-sm text-gray-700">
-        <time dateTime={event.start_at}>
-          {formatDateTime(event.start_at, lang, venue?.timezone)}
-        </time>
-      </p>
-      {venue && (
-        <p className="text-sm text-gray-700">
-          {venue.name}
-          {venue.city ? `, ${venue.city}` : ""}
-        </p>
-      )}
+    <li className={className}>
       <Link
         to={`/events/${event.id}`}
-        className="mt-auto self-start text-sm font-medium underline"
-        aria-label={`${t("events.more")}: ${event.title}`}
+        className="flex h-full flex-col gap-2 rounded-2xl bg-white p-3 ring-1 ring-transparent transition-shadow hover:ring-[#8F8C85] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2448C9]"
       >
-        {t("events.more")}
+        <p className="px-1 pt-1 text-sm font-medium text-[#1A1A18]">
+          <time dateTime={event.start_at}>{formatCardDate(event.start_at, lang, venue?.timezone)}</time>
+        </p>
+        <Heading className="line-clamp-2 px-1 text-lg font-medium leading-snug text-[#1A1A18]">
+          {event.title}
+        </Heading>
+        {venue && (
+          <p className="px-1 text-sm text-[#5E5C57]">
+            {venue.name}
+            {venue.city ? `, ${venue.city}` : ""}
+          </p>
+        )}
       </Link>
     </li>
   );

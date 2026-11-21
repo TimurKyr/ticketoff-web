@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NotFoundPage } from "@/components/layout/NotFoundPage";
 import { EventDetailsPage, EventsListPage } from "@/features/events";
+import { HomePage } from "@/features/home";
 import { MyTicketsPage, OrderPage } from "@/features/tickets";
 import { CreateEventPage, ManageEventPage, OrganizerDashboardPage } from "@/features/organizer";
 import { AttendeeDashboardPage } from "@/features/attendee";
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <EventsListPage /> },
+      { index: true, element: <HomePage /> },
       { path: "events", element: <EventsListPage /> },
       { path: "events/:eventId", element: <EventDetailsPage /> },
       { path: "login", element: <GuestOnly><LoginPage /></GuestOnly> },

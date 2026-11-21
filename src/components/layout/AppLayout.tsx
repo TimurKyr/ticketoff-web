@@ -1,6 +1,7 @@
-import { NavLink, Outlet, Link } from "react-router-dom";
+import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "@/features/auth";
+import { CitySelect } from "@/features/events";
 import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language } from "@/lib/i18n";
 
 import { Footer } from "./Footer";
@@ -35,11 +36,12 @@ function Header() {
   const { user, isLoading, logout } = useAuth();
 
   return (
-    <header className="border-b border-gray-300">
+    <header className="border-b border-gray-300 bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
         <Link to="/" className="text-lg font-bold">
           {t("app.name")}
         </Link>
+        <CitySelect />
         <nav aria-label="main" className="flex flex-wrap gap-3 text-sm">
           <NavLink to="/events" className={navClass}>
             {t("nav.events")}
@@ -109,10 +111,14 @@ function Header() {
   );
 }
 
+// Pages already in the new style (design brief §1a): white cards on a light grey page.
+const TINTED = new Set(["/", "/events"]);
+
 export function AppLayout() {
+  const { pathname } = useLocation();
   return (
     <AuthProvider>
-      <div className="flex min-h-screen flex-col">
+      <div className={`flex min-h-screen flex-col ${TINTED.has(pathname) ? "bg-[#F2F1EE]" : ""}`}>
         <Header />
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
           <Outlet />
