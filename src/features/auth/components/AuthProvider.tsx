@@ -99,7 +99,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       meQuery.isPending,
       sessionExpired,
       justRegistered,
-      login, register, logout, refresh]
+      login,
+      register,
+      logout,
+      refresh,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

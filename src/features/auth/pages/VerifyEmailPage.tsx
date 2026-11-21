@@ -27,14 +27,28 @@ export function VerifyEmailPage() {
   const [outcome, setOutcome] = useState<{ token: string; result: Result } | null>(null);
   // StrictMode runs effects twice in dev; send each token only once.
   const sentFor = useRef<string | null>(null);
+  // The token in the URL right now. A late answer for an older token (the route changed
+  // while it was in flight) is dropped: it must not replace the current result or strip
+  // the newer token from the address bar.
+  const activeToken = useRef(token);
+  useEffect(() => {
+    activeToken.current = token;
+  }, [token]);
 
   useEffect(() => {
     // Wait for the first /auth/me: a refresh() while it is still loading would reuse that
     // request, which may have read the user before the verification, and keep it unverified.
     if (isLoading || !token || sentFor.current === token) return;
     sentFor.current = token;
+    // A dropped answer forgets the send, so coming back to this token sends it again.
+    const isStale = () => {
+      if (activeToken.current === token) return false;
+      if (sentFor.current === token) sentFor.current = null;
+      return true;
+    };
     verifyEmail(token)
       .then(() => {
+        if (isStale()) return;
         setOutcome({ token, result: { status: "success" } });
         void refresh(); // email_verified changed on /auth/me
         // Drop the one-time token from the address bar (history, screenshots). Done on
@@ -43,6 +57,7 @@ export function VerifyEmailPage() {
         window.history.replaceState(window.history.state, "", window.location.pathname);
       })
       .catch((err: unknown) => {
+        if (isStale()) return;
         // 422: bad, expired or tampered token (one message for all).
         const result: Result =
           err instanceof ApiError && err.status === 422
