@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
 
 import type { Availability, EventOut, VenueOut } from "@/lib/api/types";
-import { formatKzt } from "@/lib/format";
+import { formatKzt, formatShortDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
-import { formatCardDate } from "../cardDate";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { EventCover } from "./EventCover";
 
@@ -44,7 +43,7 @@ export function EventCard({
       >
         <EventCover event={event} />
         <p className="px-1 pt-1 text-sm font-medium text-[#1A1A18]">
-          <time dateTime={event.start_at}>{formatCardDate(event.start_at, lang, venue?.timezone)}</time>
+          <time dateTime={event.start_at}>{formatShortDateTime(event.start_at, lang, venue?.timezone)}</time>
         </p>
         <Heading className="line-clamp-2 px-1 text-lg font-medium leading-snug text-[#1A1A18]">
           {event.title}
