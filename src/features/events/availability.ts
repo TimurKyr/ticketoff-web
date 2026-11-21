@@ -4,6 +4,9 @@ import type { EventOut, PublicTicketTypeOut } from "@/lib/api/types";
 // _ensure_registration_open and _check_ticket_type), so the form is hidden exactly
 // when the API would refuse it.
 
+/** "Осталось мало билетов" on the event page: a type with at most this many left (brief §7a). */
+export const FEW_LEFT = 10;
+
 export type RegistrationState = "open" | "started" | "notOpen" | "closed";
 
 export function registrationState(event: EventOut, now: number): RegistrationState {
