@@ -14,6 +14,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [hasToken, setHasToken] = useState(() => getAuthToken() !== null);
   // Set when the API rejected our token; protected pages then show "session expired" on /login.
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
 
   const meQuery = useQuery({
     queryKey: authApi.meQueryKey,
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetSession = useCallback(() => {
     clearAuthToken();
     setHasToken(false);
+    setJustRegistered(false);
     queryClient.clear();
   }, [queryClient]);
 
@@ -53,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { access_token } = await authApi.login(email, password);
       setAuthToken(access_token);
       setSessionExpired(false);
+      setJustRegistered(false);
       return loadMe();
     },
     [loadMe]
@@ -60,9 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (email: string, password: string) => {
+      // The backend emails a verification link; logging in does not wait for it.
       // Email language: the API knows ru/en only (no kk yet), so ru for now.
       await authApi.register({ email, password, language: "ru" });
-      return login(email, password);
+      const me = await login(email, password);
+      setJustRegistered(true);
+      return me;
     },
     [login]
   );
@@ -81,12 +87,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: hasToken ? (meQuery.data ?? null) : null,
       isLoading: hasToken && meQuery.isPending,
       sessionExpired,
+      justRegistered,
       login,
       register,
       logout,
       refresh,
     }),
-    [hasToken, meQuery.data, meQuery.isPending, sessionExpired, login, register, logout, refresh]
+    [
+      hasToken,
+      meQuery.data,
+      meQuery.isPending,
+      sessionExpired,
+      justRegistered,
+      login, register, logout, refresh]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

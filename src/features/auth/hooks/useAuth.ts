@@ -9,6 +9,8 @@ export interface AuthValue {
   isLoading: boolean;
   /** The API rejected the stored token (expired); cleared on the next login. */
   sessionExpired: boolean;
+  /** Set by a successful register() until the next login or logout: "we sent you an email". */
+  justRegistered: boolean;
   login: (email: string, password: string) => Promise<MeOut>;
   register: (email: string, password: string) => Promise<MeOut>;
   logout: () => void;
