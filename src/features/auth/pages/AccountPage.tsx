@@ -7,11 +7,12 @@ import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
 
 import { createOrganizerProfile } from "../api";
+import { ResendVerificationButton } from "../components/ResendVerificationButton";
 import { useAuth } from "../hooks/useAuth";
 
 export function AccountPage() {
   const { t } = useI18n();
-  const { user, refresh } = useAuth();
+  const { user, refresh, justRegistered } = useAuth();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -41,6 +42,20 @@ export function AccountPage() {
   return (
     <section className="mx-auto flex w-full max-w-lg flex-col gap-6">
       <h1 className="text-2xl font-semibold">{t("account.title")}</h1>
+      {justRegistered && !user.email_verified && (
+        <Alert tone="success">
+          {t("verifyEmail.registered").replace("{email}", user.email)}
+        </Alert>
+      )}
+      {!user.email_verified && (
+        <div className="flex flex-col gap-3 rounded-lg border border-amber-600 bg-amber-50 p-4">
+          <h2 className="font-semibold text-amber-900">{t("account.emailNotVerified")}</h2>
+          <p className="text-sm text-amber-900">
+            {t("verifyEmail.banner.text").replace("{email}", user.email)}
+          </p>
+          <ResendVerificationButton />
+        </div>
+      )}
       <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-gray-600">{t("auth.email")}</dt>
         <dd className="break-all">

@@ -14,6 +14,7 @@ import {
   RegisterPage,
   RequireAuth,
   RequireRole,
+  VerifyEmailPage,
 } from "@/features/auth";
 
 export const router = createBrowserRouter([
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: "events/:eventId", element: <EventDetailsPage /> },
       { path: "login", element: <GuestOnly><LoginPage /></GuestOnly> },
       { path: "register", element: <GuestOnly redirectTo="/account"><RegisterPage /></GuestOnly> },
+      { path: "verify-email", element: <VerifyEmailPage /> },
       { path: "account", element: <RequireAuth><AccountPage /></RequireAuth> },
       { path: "tickets", element: <RequireAuth><MyTicketsPage /></RequireAuth> },
       { path: "orders/:orderId", element: <RequireAuth><OrderPage /></RequireAuth> },
