@@ -4,9 +4,11 @@ import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language, type MessageKey } f
 
 interface Column {
   title: MessageKey;
-  links: { to: string; label: MessageKey }[];
+  links: { to: string; label: MessageKey; external?: boolean }[];
   note?: MessageKey;
 }
+
+const REPO_URL = "https://github.com/TimurKyr/ticketoff-web";
 
 const COLUMNS: Column[] = [
   {
@@ -14,6 +16,7 @@ const COLUMNS: Column[] = [
     links: [
       { to: "/about", label: "footer.aboutService" },
       { to: "/events", label: "footer.allEvents" },
+      { to: REPO_URL, label: "footer.github", external: true },
     ],
   },
   {
@@ -28,7 +31,8 @@ const COLUMNS: Column[] = [
     links: [
       { to: "/help", label: "footer.faq" },
       { to: "/tickets", label: "nav.tickets" },
-      { to: "/support", label: "nav.support" },
+      // Login-guarded: a guest goes to /login and comes back here after it.
+      { to: "/support", label: "footer.writeSupport" },
     ],
   },
   {
@@ -37,6 +41,8 @@ const COLUMNS: Column[] = [
     note: "footer.refundNote",
   },
 ];
+
+const linkClass = "text-gray-700 hover:text-[#2448C9] hover:underline";
 
 /** Language as two buttons ("Қаз · Рус"); the header keeps its own select. */
 function FooterLanguages() {
@@ -77,9 +83,15 @@ export function Footer() {
             <ul className="space-y-1.5">
               {col.links.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} className="text-gray-700 hover:text-[#2448C9] hover:underline">
-                    {t(link.label)}
-                  </Link>
+                  {link.external ? (
+                    <a href={link.to} target="_blank" rel="noreferrer" className={linkClass}>
+                      {t(link.label)} ↗
+                    </a>
+                  ) : (
+                    <Link to={link.to} className={linkClass}>
+                      {t(link.label)}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
