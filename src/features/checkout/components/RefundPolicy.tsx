@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { useI18n } from "@/lib/i18n";
 
 /**
@@ -13,7 +15,12 @@ export function RefundPolicy({ policy }: { policy: string | null }) {
         {t("checkout.refundPolicy")}
       </h3>
       <p className="whitespace-pre-line text-gray-800">{policy?.trim() || t("checkout.refundPolicyNone")}</p>
-      <p className="mt-1 text-xs text-gray-600">{t("checkout.refundByOrganizer")}</p>
+      <p className="mt-1 text-xs text-gray-600">
+        {t("checkout.refundByOrganizer")}{" "}
+        <Link to="/refund-policy" target="_blank" className="text-[#2448C9] underline">
+          {t("checkout.refundRulesLink")}
+        </Link>
+      </p>
     </section>
   );
 }

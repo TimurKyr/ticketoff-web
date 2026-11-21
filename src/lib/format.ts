@@ -1,33 +1,91 @@
 import type { Language } from "@/lib/i18n";
 
-const LOCALES: Record<Language, string> = { ru: "ru-RU", kk: "kk-KZ" };
+const NBSP = "\u00a0";
 
-/** Whole tenge from the API, e.g. "15 000 ₸". Never computed on the client. */
-export function formatKzt(amount: number, lang: Language): string {
-  return new Intl.NumberFormat(LOCALES[lang], {
-    style: "currency",
-    currency: "KZT",
-    currencyDisplay: "narrowSymbol",
-    maximumFractionDigits: 0,
-  }).format(amount);
+/**
+ * Whole tenge from the API → "15 000 ₸" in every language (non-breaking spaces).
+ * `_lang` is accepted for call-site symmetry with the date helpers; the format is the same.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function formatKzt(amount: number, _lang?: Language): string {
+  const sign = amount < 0 ? "−" : "";
+  const digits = String(Math.round(Math.abs(amount)));
+  return `${sign}${digits.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP)}${NBSP}₸`;
 }
 
-/** Date and time in the venue's time zone (falls back to the browser's). */
-export function formatDateTime(iso: string, lang: Language, timeZone?: string): string {
-  const options: Intl.DateTimeFormatOptions = {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  };
+// Own month and weekday names: Intl has no reliable "kk" data in every browser
+// (Chrome prints "2026 M12 7"), so dates never depend on it.
+const MONTHS: Record<Language, string[]> = {
+  ru: ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
+  kk: ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"],
+};
+const MONTHS_SHORT: Record<Language, string[]> = {
+  ru: ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
+  kk: ["қаң", "ақп", "нау", "сәу", "мам", "мау", "шіл", "там", "қыр", "қаз", "қар", "жел"],
+};
+// Sunday first, as Date.getUTCDay().
+const WEEKDAYS: Record<Language, string[]> = {
+  ru: ["вс", "пн", "вт", "ср", "чт", "пт", "сб"],
+  kk: ["жс", "дс", "сс", "ср", "бс", "жм", "сб"],
+};
+
+interface WallClock {
+  year: number;
+  month: number; // 0-11
+  day: number;
+  weekday: number; // 0 = Sunday
+  hh: string;
+  mm: string;
+  /** "GMT+5", "GMT+5:30", "GMT": the offset of the zone the time was converted to. */
+  zone: string;
+}
+
+function gmtLabel(offsetMs: number): string {
+  const total = Math.round(offsetMs / 60_000);
+  if (total === 0) return "GMT";
+  const abs = Math.abs(total);
+  const minutes = abs % 60;
+  return `GMT${total < 0 ? "−" : "+"}${Math.floor(abs / 60)}${minutes ? `:${String(minutes).padStart(2, "0")}` : ""}`;
+}
+
+/** Wall-clock parts of `iso` in `timeZone` (Kazakhstan time by default). */
+function wallClock(iso: string, timeZone: string = DEFAULT_TIME_ZONE): WallClock {
+  const utc = new Date(iso).getTime();
+  let offset = 0;
   try {
-    return new Intl.DateTimeFormat(LOCALES[lang], { ...options, timeZone }).format(new Date(iso));
+    offset = zoneOffsetMs(utc, timeZone);
   } catch {
-    // unknown time zone name
-    return new Intl.DateTimeFormat(LOCALES[lang], options).format(new Date(iso));
+    offset = zoneOffsetMs(utc, DEFAULT_TIME_ZONE); // unknown time zone name
   }
+  const d = new Date(utc + offset);
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth(),
+    day: d.getUTCDate(),
+    weekday: d.getUTCDay(),
+    hh: String(d.getUTCHours()).padStart(2, "0"),
+    mm: String(d.getUTCMinutes()).padStart(2, "0"),
+    zone: gmtLabel(offset),
+  };
+}
+
+/**
+ * Date and time in the venue's time zone (Kazakhstan time when none is given), with that
+ * zone's offset so a buyer abroad does not read it as local time:
+ * "7 декабря 2026, пн · 19:00 GMT+5", "7 желтоқсан 2026, дс · 19:00 GMT+5".
+ */
+export function formatDateTime(iso: string, lang: Language, timeZone?: string): string {
+  const w = wallClock(iso, timeZone);
+  return `${w.day} ${MONTHS[lang][w.month]} ${w.year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
+}
+
+/**
+ * Short form for cards, same zone label: "7 дек, пн · 19:00 GMT+5" (year only if not this one).
+ */
+export function formatShortDateTime(iso: string, lang: Language, timeZone?: string): string {
+  const w = wallClock(iso, timeZone);
+  const year = w.year !== wallClock(new Date().toISOString(), timeZone).year ? ` ${w.year}` : "";
+  return `${w.day} ${MONTHS_SHORT[lang][w.month]}${year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
 /** Platform default zone (all venues are in Kazakhstan, UTC+5). */
