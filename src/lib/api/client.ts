@@ -5,6 +5,7 @@
 // request/response types here: use the aliases in `./types` instead.
 
 import { clearAuthToken, getAuthToken } from "@/lib/auth/token";
+import { noteServerDate } from "@/lib/serverClock";
 
 export const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || "https://api.ticketoff.store"
@@ -73,6 +74,7 @@ async function request<TResponse>(
     },
     body: payload,
   });
+  noteServerDate(res.headers.get("Date"));
 
   if (!res.ok) {
     let errorBody: unknown = null;

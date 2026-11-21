@@ -16,7 +16,16 @@ import { amountDue } from "../order";
  * card result. A failed payment keeps the order pending, so it can be tried again until
  * the hold runs out.
  */
-export function PaymentPanel({ order, onPaid }: { order: OrderOut; onPaid: () => void }) {
+export function PaymentPanel({
+  order,
+  onPaid,
+  onError,
+}: {
+  order: OrderOut;
+  onPaid: () => void;
+  /** The API refused the payment (e.g. the hold ran out). The panel may unmount right after. */
+  onError?: (message: string) => void;
+}) {
   const { t, lang } = useI18n();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -36,7 +45,9 @@ export function PaymentPanel({ order, onPaid }: { order: OrderOut; onPaid: () =>
         setMessage({ tone: "error", text: t("pay.failed") });
       }
     } catch (err) {
-      setMessage({ tone: "error", text: errorMessage(err, t) });
+      const text = errorMessage(err, t);
+      setMessage({ tone: "error", text });
+      onError?.(text);
       // e.g. the hold ran out: the server has cancelled the order, show its new state.
       void queryClient.invalidateQueries({ queryKey: ["orders"] });
       void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", order.event_id] });

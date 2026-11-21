@@ -1,20 +1,31 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import type { OrderOut } from "@/lib/api/types";
+import { serverNow } from "@/lib/serverClock";
 
-/** The API may cancel an expired hold a little late, so we ask once more after this delay. */
+/** The API may count a hold as over a little late, so we ask once more after this delay. */
 export const HOLD_RECHECK_MS = 4000;
 
+function refreshHold(queryClient: QueryClient, orderId: string, eventId: string): void {
+  void queryClient.invalidateQueries({ queryKey: ["orders", orderId] });
+  void queryClient.invalidateQueries({ queryKey: ["orders", "me"] });
+  // Remaining stock: the API stops counting the held tickets once the hold is over.
+  void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
+}
+
 /**
- * When a pending order's hold runs out, the server cancels it and releases the seats, but the
- * cache still has the old order. At that moment refetch the order, the user's order list and
- * the event's ticket types (remaining stock), then once more a few seconds later.
+ * Keeps cached data in step with pending checkouts' holds. When a hold runs out (server time),
+ * refetch the order, the user's order list and the event's ticket types, then once more a few
+ * seconds later. A hold that is already over when the page opens (e.g. it ended at 14:00 and
+ * the order is opened at 14:05) gets one refetch right away; it is not repeated, since the
+ * API leaves such an order as it is until someone tries to pay it.
  */
 export function useHoldExpiry(orders: OrderOut[] | undefined): void {
   const queryClient = useQueryClient();
-  // Only pending orders with a running hold matter; a string key keeps refetches of the
-  // same data from rescheduling the timers.
+  // Holds already refreshed on load, so refetches of the same data don't loop.
+  const refreshedOnLoad = useRef(new Set<string>());
+  // A string key keeps refetches of the same data from rescheduling the timers.
   const holds = (orders ?? [])
     .filter((order) => order.status === "pending" && order.expires_at)
     .map((order) => `${order.id}|${order.event_id}|${order.expires_at}`)
@@ -25,18 +36,18 @@ export function useHoldExpiry(orders: OrderOut[] | undefined): void {
     const timers: number[] = [];
     for (const hold of holds.split(",")) {
       const [orderId, eventId, expiresAt] = hold.split("|");
-      const delay = Date.parse(expiresAt) - Date.now();
-      // Already over when loaded: the data is as fresh as the server has it.
-      if (delay <= 0) continue;
-      const refresh = () => {
-        void queryClient.invalidateQueries({ queryKey: ["orders", orderId] });
-        void queryClient.invalidateQueries({ queryKey: ["orders", "me"] });
-        void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
-      };
+      const delay = Date.parse(expiresAt) - serverNow();
+      if (delay <= 0) {
+        if (!refreshedOnLoad.current.has(hold)) {
+          refreshedOnLoad.current.add(hold);
+          refreshHold(queryClient, orderId, eventId);
+        }
+        continue;
+      }
       timers.push(
         window.setTimeout(() => {
-          refresh();
-          timers.push(window.setTimeout(refresh, HOLD_RECHECK_MS));
+          refreshHold(queryClient, orderId, eventId);
+          timers.push(window.setTimeout(() => refreshHold(queryClient, orderId, eventId), HOLD_RECHECK_MS));
         }, delay),
       );
     }

@@ -6,7 +6,7 @@ import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import {
   amountDue,
   CancelOrderButton,
-  isExpired,
+  holdState,
   PaymentPanel,
   RefundPolicy,
   timeLeft,
@@ -86,6 +86,8 @@ export function OrderPage() {
   const { t } = useI18n();
   const justCreated = Boolean((useLocation().state as { justCreated?: boolean } | null)?.justCreated);
   const [paidNow, setPaidNow] = useState(false);
+  // Why the last payment was refused; kept here since the panel goes away once the order is cancelled.
+  const [payError, setPayError] = useState<string | null>(null);
 
   const order = useOrder(orderId);
   const eventId = order.data?.event_id ?? "";
@@ -107,8 +109,10 @@ export function OrderPage() {
 
   const data = order.data;
   const typeName = (id: string) => ticketTypes.data?.find((type) => type.id === id)?.name;
-  const expired = isExpired(data, now);
-  const payable = data.status === "pending" && !expired;
+  const hold = holdState(data, now);
+  const expired = hold === "expired";
+  // While the hold is "ending" payment stays open: the server has the final word.
+  const payable = hold === "active" || hold === "ending";
   // The API refuses to cancel once the event has started or a ticket was used at the door.
   const started = event.data ? Date.parse(event.data.start_at) <= now : true;
   const used = data.tickets.some((ticket) => ticket.status === "checked_in");
@@ -133,13 +137,31 @@ export function OrderPage() {
 
       {payable && data.expires_at && (
         <>
-          <HoldTimer expiresAt={data.expires_at} now={now} />
+          {hold === "ending" ? (
+            <p role="status" className="text-sm font-semibold text-red-800">
+              {t("order.holdEnding")}
+            </p>
+          ) : (
+            <HoldTimer expiresAt={data.expires_at} now={now} />
+          )}
           <RefundPolicy policy={event.data?.refund_policy} />
-          <PaymentPanel order={data} onPaid={() => {
+          <PaymentPanel
+            order={data}
+            onPaid={() => {
               setPaidNow(true);
               window.scrollTo({ top: 0 });
-            }} />
+            }}
+            onError={setPayError}
+          />
         </>
+      )}
+      {payError && data.status === "cancelled" && (
+        <Alert tone="error">
+          {payError}{" "}
+          <Link to={`/events/${data.event_id}`} className="underline">
+            {t("order.startAgain")}
+          </Link>
+        </Alert>
       )}
       {expired && (
         <Alert tone="error">

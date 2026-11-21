@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
-import { amountDue, isExpired, timeLeft, useHoldExpiry } from "@/features/checkout";
+import { amountDue, holdState, timeLeft, useHoldExpiry } from "@/features/checkout";
 import { useEvent } from "@/features/events/api";
 import type { OrderOut } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
@@ -13,8 +13,9 @@ import { useMyOrders } from "../api";
 function OrderRow({ order, now }: { order: OrderOut; now: number }) {
   const { t, lang } = useI18n();
   const event = useEvent(order.event_id);
-  const expired = isExpired(order, now);
-  const holding = order.status === "pending" && !expired && Boolean(order.expires_at);
+  const hold = holdState(order, now);
+  const expired = hold === "expired";
+  const holding = hold === "active" || hold === "ending";
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-300 p-4">
       <div>
@@ -24,7 +25,8 @@ function OrderRow({ order, now }: { order: OrderOut; now: number }) {
           {order.tickets.length > 0 && `${t("myTickets.tickets")}: ${order.tickets.length} · `}
           {order.total_kzt > 0 && `${formatKzt(amountDue(order), lang)} · `}
           <strong>{expired ? t("order.status.expired") : t(`order.status.${order.status}`)}</strong>
-          {holding && ` · ${t("order.holdLeft")} ${timeLeft(order.expires_at!, now)}`}
+          {hold === "active" && ` · ${t("order.holdLeft")} ${timeLeft(order.expires_at!, now)}`}
+          {hold === "ending" && ` · ${t("order.holdEndingShort")}`}
         </p>
       </div>
       <Link to={`/orders/${order.id}`} className="text-sm font-medium underline">
