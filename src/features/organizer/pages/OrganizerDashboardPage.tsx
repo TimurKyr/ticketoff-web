@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useVenues } from "@/features/events/api";
+import { HelpButton } from "@/features/support";
 import type { EventBucket } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -40,6 +41,7 @@ export function OrganizerDashboardPage() {
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">{t("org.title")}</h1>
+        <HelpButton kind="organizer" label="support.helpPlatform" className="sm:ml-auto" />
         <Link
           to="/organizer/events/new"
           className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"

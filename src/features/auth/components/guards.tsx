@@ -44,19 +44,26 @@ const forbiddenText: Record<Role, MessageKey> = {
   platform_admin: "guard.forbidden.admin",
 };
 
-/** Organizer pages need `is_organizer`; admin pages need `system_role == platform_admin`. */
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+/**
+ * Organizer pages need `is_organizer`; admin pages need `system_role == platform_admin`.
+ * With a list, any one of the roles is enough (e.g. the support inbox).
+ */
+export function RequireRole({ role, children }: { role: Role | Role[]; children: ReactNode }) {
   const { user } = useAuth();
   const { t } = useI18n();
+  const roles = Array.isArray(role) ? role : [role];
+  // The message names the first role: for ["organizer", "platform_admin"] a regular user
+  // can still become an organizer.
+  const main = roles[0];
   return (
     <RequireAuth>
-      {user && allowed[role](user) ? (
+      {user && roles.some((r) => allowed[r](user)) ? (
         children
       ) : (
         <section className="max-w-lg">
           <h1 className="text-xl font-semibold mb-2">{t("guard.forbidden.title")}</h1>
-          <p className="text-gray-700">{t(forbiddenText[role])}</p>
-          {role === "organizer" && (
+          <p className="text-gray-700">{t(forbiddenText[main])}</p>
+          {main === "organizer" && (
             <Link to="/account" className="mt-3 inline-block underline">
               {t("guard.toAccount")}
             </Link>

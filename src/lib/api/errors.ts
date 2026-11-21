@@ -2,8 +2,28 @@ import type { MessageKey } from "@/lib/i18n";
 
 import { ApiError } from "./client";
 
+// FE-8: organizer promo campaigns/codes and support cases.
+// ("Promo code not found", "Order not found" and "Ticket not found" are mapped by FE-6.)
+const FE8_DETAILS: Record<string, MessageKey> = {
+  "Campaign not found": "err.campaignNotFound",
+  "Promo campaigns and codes are closed for this event": "err.promoClosed",
+  "This promo code is not available, choose another": "err.codeTaken",
+  "Could not generate a free code, try again": "err.codeGenerateFailed",
+  "A percent discount cannot be more than 100": "err.percentOver100",
+  "starts_at must be before ends_at": "err.campaignDates",
+  "Support case not found": "support.case.notFound",
+  "This case is already taken by someone else": "err.caseTaken",
+  "Only a handler of this case can take it": "err.caseNotHandler",
+  "You can only mark your own case as resolved": "err.caseOnlyResolve",
+  "Only organizers and platform admins have a support inbox": "err.noInbox",
+  "An attendee case needs an event_id, order_id or ticket_id": "err.caseNeedsEvent",
+  "The event, order and ticket given belong to different events": "err.caseMixedEvents",
+  "Organizer account required": "err.organizerRequired",
+};
+
 /** Backend `detail` strings that have a translated message. */
 const KNOWN_DETAILS: Record<string, MessageKey> = {
+  ...FE8_DETAILS,
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",

@@ -7,6 +7,7 @@ import { MyTicketsPage, OrderPage } from "@/features/tickets";
 import { CreateEventPage, ManageEventPage, OrganizerDashboardPage } from "@/features/organizer";
 import { AttendeeDashboardPage } from "@/features/attendee";
 import { AdminDashboardPage } from "@/features/admin";
+import { CasePage, InboxPage, MyCasesPage } from "@/features/support";
 import {
   AccountPage,
   GuestOnly,
@@ -30,6 +31,12 @@ export const router = createBrowserRouter([
       { path: "tickets", element: <RequireAuth><MyTicketsPage /></RequireAuth> },
       { path: "orders/:orderId", element: <RequireAuth><OrderPage /></RequireAuth> },
       { path: "attendee", element: <RequireAuth><AttendeeDashboardPage /></RequireAuth> },
+      { path: "support", element: <RequireAuth><MyCasesPage /></RequireAuth> },
+      { path: "support/cases/:caseId", element: <RequireAuth><CasePage /></RequireAuth> },
+      {
+        path: "support/inbox",
+        element: <RequireRole role={["organizer", "platform_admin"]}><InboxPage /></RequireRole>,
+      },
       {
         path: "organizer",
         element: <RequireRole role="organizer"><OrganizerDashboardPage /></RequireRole>,
