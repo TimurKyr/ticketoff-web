@@ -21,6 +21,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm my email from the link
+         * @description No login needed: the link's token says who it is. Calling it again is fine.
+         */
+        post: operations["verify_email_auth_verify_email_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify-email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send me a new verification link */
+        post: operations["resend_verification_email_auth_verify_email_resend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -691,6 +728,410 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{event_id}/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Campaigns of my event */
+        get: operations["list_campaigns_events__event_id__campaigns_get"];
+        put?: never;
+        /** Create a promo campaign for my event */
+        post: operations["create_campaign_events__event_id__campaigns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_id}/campaigns/{campaign_id}/codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Codes of a campaign, with their status and how many times each was used */
+        get: operations["list_codes_events__event_id__campaigns__campaign_id__codes_get"];
+        put?: never;
+        /** Add a promo code (made up if you do not send one) with its campaign QR token */
+        post: operations["create_code_events__event_id__campaigns__campaign_id__codes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_id}/campaigns/{campaign_id}/codes/{code_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Disable or re-enable a promo code */
+        patch: operations["update_code_events__event_id__campaigns__campaign_id__codes__code_id__patch"];
+        trace?: never;
+    };
+    "/events/{event_id}/campaigns/{campaign_id}/codes/{code_id}/qr.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Campaign QR of a promo code as a PNG */
+        get: operations["get_code_qr_events__event_id__campaigns__campaign_id__codes__code_id__qr_png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_id}/promo-codes/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check a promo code before paying (does not use it up) */
+        post: operations["check_code_events__event_id__promo_codes_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/promo-qr/{qr_token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Where a scanned campaign QR leads (no login) */
+        get: operations["resolve_qr_promo_qr__qr_token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/events/{event_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop new sales of an event
+         * @description Free registration, checkout and pay answer 409 until unsuspended. Tickets already
+         *     issued stay valid and scan at the door. Repeating it changes nothing.
+         */
+        post: operations["suspend_event_admin_events__event_id__suspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/events/{event_id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore sales of an event */
+        post: operations["unsuspend_event_admin_events__event_id__unsuspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{user_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Block a user account
+         * @description Login and every token of the user answer 403. Not allowed on your own account (409).
+         *
+         *     Account only: the events of a suspended organizer keep selling and their tickets stay
+         *     valid. Stop an event's sales separately with POST /admin/events/{event_id}/suspend.
+         */
+        post: operations["suspend_user_admin_users__user_id__suspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{user_id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unblock a user account */
+        post: operations["unsuspend_user_admin_users__user_id__unsuspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find users or events */
+        get: operations["search_admin_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All payments, newest first */
+        get: operations["list_payments_admin_payments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All refunds, newest first */
+        get: operations["list_refunds_admin_refunds_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/activations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Activation fee payments, newest first */
+        get: operations["list_activations_admin_activations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platform fees (read-only) */
+        get: operations["read_settings_admin_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My notifications */
+        get: operations["list_notifications_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{notification_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark one of my notifications read */
+        post: operations["read_notification_notifications__notification_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cases I opened, newest first */
+        get: operations["list_my_cases_support_cases_get"];
+        put?: never;
+        /** Open a support case (the first message is the case text) */
+        post: operations["open_case_support_cases_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cases I handle, oldest first: my events' attendee cases, or all cases for an admin */
+        get: operations["list_inbox_support_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/cases/{case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A case with its messages */
+        get: operations["get_case_support_cases__case_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/cases/{case_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reply in a case */
+        post: operations["add_message_support_cases__case_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/cases/{case_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take a case (handlers only) */
+        post: operations["assign_case_support_cases__case_id__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/cases/{case_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the status (handlers: in_progress, waiting_customer, resolved; the customer: resolved only) */
+        patch: operations["update_status_support_cases__case_id__status_patch"];
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -739,6 +1180,74 @@ export interface components {
              * @constant
              */
             is_simulated: true;
+        };
+        /**
+         * AdminPaymentOut
+         * @description event_id: the activation's event, or the event of a ticket payment's order.
+         */
+        AdminPaymentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            purpose: components["schemas"]["PaymentPurpose"];
+            status: components["schemas"]["PaymentStatus"];
+            /** Order Id */
+            order_id: string | null;
+            /** Event Id */
+            event_id: string | null;
+            /** Amount Kzt */
+            amount_kzt: number;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AdminRefundOut */
+        AdminRefundOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Payment Id
+             * Format: uuid
+             */
+            payment_id: string;
+            /** Order Id */
+            order_id: string | null;
+            /** Event Id */
+            event_id: string | null;
+            /** Amount Kzt */
+            amount_kzt: number;
+            status: components["schemas"]["RefundStatus"];
+            /** Reason */
+            reason: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AdminUserOut */
+        AdminUserOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Email */
+            email: string;
+            system_role: components["schemas"]["SystemRole"];
+            /** Email Verified */
+            email_verified: boolean;
+            /** Is Suspended */
+            is_suspended: boolean;
         };
         /** AttendeeIn */
         AttendeeIn: {
@@ -804,19 +1313,203 @@ export interface components {
              */
             client_secret?: string | null;
         };
+        /** CampaignCreate */
+        CampaignCreate: {
+            /** Name */
+            name: string;
+            discount_type: components["schemas"]["DiscountType"];
+            /** Discount Value */
+            discount_value: number;
+            /** Max Redemptions */
+            max_redemptions?: number | null;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+        };
+        /** CampaignOut */
+        CampaignOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string;
+            discount_type: components["schemas"]["DiscountType"];
+            /** Discount Value */
+            discount_value: number;
+            /** Max Redemptions */
+            max_redemptions: number | null;
+            /** Starts At */
+            starts_at: string | null;
+            /** Ends At */
+            ends_at: string | null;
+        };
+        /**
+         * CaseCreate
+         * @description Open a case. The first message is the case text; there is no separate title.
+         *
+         *     `kind` says who is asking: "attendee" (a ticket buyer, answered by the event's organizer)
+         *     or "organizer" (an organizer asking the platform, answered by a platform admin).
+         *     An attendee case must point to an event, directly or through an order or ticket.
+         */
+        CaseCreate: {
+            kind: components["schemas"]["SupportKind"];
+            category: components["schemas"]["SupportCategory"];
+            /** Body */
+            body: string;
+            /** Event Id */
+            event_id?: string | null;
+            /** Order Id */
+            order_id?: string | null;
+            /** Ticket Id */
+            ticket_id?: string | null;
+        };
+        /** CaseDetailOut */
+        CaseDetailOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Opened By
+             * Format: uuid
+             */
+            opened_by: string;
+            /** Assignee Id */
+            assignee_id: string | null;
+            kind: components["schemas"]["SupportKind"];
+            category: components["schemas"]["SupportCategory"];
+            status: components["schemas"]["SupportStatus"];
+            /** Event Id */
+            event_id: string | null;
+            /** Order Id */
+            order_id: string | null;
+            /** Ticket Id */
+            ticket_id: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Opener Email */
+            opener_email: string;
+            /** Event Title */
+            event_title: string | null;
+            /** Messages */
+            messages: components["schemas"]["MessageOut"][];
+        };
+        /** CaseOut */
+        CaseOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Opened By
+             * Format: uuid
+             */
+            opened_by: string;
+            /** Assignee Id */
+            assignee_id: string | null;
+            kind: components["schemas"]["SupportKind"];
+            category: components["schemas"]["SupportCategory"];
+            status: components["schemas"]["SupportStatus"];
+            /** Event Id */
+            event_id: string | null;
+            /** Order Id */
+            order_id: string | null;
+            /** Ticket Id */
+            ticket_id: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Opener Email */
+            opener_email: string;
+            /** Event Title */
+            event_title: string | null;
+        };
+        /**
+         * CasePage
+         * @description One page of cases. total counts every matching case.
+         */
+        CasePage: {
+            /** Items */
+            items: components["schemas"]["CaseOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
         /**
          * CheckoutCreate
          * @description Paid checkout: the same shape as a free registration, for paid ticket types only.
          *
          *     One attendee per ticket, matched in item order. The client never sends prices; unknown
          *     fields such as a price are ignored and the total comes from the ticket types.
+         *
+         *     `promo_code` is optional (BE-16): a valid code lowers what the buyer pays.
          */
         CheckoutCreate: {
             /** Items */
             items: components["schemas"]["RegistrationItemIn"][];
             /** Attendees */
             attendees: components["schemas"]["AttendeeIn"][];
+            /** Promo Code */
+            promo_code?: string | null;
         };
+        /** CodeCreate */
+        CodeCreate: {
+            /** Code */
+            code?: string | null;
+        };
+        /** CodeOut */
+        CodeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Campaign Id
+             * Format: uuid
+             */
+            campaign_id: string;
+            /** Code */
+            code: string;
+            /** Qr Token */
+            qr_token: string;
+            status: components["schemas"]["PromoCodeStatus"];
+            /** Redeemable Now */
+            redeemable_now: boolean;
+            /** Redemptions */
+            redemptions: number;
+        };
+        /** CodeUpdate */
+        CodeUpdate: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disabled";
+        };
+        /**
+         * DiscountType
+         * @enum {string}
+         */
+        DiscountType: "percent" | "fixed";
         /**
          * EventBucket
          * @description Organizer dashboard grouping, derived from `status` and dates.
@@ -916,6 +1609,8 @@ export interface components {
             seating_type: components["schemas"]["SeatingType"];
             /** Paid Sales Active */
             paid_sales_active: boolean;
+            /** Sales Suspended */
+            sales_suspended: boolean;
             /** Capacity */
             capacity: number | null;
             /**
@@ -1030,6 +1725,13 @@ export interface components {
             cancelled: number;
         };
         /**
+         * Language
+         * @description Language of the user's emails (BE-18). Stored as text with a CHECK, so adding one
+         *     (e.g. "kk") is a one-line migration.
+         * @enum {string}
+         */
+        Language: "ru" | "en";
+        /**
          * MeOut
          * @description `/auth/me`: the user plus the roles that come from other tables.
          */
@@ -1044,12 +1746,43 @@ export interface components {
             system_role: components["schemas"]["SystemRole"];
             /** Email Verified */
             email_verified: boolean;
+            language: components["schemas"]["Language"];
             /** Is Organizer */
             is_organizer: boolean;
             /** Organizer Profile Id */
             organizer_profile_id: string | null;
             /** Staff Event Ids */
             staff_event_ids: string[];
+        };
+        /** MessageCreate */
+        MessageCreate: {
+            /** Body */
+            body: string;
+        };
+        /** MessageOut */
+        MessageOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Sender Id
+             * Format: uuid
+             */
+            sender_id: string;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /**
          * MyEventOut
@@ -1080,6 +1813,50 @@ export interface components {
             /** Is Owner */
             is_owner: boolean;
         };
+        /** NotificationOut */
+        NotificationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            type: components["schemas"]["NotificationType"];
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Read At */
+            read_at: string | null;
+        };
+        /**
+         * NotificationPage
+         * @description One page of my notifications, newest first.
+         *
+         *     total counts the rows matching the filter; unread_count counts all my unread rows,
+         *     whatever the filter (the web app's badge).
+         */
+        NotificationPage: {
+            /** Items */
+            items: components["schemas"]["NotificationOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Unread Count */
+            unread_count: number;
+        };
+        /**
+         * NotificationType
+         * @enum {string}
+         */
+        NotificationType: "order_confirmed" | "ticket_issued" | "event_updated" | "event_cancelled" | "refund_processed" | "support_reply" | "account_verification" | "payment_failed" | "support_status";
         /** OrderItemOut */
         OrderItemOut: {
             /**
@@ -1107,6 +1884,11 @@ export interface components {
             status: components["schemas"]["OrderStatus"];
             /** Total Kzt */
             total_kzt: number;
+            /**
+             * Discount Kzt
+             * @default 0
+             */
+            discount_kzt: number;
             /** Items */
             items: components["schemas"]["OrderItemOut"][];
             /** Tickets */
@@ -1159,6 +1941,22 @@ export interface components {
             /** Is Simulated */
             is_simulated: boolean;
         };
+        /** PaymentPage */
+        PaymentPage: {
+            /** Items */
+            items: components["schemas"]["AdminPaymentOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /**
+         * PaymentPurpose
+         * @enum {string}
+         */
+        PaymentPurpose: "ticket_order" | "activation";
         /**
          * PaymentResultOut
          * @description Result of a pay attempt. A failed simulated payment is still a 200: the request
@@ -1203,6 +2001,66 @@ export interface components {
              * @constant
              */
             is_simulated: true;
+        };
+        /**
+         * PlatformSettingsOut
+         * @description Read-only: these come from the server configuration (env), not from the database.
+         */
+        PlatformSettingsOut: {
+            /** Activation Fee Kzt */
+            activation_fee_kzt: number;
+            /** Processing Fee Percent */
+            processing_fee_percent: number;
+            /** Checkout Hold Minutes */
+            checkout_hold_minutes: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Read Only
+             * @default true
+             * @constant
+             */
+            read_only: true;
+        };
+        /** PromoCheckIn */
+        PromoCheckIn: {
+            /** Code */
+            code: string;
+        };
+        /**
+         * PromoCheckOut
+         * @description What a buyer needs to see before paying; the real discount is worked out at checkout.
+         */
+        PromoCheckOut: {
+            /** Code */
+            code: string;
+            /** Campaign Name */
+            campaign_name: string;
+            discount_type: components["schemas"]["DiscountType"];
+            /** Discount Value */
+            discount_value: number;
+        };
+        /**
+         * PromoCodeStatus
+         * @enum {string}
+         */
+        PromoCodeStatus: "active" | "disabled" | "exhausted" | "expired";
+        /**
+         * PromoQrOut
+         * @description Where a scanned campaign QR leads: the event, and the code to pre-fill at checkout.
+         */
+        PromoQrOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Code */
+            code: string;
         };
         /**
          * PublicTicketTypeOut
@@ -1252,6 +2110,17 @@ export interface components {
             reason: string | null;
             /** Is Simulated */
             is_simulated: boolean;
+        };
+        /** RefundPage */
+        RefundPage: {
+            /** Items */
+            items: components["schemas"]["AdminRefundOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
         };
         /** RefundResultOut */
         RefundResultOut: {
@@ -1325,6 +2194,41 @@ export interface components {
             status: components["schemas"]["TicketStatus"];
         };
         /**
+         * SearchItemOut
+         * @description One search hit. label is the user's email or the event's title; status is the
+         *     user's system role or the event's status; suspended is users.is_suspended or
+         *     events.sales_suspended.
+         */
+        SearchItemOut: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "user" | "event";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Status */
+            status: string;
+            /** Suspended */
+            suspended: boolean;
+        };
+        /** SearchPage */
+        SearchPage: {
+            /** Items */
+            items: components["schemas"]["SearchItemOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /**
          * SeatingType
          * @enum {string}
          */
@@ -1364,6 +2268,29 @@ export interface components {
             /** Percent */
             percent: number;
         };
+        /** StatusUpdate */
+        StatusUpdate: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_progress" | "waiting_customer" | "resolved";
+        };
+        /**
+         * SupportCategory
+         * @enum {string}
+         */
+        SupportCategory: "payment" | "refund" | "ticket" | "event" | "account" | "other";
+        /**
+         * SupportKind
+         * @enum {string}
+         */
+        SupportKind: "attendee" | "organizer";
+        /**
+         * SupportStatus
+         * @enum {string}
+         */
+        SupportStatus: "open" | "in_progress" | "waiting_customer" | "resolved";
         /**
          * SystemRole
          * @enum {string}
@@ -1549,6 +2476,7 @@ export interface components {
             system_role: components["schemas"]["SystemRole"];
             /** Email Verified */
             email_verified: boolean;
+            language: components["schemas"]["Language"];
         };
         /** UserRegister */
         UserRegister: {
@@ -1559,6 +2487,8 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+            /** @default ru */
+            language: components["schemas"]["Language"];
         };
         /** ValidationError */
         ValidationError: {
@@ -1594,6 +2524,11 @@ export interface components {
          * @enum {string}
          */
         VerificationStatus: "unverified" | "pending" | "verified";
+        /** VerifyEmailIn */
+        VerifyEmailIn: {
+            /** Token */
+            token: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1633,6 +2568,57 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    verify_email_auth_verify_email_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resend_verification_email_auth_verify_email_resend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3007,6 +3993,853 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TimelinePage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_campaigns_events__event_id__campaigns_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_campaign_events__event_id__campaigns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_codes_events__event_id__campaigns__campaign_id__codes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_code_events__event_id__campaigns__campaign_id__codes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_code_events__event_id__campaigns__campaign_id__codes__code_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+                code_id: string;
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_code_qr_events__event_id__campaigns__campaign_id__codes__code_id__qr_png_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+                code_id: string;
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The campaign QR as a PNG picture (not an entry ticket) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_code_events__event_id__promo_codes_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromoCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoCheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_qr_promo_qr__qr_token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qr_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoQrOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suspend_event_admin_events__event_id__suspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsuspend_event_admin_events__event_id__unsuspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suspend_user_admin_users__user_id__suspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsuspend_user_admin_users__user_id__unsuspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_admin_search_get: {
+        parameters: {
+            query: {
+                /** @description Part of email or title */
+                q: string;
+                /** @description user (by email) or event (by title) */
+                type: "user" | "event";
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_payments_admin_payments_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["PaymentStatus"] | null;
+                purpose?: components["schemas"]["PaymentPurpose"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_refunds_admin_refunds_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["RefundStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_activations_admin_activations_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["PaymentStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_settings_admin_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformSettingsOut"];
+                };
+            };
+        };
+    };
+    list_notifications_notifications_get: {
+        parameters: {
+            query?: {
+                /** @description Only unread notifications */
+                unread?: boolean;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_notification_notifications__notification_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_my_cases_support_cases_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["SupportStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasePage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_case_support_cases_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_inbox_support_inbox_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["SupportStatus"] | null;
+                kind?: components["schemas"]["SupportKind"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasePage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_case_support_cases__case_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_message_support_cases__case_id__messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_case_support_cases__case_id__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_status_support_cases__case_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
                 };
             };
             /** @description Validation Error */
