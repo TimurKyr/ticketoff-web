@@ -27,7 +27,8 @@ interface Props {
   /** Ticket types of this kind that can be taken now (available > 0). */
   ticketTypes: PublicTicketTypeOut[];
   /** Paid only: shown before the buyer commits. */
-  refundPolicy?: string | null;
+  /** From the loaded event; shown before a paid checkout. */
+  refundPolicy: string | null;
   /** Paid only: code from a campaign QR link, filled in unless the buyer typed one. */
   linkPromoCode?: string | null;
 }

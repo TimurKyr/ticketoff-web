@@ -144,15 +144,24 @@ export function OrderPage() {
           ) : (
             <HoldTimer expiresAt={data.expires_at} now={now} />
           )}
-          <RefundPolicy policy={event.data?.refund_policy} />
-          <PaymentPanel
-            order={data}
-            onPaid={() => {
-              setPaidNow(true);
-              window.scrollTo({ top: 0 });
-            }}
-            onError={setPayError}
-          />
+          {/* Payment only once the buyer can see the organizer's refund terms. */}
+          {event.data ? (
+            <>
+              <RefundPolicy policy={event.data.refund_policy} />
+              <PaymentPanel
+                order={data}
+                onPaid={() => {
+                  setPaidNow(true);
+                  window.scrollTo({ top: 0 });
+                }}
+                onError={setPayError}
+              />
+            </>
+          ) : event.isError ? (
+            <ErrorState error={event.error} onRetry={() => event.refetch()} />
+          ) : (
+            <Loading />
+          )}
         </>
       )}
       {payError && data.status === "cancelled" && (

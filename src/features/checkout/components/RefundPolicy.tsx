@@ -1,7 +1,11 @@
 import { useI18n } from "@/lib/i18n";
 
-/** The organizer's refund terms, shown before paying. Refunds are done by the organizer. */
-export function RefundPolicy({ policy }: { policy: string | null | undefined }) {
+/**
+ * The organizer's refund terms, shown before paying. Refunds are done by the organizer.
+ * `policy` is the loaded event's value (null = the organizer set none); there is no
+ * "not loaded yet" state here, so callers must wait for the event before rendering this.
+ */
+export function RefundPolicy({ policy }: { policy: string | null }) {
   const { t } = useI18n();
   return (
     <section className="rounded-md bg-gray-50 p-3 text-sm" aria-labelledby="refund-policy-title">
