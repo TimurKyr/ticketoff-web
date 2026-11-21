@@ -26,6 +26,8 @@ const KNOWN_DETAILS: Record<string, MessageKey> = {
   "Free ticket types must have price_kzt = 0": "err.freePrice",
   "Paid ticket types must have price_kzt > 0": "err.paidPrice",
   "Event not found": "events.notFound",
+  "Invalid or expired verification link": "verifyEmail.invalid",
+  "Email is already verified": "verifyEmail.alreadyVerified",
 };
 
 /** Backend messages with values inside: pattern → translated text with $1, $2. */

@@ -274,6 +274,23 @@ export const ru = {
   "org.act.todo": "не сделано",
 
   "guard.toAccount": "Перейти в профиль",
+
+  "verifyEmail.title": "Подтверждение email",
+  "verifyEmail.success": "Email подтверждён. Спасибо!",
+  "verifyEmail.toAccount": "Перейти в профиль",
+  "verifyEmail.toHome": "На главную",
+  "verifyEmail.invalid": "Ссылка недействительна или устарела.",
+  "verifyEmail.invalid.resendHint": "Отправим новую ссылку на {email}. Она действует 24 часа.",
+  "verifyEmail.invalid.loginHint": "Войдите, чтобы получить новое письмо:",
+  "verifyEmail.alreadyVerified": "Ваш email уже подтверждён.",
+  "verifyEmail.registered": "Аккаунт создан. Мы отправили письмо для подтверждения на {email}.",
+  "verifyEmail.banner.text":
+    "Откройте ссылку из письма, которое мы отправили на {email}. Если письма нет, проверьте спам или отправьте его ещё раз.",
+  "verifyEmail.resend.button": "Отправить письмо ещё раз",
+  "verifyEmail.resend.sent": "Письмо отправлено. Проверьте почту.",
+  "verifyEmail.resend.tooSoon": "Письмо уже отправлено недавно. Повторить можно через {seconds} с.",
+  "verifyEmail.resend.tooSoonMinute": "Письмо уже отправлено недавно. Повторить можно примерно через минуту.",
+  "verifyEmail.resend.wait": "Отправить ещё раз через {seconds} с",
 } as const;
 
 export type MessageKey = keyof typeof ru;
@@ -330,6 +347,25 @@ export const kk: Messages = {
   "account.title": "Профиль",
   "account.becomeOrganizer.title": "Ұйымдастырушы болу",
   "account.becomeOrganizer.submit": "Ұйымдастырушы болу",
+
+  "account.emailVerified": "Email расталды",
+  "account.emailNotVerified": "Email расталмаған",
+  "verifyEmail.title": "Email растау",
+  "verifyEmail.success": "Email расталды. Рақмет!",
+  "verifyEmail.toAccount": "Профильге өту",
+  "verifyEmail.toHome": "Басты бетке",
+  "verifyEmail.invalid": "Сілтеме жарамсыз немесе мерзімі өтіп кеткен.",
+  "verifyEmail.invalid.resendHint": "{email} поштасына жаңа сілтеме жібереміз. Ол 24 сағат жарамды.",
+  "verifyEmail.invalid.loginHint": "Жаңа хат алу үшін жүйеге кіріңіз:",
+  "verifyEmail.alreadyVerified": "Сіздің email-іңіз расталған.",
+  "verifyEmail.registered": "Аккаунт ашылды. Растау хатын {email} поштасына жібердік.",
+  "verifyEmail.banner.text":
+    "{email} поштасына жіберілген хаттағы сілтемені ашыңыз. Хат келмесе, «Спам» бумасын тексеріңіз немесе хатты қайта жіберіңіз.",
+  "verifyEmail.resend.button": "Хатты қайта жіберу",
+  "verifyEmail.resend.sent": "Хат жіберілді. Поштаңызды тексеріңіз.",
+  "verifyEmail.resend.tooSoon": "Хат жақында ғана жіберілді. {seconds} секундтан кейін қайталауға болады.",
+  "verifyEmail.resend.tooSoonMinute": "Хат жақында ғана жіберілді. Шамамен бір минуттан кейін қайталаңыз.",
+  "verifyEmail.resend.wait": "{seconds} с кейін қайта жіберу",
 };
 
 export const LANGUAGES = { ru, kk } as const;
