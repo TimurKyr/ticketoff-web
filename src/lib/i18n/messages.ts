@@ -508,6 +508,22 @@ export const ru = {
   "verifyEmail.resend.tooSoonMinute": "Письмо уже отправлено недавно. Повторить можно примерно через минуту.",
   "verifyEmail.resend.wait": "Отправить ещё раз через {seconds} с",
 
+  // FE-11: footer and static pages
+  "footer.title": "Разделы сайта",
+  "footer.about": "О проекте",
+  "footer.aboutService": "О сервисе",
+  "footer.allEvents": "Все события",
+  "footer.organizers": "Организаторам",
+  "footer.howToStart": "Как провести событие",
+  "footer.help": "Помощь",
+  "footer.faq": "Частые вопросы",
+  "footer.refund": "Условия возврата",
+  "footer.refundRules": "Общие правила",
+  "footer.refundNote": "У платного события есть и условия организатора, они показаны перед оплатой.",
+  "footer.disclaimer":
+    "Учебный проект CSCI 361, Nazarbayev University. Оплата симулируется, деньги не списываются.",
+  "static.faqTitle": "Частые вопросы",
+  "checkout.refundRulesLink": "Общие условия возврата",
 } as const;
 
 export type MessageKey = keyof typeof ru;
@@ -748,6 +764,23 @@ export const kk: Messages = {
   "verifyEmail.resend.tooSoon": "Хат жақында ғана жіберілді. {seconds} секундтан кейін қайталауға болады.",
   "verifyEmail.resend.tooSoonMinute": "Хат жақында ғана жіберілді. Шамамен бір минуттан кейін қайталаңыз.",
   "verifyEmail.resend.wait": "{seconds} с кейін қайта жіберу",
+
+  // FE-11: footer and static pages
+  "footer.title": "Сайт бөлімдері",
+  "footer.about": "Жоба туралы",
+  "footer.aboutService": "Сервис туралы",
+  "footer.allEvents": "Барлық іс-шаралар",
+  "footer.organizers": "Ұйымдастырушыларға",
+  "footer.howToStart": "Іс-шараны қалай өткізу керек",
+  "footer.help": "Көмек",
+  "footer.faq": "Жиі қойылатын сұрақтар",
+  "footer.refund": "Қайтару шарттары",
+  "footer.refundRules": "Жалпы ережелер",
+  "footer.refundNote": "Ақылы іс-шараның ұйымдастырушы шарттары да бар, олар төлем алдында көрсетіледі.",
+  "footer.disclaimer":
+    "CSCI 361 оқу жобасы, Nazarbayev University. Төлем симуляцияланады, ақша есептен шығарылмайды.",
+  "static.faqTitle": "Жиі қойылатын сұрақтар",
+  "checkout.refundRulesLink": "Жалпы қайтару шарттары",
 
   // FE-11: keys that had no Kazakh text (fell back to Russian)
   "app.name": "ticketoff",

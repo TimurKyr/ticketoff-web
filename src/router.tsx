@@ -8,6 +8,7 @@ import { CreateEventPage, ManageEventPage, OrganizerDashboardPage } from "@/feat
 import { AttendeeDashboardPage } from "@/features/attendee";
 import { AdminDashboardPage } from "@/features/admin";
 import { CasePage, InboxPage, MyCasesPage } from "@/features/support";
+import { AboutPage, HelpPage, OrganizersPage, RefundPolicyPage } from "@/features/static";
 import {
   AccountPage,
   GuestOnly,
@@ -55,6 +56,10 @@ export const router = createBrowserRouter([
         path: "admin",
         element: <RequireRole role="platform_admin"><AdminDashboardPage /></RequireRole>,
       },
+      { path: "about", element: <AboutPage /> },
+      { path: "organizers", element: <OrganizersPage /> },
+      { path: "help", element: <HelpPage /> },
+      { path: "refund-policy", element: <RefundPolicyPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

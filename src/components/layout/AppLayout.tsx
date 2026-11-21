@@ -3,6 +3,8 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/features/auth";
 import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language } from "@/lib/i18n";
 
+import { Footer } from "./Footer";
+
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded px-1 py-0.5 hover:underline focus-visible:outline focus-visible:outline-2 ${
     isActive ? "font-semibold text-black" : "text-gray-700"
@@ -115,6 +117,7 @@ export function AppLayout() {
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
           <Outlet />
         </main>
+        <Footer />
       </div>
     </AuthProvider>
   );
