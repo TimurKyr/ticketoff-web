@@ -36,6 +36,16 @@ interface WallClock {
   weekday: number; // 0 = Sunday
   hh: string;
   mm: string;
+  /** "GMT+5", "GMT+5:30", "GMT": the offset of the zone the time was converted to. */
+  zone: string;
+}
+
+function gmtLabel(offsetMs: number): string {
+  const total = Math.round(offsetMs / 60_000);
+  if (total === 0) return "GMT";
+  const abs = Math.abs(total);
+  const minutes = abs % 60;
+  return `GMT${total < 0 ? "−" : "+"}${Math.floor(abs / 60)}${minutes ? `:${String(minutes).padStart(2, "0")}` : ""}`;
 }
 
 /** Wall-clock parts of `iso` in `timeZone` (Kazakhstan time by default). */
@@ -55,23 +65,27 @@ function wallClock(iso: string, timeZone: string = DEFAULT_TIME_ZONE): WallClock
     weekday: d.getUTCDay(),
     hh: String(d.getUTCHours()).padStart(2, "0"),
     mm: String(d.getUTCMinutes()).padStart(2, "0"),
+    zone: gmtLabel(offset),
   };
 }
 
 /**
- * Date and time in the venue's time zone (Kazakhstan time when none is given):
- * "7 декабря 2026, пн · 19:00", "7 желтоқсан 2026, дс · 19:00".
+ * Date and time in the venue's time zone (Kazakhstan time when none is given), with that
+ * zone's offset so a buyer abroad does not read it as local time:
+ * "7 декабря 2026, пн · 19:00 GMT+5", "7 желтоқсан 2026, дс · 19:00 GMT+5".
  */
 export function formatDateTime(iso: string, lang: Language, timeZone?: string): string {
   const w = wallClock(iso, timeZone);
-  return `${w.day} ${MONTHS[lang][w.month]} ${w.year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}`;
+  return `${w.day} ${MONTHS[lang][w.month]} ${w.year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
-/** Short form for cards: "7 дек, пн · 19:00", "7 жел, дс · 19:00" (year only if not this one). */
+/**
+ * Short form for cards, same zone label: "7 дек, пн · 19:00 GMT+5" (year only if not this one).
+ */
 export function formatShortDateTime(iso: string, lang: Language, timeZone?: string): string {
   const w = wallClock(iso, timeZone);
   const year = w.year !== wallClock(new Date().toISOString(), timeZone).year ? ` ${w.year}` : "";
-  return `${w.day} ${MONTHS_SHORT[lang][w.month]}${year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}`;
+  return `${w.day} ${MONTHS_SHORT[lang][w.month]}${year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
 /** Platform default zone (all venues are in Kazakhstan, UTC+5). */
