@@ -12,6 +12,28 @@ import { useAuth } from "../hooks/useAuth";
 /** The backend sends at most one verification email per minute (registration counts). */
 const RESEND_COOLDOWN_S = 60;
 
+// The cooldown end is kept for the tab, so leaving the page (or reloading) does not reset it.
+const cooldownKey = (userId: string) => `ticketoff.verifyResendUntil.${userId}`;
+
+function readCooldown(userId: string | undefined): number | null {
+  if (!userId) return null;
+  try {
+    const until = Number(window.sessionStorage.getItem(cooldownKey(userId)));
+    return Number.isFinite(until) && until > Date.now() ? until : null;
+  } catch {
+    return null; // storage blocked: the cooldown just lives in memory
+  }
+}
+
+function saveCooldown(userId: string | undefined, until: number): void {
+  if (!userId) return;
+  try {
+    window.sessionStorage.setItem(cooldownKey(userId), String(until));
+  } catch {
+    // storage blocked: ignore
+  }
+}
+
 /** Kept untranslated so the text follows a language switch. */
 type Notice =
   | { tone: "success" | "error"; key: MessageKey; seconds?: number }
@@ -25,10 +47,13 @@ type Notice =
  */
 export function ResendVerificationButton() {
   const { t } = useI18n();
-  const { refresh } = useAuth();
+  const { user, refresh } = useAuth();
+  const userId = user?.id;
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
-  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(() =>
+    readCooldown(userId)
+  );
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -72,8 +97,10 @@ export function ResendVerificationButton() {
 
   function startCooldown(seconds: number) {
     const start = Date.now();
+    const until = start + seconds * 1000;
     setNow(start);
-    setCooldownUntil(start + seconds * 1000);
+    setCooldownUntil(until);
+    saveCooldown(userId, until);
   }
 
   return (

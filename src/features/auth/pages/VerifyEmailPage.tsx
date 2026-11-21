@@ -22,7 +22,9 @@ export function VerifyEmailPage() {
   const { user, isLoading, refresh } = useAuth();
   const [params] = useSearchParams();
   const token = params.get("token")?.trim() ?? "";
-  const [result, setResult] = useState<Result | null>(token ? null : { status: "invalid" });
+  // Each result belongs to the token it was got for, so a change of ?token= (or its
+  // removal) never shows the previous token's answer.
+  const [outcome, setOutcome] = useState<{ token: string; result: Result } | null>(null);
   // StrictMode runs effects twice in dev; send each token only once.
   const sentFor = useRef<string | null>(null);
 
@@ -31,18 +33,30 @@ export function VerifyEmailPage() {
     // request, which may have read the user before the verification, and keep it unverified.
     if (isLoading || !token || sentFor.current === token) return;
     sentFor.current = token;
-    setResult(null);
     verifyEmail(token)
       .then(() => {
-        setResult({ status: "success" });
+        setOutcome({ token, result: { status: "success" } });
         void refresh(); // email_verified changed on /auth/me
+        // Drop the one-time token from the address bar (history, screenshots). Done on
+        // window.history only, so the router still holds the token and the result above
+        // stays bound to it; router navigation to a bare /verify-email shows "invalid".
+        window.history.replaceState(window.history.state, "", window.location.pathname);
       })
       .catch((err: unknown) => {
         // 422: bad, expired or tampered token (one message for all).
-        if (err instanceof ApiError && err.status === 422) setResult({ status: "invalid" });
-        else setResult({ status: "error", error: err });
+        const result: Result =
+          err instanceof ApiError && err.status === 422
+            ? { status: "invalid" }
+            : { status: "error", error: err };
+        setOutcome({ token, result });
       });
   }, [isLoading, token, refresh]);
+
+  const result: Result | null = !token
+    ? { status: "invalid" }
+    : outcome?.token === token
+      ? outcome.result
+      : null;
 
   return (
     <section className="mx-auto flex w-full max-w-md flex-col gap-4">
