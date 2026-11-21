@@ -5,6 +5,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useVenues } from "@/features/events/api";
+import { PromotionsSection } from "@/features/promotions";
 import { ApiError } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/errors";
 import type { EventStatus } from "@/lib/api/types";
@@ -136,6 +137,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
       <TicketTypesSection eventId={data.id} tz={tz} editable={open} />
       {data.status !== "draft" && <InventorySection eventId={data.id} />}
       {hasPaid && <ActivationSection eventId={data.id} editable={open} />}
+      <PromotionsSection eventId={data.id} tz={tz} editable={open} />
 
       <section className="flex flex-col gap-3 rounded-lg border border-gray-300 p-4">
         <h2 className="text-xl font-semibold">{t("org.form.editTitle")}</h2>

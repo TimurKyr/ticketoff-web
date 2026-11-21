@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { Alert } from "@/components/ui/Alert";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useEvent, usePublicTicketTypes } from "@/features/events/api";
+import { HelpButton } from "@/features/support";
 import { ApiError } from "@/lib/api/client";
 import { formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -48,6 +49,7 @@ export function OrderPage() {
         <Link to={`/events/${data.event_id}`} className="text-sm underline">
           {t("order.toEvent")}
         </Link>
+        <HelpButton context={{ order_id: data.id }} className="mt-1" />
       </header>
       <ul className="flex flex-col gap-4">
         {data.tickets.map((ticket) => (

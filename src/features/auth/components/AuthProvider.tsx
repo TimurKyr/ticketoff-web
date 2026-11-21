@@ -60,7 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (email: string, password: string) => {
-      await authApi.register({ email, password });
+      // Email language: the API knows ru/en only (no kk yet), so ru for now.
+      await authApi.register({ email, password, language: "ru" });
       return login(email, password);
     },
     [login]

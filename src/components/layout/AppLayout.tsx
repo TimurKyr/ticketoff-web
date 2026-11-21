@@ -47,6 +47,16 @@ function Header() {
               {t("nav.tickets")}
             </NavLink>
           )}
+          {user && (
+            <NavLink to="/support" end className={navClass}>
+              {t("nav.support")}
+            </NavLink>
+          )}
+          {(user?.is_organizer || user?.system_role === "platform_admin") && (
+            <NavLink to="/support/inbox" className={navClass}>
+              {t("nav.inbox")}
+            </NavLink>
+          )}
           {user?.is_organizer && (
             <NavLink to="/organizer" className={navClass}>
               {t("nav.organizer")}

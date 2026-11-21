@@ -34,3 +34,24 @@ export type TicketTypeCreate = Schemas["TicketTypeCreate"];
 export type TicketTypeUpdate = Schemas["TicketTypeUpdate"];
 export type EventInventoryOut = Schemas["EventInventoryOut"];
 export type ActivationChecklistOut = Schemas["ActivationChecklistOut"];
+
+// FE-8: promo campaigns and codes (organizer side)
+export type DiscountType = Schemas["DiscountType"];
+export type CampaignCreate = Schemas["CampaignCreate"];
+export type CampaignOut = Schemas["CampaignOut"];
+export type CodeCreate = Schemas["CodeCreate"];
+export type CodeOut = Schemas["CodeOut"];
+export type CodeUpdate = Schemas["CodeUpdate"];
+export type PromoCodeStatus = Schemas["PromoCodeStatus"];
+
+// FE-8: support cases
+export type SupportKind = Schemas["SupportKind"];
+export type SupportCategory = Schemas["SupportCategory"];
+export type SupportStatus = Schemas["SupportStatus"];
+export type CaseCreate = Schemas["CaseCreate"];
+export type CaseOut = Schemas["CaseOut"];
+export type CaseDetailOut = Schemas["CaseDetailOut"];
+export type CasePage = Schemas["CasePage"];
+export type MessageCreate = Schemas["MessageCreate"];
+export type MessageOut = Schemas["MessageOut"];
+export type SupportStatusUpdate = Schemas["StatusUpdate"];

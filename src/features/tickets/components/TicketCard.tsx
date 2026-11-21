@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { HelpButton } from "@/features/support";
 import type { TicketOut } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -53,6 +54,7 @@ export function TicketCard({
           </Button>
         )}
         {error && <Alert tone="error">{t("ticket.pdfError")}</Alert>}
+        <HelpButton context={{ ticket_id: ticket.id }} className="mt-1" />
       </div>
     </li>
   );

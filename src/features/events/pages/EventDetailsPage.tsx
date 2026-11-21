@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Alert } from "@/components/ui/Alert";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { HelpButton } from "@/features/support";
 import { ApiError } from "@/lib/api/client";
 import type { PublicTicketTypeOut } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
@@ -106,6 +107,8 @@ export function EventDetailsPage() {
           </span>
         )}
         <h1 className="text-3xl font-bold">{data.title}</h1>
+        {/* Only a published event can be asked about (the API refuses the rest). */}
+        {data.status === "published" && <HelpButton context={{ event_id: data.id }} />}
       </header>
 
       {cancelled && <Alert tone="error">{t("events.cancelled")}</Alert>}
