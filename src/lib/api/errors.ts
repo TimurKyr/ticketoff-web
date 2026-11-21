@@ -70,6 +70,8 @@ const KNOWN_DETAILS: Record<string, MessageKey> = {
   "This promo code has been fully used": "err.promoUsedUp",
   "Promo QR not found": "err.promoQrNotFound",
   "This promo code gives no discount on this order": "err.promoNoDiscount",
+  "Invalid or expired verification link": "verifyEmail.invalid",
+  "Email is already verified": "verifyEmail.alreadyVerified",
 };
 
 /** Backend messages with values inside: pattern → translated text with $1, $2. */

@@ -14,12 +14,18 @@ export const API_BASE_URL = (
 export class ApiError extends Error {
   status: number;
   body: unknown;
+  /**
+   * Seconds from the `Retry-After` header of a 429, or null. Cross-origin the browser shows
+   * it only if the API lists it in `Access-Control-Expose-Headers`.
+   */
+  retryAfter: number | null;
 
-  constructor(status: number, body: unknown, message?: string) {
+  constructor(status: number, body: unknown, message?: string, retryAfter: number | null = null) {
     super(message ?? `API request failed with status ${status}`);
     this.name = "ApiError";
     this.status = status;
     this.body = body;
+    this.retryAfter = retryAfter;
   }
 
   /** `detail` from `{"detail": ...}`: a string, or a list of 422 validation errors. */
@@ -87,7 +93,13 @@ async function request<TResponse>(
       clearAuthToken();
       onUnauthorized?.();
     }
-    throw new ApiError(res.status, errorBody);
+    const retryAfter = Number.parseInt(res.headers.get("Retry-After") ?? "", 10);
+    throw new ApiError(
+      res.status,
+      errorBody,
+      undefined,
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null
+    );
   }
 
   if (responseType === "blob") {

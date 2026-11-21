@@ -23,6 +23,16 @@ export function register(payload: UserRegister): Promise<UserOut> {
   return apiClient.post<UserOut>("/auth/register", payload);
 }
 
+/** No login needed: the token from the email link says who it is. Repeating it is fine. */
+export function verifyEmail(token: string): Promise<UserOut> {
+  return apiClient.post<UserOut>("/auth/verify-email", { token });
+}
+
+/** A new verification link for the logged-in user; 429 when asked again within 60 s. */
+export function resendVerificationEmail(): Promise<void> {
+  return apiClient.post<void>("/auth/verify-email/resend");
+}
+
 export function createOrganizerProfile(
   payload: OrganizerProfileIn
 ): Promise<OrganizerProfileOut> {
