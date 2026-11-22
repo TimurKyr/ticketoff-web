@@ -1,10 +1,10 @@
 import { useState } from "react";
 
+import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { PAGE_SIZE } from "../config";
 import { useAdminRefunds } from "../hooks/useAdminQueries";
-import { useFormat } from "../hooks/useFormat";
 import { ListState } from "./ListState";
 import { Pager } from "./Pager";
 import { StatusBadge } from "./StatusBadge";
@@ -12,8 +12,7 @@ import { StatusBadge } from "./StatusBadge";
 const shortId = (id: string | null) => (id ? id.slice(0, 8) : "—");
 
 export function RefundsTab() {
-  const { t } = useI18n();
-  const { money, date } = useFormat();
+  const { t, lang } = useI18n();
   const [offset, setOffset] = useState(0);
   const query = useAdminRefunds(PAGE_SIZE, offset);
   const data = query.data;
@@ -42,8 +41,8 @@ export function RefundsTab() {
               <tbody>
                 {data.items.map((r) => (
                   <tr key={r.id} className="border-b">
-                    <td className="py-2 pr-4">{date(r.created_at)}</td>
-                    <td className="py-2 pr-4">{money(r.amount_kzt)}</td>
+                    <td className="py-2 pr-4">{formatDateTime(r.created_at, lang)}</td>
+                    <td className="py-2 pr-4">{formatKzt(r.amount_kzt, lang)}</td>
                     <td className="py-2 pr-4">
                       <StatusBadge status={r.status} />
                     </td>

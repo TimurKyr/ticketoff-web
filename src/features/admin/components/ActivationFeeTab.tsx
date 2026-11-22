@@ -1,13 +1,12 @@
+import { formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { useAdminSettings } from "../hooks/useAdminQueries";
-import { useFormat } from "../hooks/useFormat";
 import { ListState } from "./ListState";
 
 /** Platform fees, read-only (the API has no PUT yet). */
 export function ActivationFeeTab() {
-  const { t } = useI18n();
-  const { money } = useFormat();
+  const { t, lang } = useI18n();
   const query = useAdminSettings();
   const data = query.data;
 
@@ -23,7 +22,7 @@ export function ActivationFeeTab() {
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between border-b pb-2">
               <dt className="text-gray-600">{t("admin.fee.activation")}</dt>
-              <dd className="font-semibold">{money(data.activation_fee_kzt)}</dd>
+              <dd className="font-semibold">{formatKzt(data.activation_fee_kzt, lang)}</dd>
             </div>
             <div className="flex justify-between border-b pb-2">
               <dt className="text-gray-600">{t("admin.fee.processing")}</dt>

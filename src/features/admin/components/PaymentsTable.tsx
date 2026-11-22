@@ -1,15 +1,14 @@
+import { formatDateTime, formatKzt } from "@/lib/format";
 import type { AdminPaymentOut } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 
-import { useFormat } from "../hooks/useFormat";
 import { StatusBadge } from "./StatusBadge";
 
 const shortId = (id: string | null) => (id ? id.slice(0, 8) : "—");
 
 /** Read-only table of payments (used by failed payments and activations). */
 export function PaymentsTable({ items }: { items: AdminPaymentOut[] }) {
-  const { t } = useI18n();
-  const { money, date } = useFormat();
+  const { t, lang } = useI18n();
 
   return (
     <div className="overflow-x-auto">
@@ -26,9 +25,9 @@ export function PaymentsTable({ items }: { items: AdminPaymentOut[] }) {
         <tbody>
           {items.map((p) => (
             <tr key={p.id} className="border-b">
-              <td className="py-2 pr-4">{date(p.created_at)}</td>
+              <td className="py-2 pr-4">{formatDateTime(p.created_at, lang)}</td>
               <td className="py-2 pr-4">
-                {money(p.amount_kzt)}
+                {formatKzt(p.amount_kzt, lang)}
                 {p.is_simulated && <span className="ml-2 text-xs text-gray-500">{t("admin.simulated")}</span>}
               </td>
               <td className="py-2 pr-4">
