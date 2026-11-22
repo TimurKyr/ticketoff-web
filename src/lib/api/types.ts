@@ -63,3 +63,25 @@ export type CasePage = Schemas["CasePage"];
 export type MessageCreate = Schemas["MessageCreate"];
 export type MessageOut = Schemas["MessageOut"];
 export type SupportStatusUpdate = Schemas["StatusUpdate"];
+
+// FE-7: organizer analytics, event orders, staff, timeline, payment summary
+export type OverviewOut = Schemas["OverviewOut"];
+export type SalesFigures = Schemas["SalesFigures"];
+export type EventCounts = Schemas["EventCounts"];
+export type EventHistoryPage = Schemas["EventHistoryPage"];
+export type EventStatsOut = Schemas["EventStatsOut"];
+export type EventAnalyticsOut = Schemas["EventAnalyticsOut"];
+export type TicketTypeStatsOut = Schemas["TicketTypeStatsOut"];
+export type DailySalesOut = Schemas["DailySalesOut"];
+export type CampaignStatsOut = Schemas["CampaignStatsOut"];
+export type EventOrderPage = Schemas["EventOrderPage"];
+export type EventOrderOut = Schemas["EventOrderOut"];
+export type EventOrderGuestOut = Schemas["EventOrderGuestOut"];
+export type CheckinStatsOut = Schemas["StatsOut"];
+export type StaffOut = Schemas["StaffOut"];
+export type StaffIn = Schemas["StaffIn"];
+export type TimelinePage = Schemas["TimelinePage"];
+export type TimelineItemOut = Schemas["TimelineItemOut"];
+export type PaymentSummaryOut = Schemas["PaymentSummaryOut"];
+export type RefundIn = Schemas["RefundIn"];
+export type RefundResultOut = Schemas["RefundResultOut"];

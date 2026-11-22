@@ -21,9 +21,18 @@ const FE8_DETAILS: Record<string, MessageKey> = {
   "Organizer account required": "err.organizerRequired",
 };
 
+// FE-7: refund rule and event staff.
+const FE7_DETAILS: Record<string, MessageKey> = {
+  "Only paid orders can be refunded": "err.onlyPaidRefund",
+  "No user with this email; ask them to register first": "err.staffNoUser",
+  "This user is already staff for the event": "err.staffAlready",
+  "This user is not staff for the event": "err.staffNotStaff",
+};
+
 /** Backend `detail` strings that have a translated message. */
 const KNOWN_DETAILS: Record<string, MessageKey> = {
   ...FE8_DETAILS,
+  ...FE7_DETAILS,
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",
