@@ -15,6 +15,7 @@ export type LoginForm = Schemas["Body_login_auth_login_post"];
 export type EventOut = Schemas["EventOut"];
 export type EventPage = Schemas["EventPage"];
 export type VenueOut = Schemas["VenueOut"];
+export type Availability = Schemas["Availability"];
 export type PublicTicketTypeOut = Schemas["PublicTicketTypeOut"];
 export type RegistrationCreate = Schemas["RegistrationCreate"];
 export type AttendeeIn = Schemas["AttendeeIn"];

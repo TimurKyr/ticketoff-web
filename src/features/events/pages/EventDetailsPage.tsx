@@ -13,7 +13,9 @@ import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
 
 import { useEvent, usePublicTicketTypes, useVenue } from "../api";
-import { registrationState, salesState } from "../availability";
+import { FEW_LEFT, registrationState, salesState } from "../availability";
+import { AvailabilityBadge } from "../components/AvailabilityBadge";
+import { EventCover } from "../components/EventCover";
 import { TicketOrderForm } from "../components/TicketOrderForm";
 import { getPromoToken, savePromoToken } from "../promo";
 
@@ -28,7 +30,14 @@ function TicketTypeRow({ type, now, timeZone }: { type: PublicTicketTypeOut; now
   return (
     <li className="flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-200 py-3 last:border-0">
       <div>
-        <p className="font-medium">{type.name}</p>
+        <p className="flex flex-wrap items-center gap-2 font-medium">
+          {type.name}
+          {type.available > 0 && type.available <= FEW_LEFT && sales !== "ended" && (
+            <span className="rounded bg-[#FCF1D9] px-2 py-0.5 text-xs font-medium text-[#7A4D00]">
+              {t("events.fewLeftType")}
+            </span>
+          )}
+        </p>
         {type.description && <p className="text-sm text-gray-700">{type.description}</p>}
         {type.max_per_order && (
           <p className="text-xs text-gray-600">
@@ -136,6 +145,7 @@ export function EventDetailsPage() {
   const types = ticketTypes.data ?? [];
   // Same checks as the API: event-level registration window, then per-type sales window and stock.
   const registration = registrationState(data, now);
+  const soldOut = types.length > 0 && types.every((type) => type.available <= 0);
 
   return (
     <article className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -143,13 +153,15 @@ export function EventDetailsPage() {
         ← {t("events.backToList")}
       </Link>
 
-      <header className="flex flex-col gap-2">
-        {data.category && (
-          <span className="self-start rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-800">
-            {data.category}
-          </span>
-        )}
+      <header className="flex flex-col gap-3">
+        {/* The cover shows the translated category; the title stays in the h1 below. */}
+        <EventCover event={data} variant="banner" />
         <h1 className="text-3xl font-bold">{data.title}</h1>
+        {soldOut && !cancelled && (
+          <div>
+            <AvailabilityBadge availability="sold_out" />
+          </div>
+        )}
         {/* Only a published event can be asked about (the API refuses the rest). */}
         {data.status === "published" && <HelpButton context={{ event_id: data.id }} />}
       </header>
