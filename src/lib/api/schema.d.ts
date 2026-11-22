@@ -167,6 +167,28 @@ export interface paths {
         patch: operations["update_event_events__event_id__patch"];
         trace?: never;
     };
+    "/events/{event_id}/calendar.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The event as an iCalendar (.ics) file
+         * @description No login. Visible like GET /events/{id}, and also cancelled or completed events that
+         *     were published: a cancelled one has STATUS:CANCELLED and the same UID, so a calendar
+         *     that imports it again drops the entry.
+         */
+        get: operations["get_event_calendar_events__event_id__calendar_ics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/duplicate": {
         parameters: {
             query?: never;
@@ -1049,6 +1071,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizer/analytics/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Totals over all my events */
+        get: operations["overview_organizer_analytics_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizer/analytics/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Event history: my events, newest first, with their numbers
+         * @description The per-event action log (audit) is GET /events/{event_id}/timeline.
+         */
+        get: operations["event_history_organizer_analytics_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizer/analytics/events/{event_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of my events: numbers, ticket types, promo campaigns and sales per day */
+        get: operations["event_analytics_organizer_analytics_events__event_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/support/cases": {
         parameters: {
             query?: never;
@@ -1339,6 +1415,28 @@ export interface components {
              */
             client_secret?: string | null;
         };
+        /**
+         * CalendarLinks
+         * @description Add-to-calendar (BE-31). Nothing is written to anyone's calendar: these open the
+         *     user's own calendar app or download a file.
+         */
+        CalendarLinks: {
+            /**
+             * Google
+             * @description Google Calendar 'create event' page, times in UTC
+             */
+            google: string;
+            /**
+             * Outlook
+             * @description Outlook.com 'new event' page, times in UTC
+             */
+            outlook: string;
+            /**
+             * Ics
+             * @description GET /events/{id}/calendar.ics: iCalendar file in the venue's time zone
+             */
+            ics: string;
+        };
         /** CampaignCreate */
         CampaignCreate: {
             /** Name */
@@ -1376,6 +1474,40 @@ export interface components {
             starts_at: string | null;
             /** Ends At */
             ends_at: string | null;
+        };
+        /**
+         * CampaignStatsOut
+         * @description What one promo campaign did on confirmed orders (campaigns with no use show zeros).
+         */
+        CampaignStatsOut: {
+            /**
+             * Campaign Id
+             * Format: uuid
+             */
+            campaign_id: string;
+            /** Name */
+            name: string;
+            discount_type: components["schemas"]["DiscountType"];
+            /** Discount Value */
+            discount_value: number;
+            /** Redemptions */
+            redemptions: number;
+            /** Orders */
+            orders: number;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /**
+             * Gross Kzt
+             * @description Sum of order total - discount of those orders.
+             */
+            gross_kzt: number;
+            /** Discount Total Kzt */
+            discount_total_kzt: number;
+            /**
+             * Net Kzt
+             * @description gross_kzt minus succeeded refunds of those orders.
+             */
+            net_kzt: number;
         };
         /**
          * CaseCreate
@@ -1531,17 +1663,84 @@ export interface components {
              */
             status: "active" | "disabled";
         };
+        /** DailySalesOut */
+        DailySalesOut: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Orders */
+            orders: number;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /**
+             * Sales Kzt
+             * @description Order totals after promo discounts, for revenue charts.
+             */
+            sales_kzt: number;
+        };
         /**
          * DiscountType
          * @enum {string}
          */
         DiscountType: "percent" | "fixed";
+        /** EventAnalyticsOut */
+        EventAnalyticsOut: {
+            event: components["schemas"]["EventStatsOut"];
+            /** Ticket Types */
+            ticket_types: components["schemas"]["TicketTypeStatsOut"][];
+            /** Campaigns */
+            campaigns: components["schemas"]["CampaignStatsOut"][];
+            /**
+             * Daily Sales
+             * @description Confirmed orders per day of creation, in the venue's time zone.
+             */
+            daily_sales: components["schemas"]["DailySalesOut"][];
+            /** Timezone */
+            timezone: string;
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
+        };
         /**
          * EventBucket
          * @description Organizer dashboard grouping, derived from `status` and dates.
          * @enum {string}
          */
         EventBucket: "upcoming" | "active" | "completed" | "cancelled";
+        /**
+         * EventCounts
+         * @description How many of my events fall in each dashboard bucket.
+         *
+         *     Every event is in exactly one bucket, so total = upcoming + active + completed + cancelled.
+         *     `draft` is not a bucket: it says how many of them are still unpublished drafts.
+         */
+        EventCounts: {
+            /** Total */
+            total: number;
+            /** Upcoming */
+            upcoming: number;
+            /** Active */
+            active: number;
+            /** Completed */
+            completed: number;
+            /** Cancelled */
+            cancelled: number;
+            /** Draft */
+            draft: number;
+        };
         /** EventCreate */
         EventCreate: {
             /** Title */
@@ -1574,6 +1773,31 @@ export interface components {
             registration_opens_at?: string | null;
             /** Registration Closes At */
             registration_closes_at?: string | null;
+        };
+        /** EventHistoryPage */
+        EventHistoryPage: {
+            /** Items */
+            items: components["schemas"]["EventStatsOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
         };
         /**
          * EventInventoryOut
@@ -1657,6 +1881,7 @@ export interface components {
             price_from?: number | null;
             /** @description sold_out: nothing left; few_left: at most 10 left or at most 10% of the on-sale quantity */
             availability?: components["schemas"]["Availability"] | null;
+            calendar_links: components["schemas"]["CalendarLinks"];
         };
         /** EventPage */
         EventPage: {
@@ -1668,6 +1893,77 @@ export interface components {
             limit: number;
             /** Offset */
             offset: number;
+        };
+        /** EventStatsOut */
+        EventStatsOut: {
+            /**
+             * Orders
+             * @description Paid or free-confirmed orders.
+             */
+            orders: number;
+            /**
+             * Tickets Sold
+             * @description Tickets in those orders (refunded orders excluded).
+             */
+            tickets_sold: number;
+            /** Checked In */
+            checked_in: number;
+            /**
+             * Check In Percent
+             * @description checked_in / tickets_sold, 0 when none sold.
+             */
+            check_in_percent: number;
+            /**
+             * Gross Kzt
+             * @description Succeeded ticket payments, i.e. already after promo discounts.
+             */
+            gross_kzt: number;
+            /**
+             * Discounts Kzt
+             * @description Promo discounts given on those orders: what the promos cost the organizer.
+             */
+            discounts_kzt: number;
+            /** Fees Kzt */
+            fees_kzt: number;
+            /** Refunds Kzt */
+            refunds_kzt: number;
+            /**
+             * Estimated Payout Kzt
+             * @description gross_kzt - fees_kzt - refunds_kzt, the same rule as the payment summary.
+             */
+            estimated_payout_kzt: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Title */
+            title: string;
+            status: components["schemas"]["EventStatus"];
+            /**
+             * Start At
+             * Format: date-time
+             */
+            start_at: string;
+            /** End At */
+            end_at: string | null;
+            /** Capacity */
+            capacity: number | null;
+            /**
+             * Tickets Total
+             * @description Sum of quantity_total over all ticket types (capacity may be empty).
+             */
+            tickets_total: number;
+            /**
+             * Remaining
+             * @description tickets_total - tickets_sold, never below 0.
+             */
+            remaining: number;
+            /**
+             * Percent Sold
+             * @description tickets_sold / tickets_total, 0 without tickets.
+             */
+            percent_sold: number;
         };
         /**
          * EventStatus
@@ -1950,6 +2246,25 @@ export interface components {
             display_name: string;
             verification_status: components["schemas"]["VerificationStatus"];
         };
+        /** OverviewOut */
+        OverviewOut: {
+            events: components["schemas"]["EventCounts"];
+            totals: components["schemas"]["SalesFigures"];
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
+        };
         /**
          * PayOrderIn
          * @description Simulated card result: there is no real payment provider.
@@ -2187,6 +2502,48 @@ export interface components {
             /** Quantity */
             quantity: number;
         };
+        /**
+         * SalesFigures
+         * @description Sales numbers of one event, or the sum over several. Money is whole KZT, simulated.
+         */
+        SalesFigures: {
+            /**
+             * Orders
+             * @description Paid or free-confirmed orders.
+             */
+            orders: number;
+            /**
+             * Tickets Sold
+             * @description Tickets in those orders (refunded orders excluded).
+             */
+            tickets_sold: number;
+            /** Checked In */
+            checked_in: number;
+            /**
+             * Check In Percent
+             * @description checked_in / tickets_sold, 0 when none sold.
+             */
+            check_in_percent: number;
+            /**
+             * Gross Kzt
+             * @description Succeeded ticket payments, i.e. already after promo discounts.
+             */
+            gross_kzt: number;
+            /**
+             * Discounts Kzt
+             * @description Promo discounts given on those orders: what the promos cost the organizer.
+             */
+            discounts_kzt: number;
+            /** Fees Kzt */
+            fees_kzt: number;
+            /** Refunds Kzt */
+            refunds_kzt: number;
+            /**
+             * Estimated Payout Kzt
+             * @description gross_kzt - fees_kzt - refunds_kzt, the same rule as the payment summary.
+             */
+            estimated_payout_kzt: number;
+        };
         /** ScanIn */
         ScanIn: {
             /**
@@ -2422,6 +2779,30 @@ export interface components {
             sold: number;
             /** Available */
             available: number;
+        };
+        /** TicketTypeStatsOut */
+        TicketTypeStatsOut: {
+            /**
+             * Ticket Type Id
+             * Format: uuid
+             */
+            ticket_type_id: string;
+            /** Name */
+            name: string;
+            kind: components["schemas"]["TicketKind"];
+            /** Price Kzt */
+            price_kzt: number;
+            /** Quantity Total */
+            quantity_total: number;
+            /** Sold */
+            sold: number;
+            /**
+             * Sales Kzt
+             * @description sum of unit price x quantity of the sold tickets, before promo discounts.
+             */
+            sales_kzt: number;
+            /** Is Hidden */
+            is_hidden: boolean;
         };
         /**
          * TicketTypeUpdate
@@ -2940,6 +3321,44 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["EventOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_event_calendar_events__event_id__calendar_ics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/calendar": string;
+                };
+            };
+            /** @description No such event, or a draft or private one */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -4681,6 +5100,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    overview_organizer_analytics_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverviewOut"];
+                };
+            };
+        };
+    };
+    event_history_organizer_analytics_events_get: {
+        parameters: {
+            query?: {
+                bucket?: components["schemas"]["EventBucket"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventHistoryPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    event_analytics_organizer_analytics_events__event_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventAnalyticsOut"];
                 };
             };
             /** @description Validation Error */

@@ -13,6 +13,7 @@ import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
 
 import { useEvent, usePublicTicketTypes, useVenue } from "../api";
+import { AddToCalendar } from "../components/AddToCalendar";
 import { FEW_LEFT, registrationState, salesState } from "../availability";
 import { AvailabilityBadge } from "../components/AvailabilityBadge";
 import { EventCover } from "../components/EventCover";
@@ -163,7 +164,12 @@ export function EventDetailsPage() {
           </div>
         )}
         {/* Only a published event can be asked about (the API refuses the rest). */}
-        {data.status === "published" && <HelpButton context={{ event_id: data.id }} />}
+        {data.status === "published" && (
+          <div className="flex flex-wrap gap-2">
+            <AddToCalendar links={data.calendar_links} />
+            <HelpButton context={{ event_id: data.id }} />
+          </div>
+        )}
       </header>
 
       {cancelled && <Alert tone="error">{t("events.cancelled")}</Alert>}
