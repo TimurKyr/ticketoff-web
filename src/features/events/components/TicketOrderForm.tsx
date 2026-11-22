@@ -5,9 +5,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
-import { useAuth } from "@/features/auth";
+import { useAuth, VerifyEmailNotice } from "@/features/auth";
 import { PromoCodeField, RefundPolicy, startCheckout } from "@/features/checkout";
-import { errorMessage } from "@/lib/api/errors";
+import { errorMessage, isEmailNotVerified } from "@/lib/api/errors";
 import type { AttendeeIn, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -39,7 +39,7 @@ interface Props {
  */
 export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, linkPromoCode }: Props) {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -54,6 +54,10 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
   const [submitting, setSubmitting] = useState(false);
   const [promo, setPromo] = useState("");
   const paid = kind === "paid";
+  // The server refused with EMAIL_NOT_VERIFIED although the cached /auth/me said confirmed.
+  const [refusedUnverified, setRefusedUnverified] = useState(false);
+  const emailVerified = user?.email_verified;
+  useEffect(() => setRefusedUnverified(false), [emailVerified]);
 
   useEffect(() => {
     if (linkPromoCode) setPromo((typed) => typed || linkPromoCode);
@@ -129,6 +133,7 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setRefusedUnverified(false);
     if (totalTickets === 0) return setError(t("register.pickTickets"));
     if (rows.some((row) => !row.name.trim())) return setError(t("register.nameRequired"));
 
@@ -148,8 +153,14 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       navigate(`/orders/${order.id}`, { state: { justCreated: true } });
     } catch (err) {
-      setError(errorMessage(err, t));
       setSubmitting(false);
+      if (isEmailNotVerified(err)) {
+        // Shown as the "confirm your email" box; /auth/me is re-read so the page agrees.
+        setRefusedUnverified(true);
+        void refresh();
+        return;
+      }
+      setError(errorMessage(err, t));
       // Stock may have changed under us (e.g. "Not enough tickets left").
       void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
     }
@@ -161,6 +172,7 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <h3 className="text-lg font-semibold">{paid ? t("checkout.title") : t("register.title")}</h3>
       {error && <Alert tone="error">{error}</Alert>}
+      {refusedUnverified && <VerifyEmailNotice reason="buy" force />}
 
       {ticketTypes.map((type) => (
         <div key={type.id} className="flex items-center justify-between gap-3 text-sm">
@@ -220,9 +232,20 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
         </>
       )}
 
-      <Button type="submit" disabled={submitting || totalTickets === 0} className="self-start">
+      {/* Early hint only: the server checks again and answers 403 EMAIL_NOT_VERIFIED. */}
+      <Button
+        type="submit"
+        disabled={submitting || totalTickets === 0 || !user.email_verified}
+        aria-describedby={user.email_verified ? undefined : `verify-hint-${kind}`}
+        className="self-start"
+      >
         {submitting ? t("common.loading") : paid ? t("checkout.submit") : t("register.submit")}
       </Button>
+      {!user.email_verified && (
+        <p id={`verify-hint-${kind}`} className="text-sm text-amber-900">
+          {t(paid ? "verifyEmail.hint.buy" : "verifyEmail.hint.register")}
+        </p>
+      )}
     </form>
   );
 }

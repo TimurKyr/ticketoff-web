@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { VerifyEmailNotice } from "@/features/auth";
 import { useVenues } from "@/features/events/api";
 import { EventHistoryList, OverviewCards } from "@/features/organizer-event";
 import { HelpButton } from "@/features/support";
@@ -51,6 +52,7 @@ export function OrganizerDashboardPage() {
         </Link>
       </div>
 
+      <VerifyEmailNotice reason="publish" />
       <OverviewCards />
 
       <nav aria-label={t("org.title")} className="flex flex-wrap gap-2 border-b border-gray-300">

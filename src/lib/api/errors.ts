@@ -109,6 +109,14 @@ function translateDetail(detail: string, t: (key: MessageKey) => string): string
   return detail;
 }
 
+/**
+ * 403 `{"code": "EMAIL_NOT_VERIFIED"}`: buying tickets, registering for free tickets and
+ * publishing an event need a confirmed email (backend BE-18).
+ */
+export function isEmailNotVerified(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 403 && error.code === "EMAIL_NOT_VERIFIED";
+}
+
 interface ValidationIssue {
   loc?: (string | number)[];
   msg?: string;
@@ -120,6 +128,7 @@ interface ValidationIssue {
  */
 export function errorMessage(error: unknown, t: (key: MessageKey) => string): string {
   if (error instanceof ApiError) {
+    if (isEmailNotVerified(error)) return t("err.emailNotVerified");
     const detail = error.detail;
     if (typeof detail === "string") return translateDetail(detail, t);
     if (Array.isArray(detail)) {
