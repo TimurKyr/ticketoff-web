@@ -344,6 +344,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/checkin/tickets/{ticket_id}/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check in a guest by ticket id
+         * @description Manual check-in of a guest found via /attendees; same results as /scan, always 200.
+         */
+        post: operations["check_in_checkin_tickets__ticket_id__check_in_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/checkin/tickets/{ticket_id}/undo": {
         parameters: {
             query?: never;
@@ -3257,6 +3277,44 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ScanOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_in_checkin_tickets__ticket_id__check_in_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanOut"];
+                };
+            };
+            /** @description Unknown ticket, or one the caller may not scan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
