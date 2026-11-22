@@ -62,3 +62,15 @@ export type CasePage = Schemas["CasePage"];
 export type MessageCreate = Schemas["MessageCreate"];
 export type MessageOut = Schemas["MessageOut"];
 export type SupportStatusUpdate = Schemas["StatusUpdate"];
+// Admin (BE-22)
+export type AdminUserOut = Schemas["AdminUserOut"];
+export type SearchItemOut = Schemas["SearchItemOut"];
+export type SearchPage = Schemas["SearchPage"];
+export type SearchType = SearchItemOut["type"];
+export type AdminPaymentOut = Schemas["AdminPaymentOut"];
+export type PaymentPage = Schemas["PaymentPage"];
+export type PaymentStatus = Schemas["PaymentStatus"];
+export type AdminRefundOut = Schemas["AdminRefundOut"];
+export type RefundPage = Schemas["RefundPage"];
+export type RefundStatus = Schemas["RefundStatus"];
+export type PlatformSettingsOut = Schemas["PlatformSettingsOut"];
