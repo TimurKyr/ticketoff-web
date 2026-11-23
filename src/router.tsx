@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "events", element: <EventsListPage /> },
-      { path: "events/:eventId", element: <EventDetailsPage /> },
+      { path: "events/:key", element: <EventDetailsPage /> },
       { path: "login", element: <GuestOnly><LoginPage /></GuestOnly> },
       { path: "register", element: <GuestOnly redirectTo="/account"><RegisterPage /></GuestOnly> },
       { path: "verify-email", element: <VerifyEmailPage /> },
