@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { useAuth, VerifyEmailNotice } from "@/features/auth";
 import { PromoCodeField, RefundPolicy, startCheckout } from "@/features/checkout";
+import { track } from "@/lib/analytics";
 import { errorMessage, isEmailNotVerified } from "@/lib/api/errors";
 import type { AttendeeIn, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
@@ -138,6 +139,9 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
     if (rows.some((row) => !row.name.trim())) return setError(t("register.nameRequired"));
 
     setSubmitting(true);
+    // Price before any promo discount; the server has the final amount.
+    const listPrice = chosen.reduce((sum, type) => sum + type.price_kzt * quantity(type), 0);
+    track("begin_checkout", { currency: "KZT", value: listPrice, quantity: totalTickets, ticket_kind: kind });
     try {
       const payload = {
         items: chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) })),
@@ -149,6 +153,8 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
       const order = paid
         ? await startCheckout(eventId, { ...payload, promo_code: promo.trim() || null })
         : await registerFree(eventId, payload);
+      // A free registration is complete at once; a paid one counts when it is paid (OrderPage).
+      if (!paid) track("purchase", { currency: "KZT", value: 0, quantity: totalTickets, ticket_kind: kind });
       await queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       navigate(`/orders/${order.id}`, { state: { justCreated: true } });

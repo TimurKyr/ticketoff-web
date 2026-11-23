@@ -4,7 +4,8 @@
 #
 # Usage: scripts/deploy.sh
 # Env:   DEPLOY_HOST (default ubuntu@84.235.162.78), DEPLOY_KEY (default ~/.ssh/ticketoff_ed25519),
-#        DEPLOY_PATH (default /opt/ticketoff/web), VITE_API_BASE_URL (default https://api.ticketoff.store)
+#        DEPLOY_PATH (default /opt/ticketoff/web), VITE_API_BASE_URL (default https://api.ticketoff.store),
+#        VITE_GA4_ID (default G-C41HW7NWVK, the GA4 measurement ID; not a secret)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -24,8 +25,9 @@ DEPLOY_HOST="${DEPLOY_HOST:-ubuntu@84.235.162.78}"
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/ticketoff_ed25519}"
 DEPLOY_PATH="${DEPLOY_PATH:-/opt/ticketoff/web}"
 export VITE_API_BASE_URL="${VITE_API_BASE_URL:-https://api.ticketoff.store}"
+export VITE_GA4_ID="${VITE_GA4_ID:-G-C41HW7NWVK}"
 
-# The exported VITE_API_BASE_URL wins over .env.local (dev proxy settings).
+# The exported VITE_API_BASE_URL and VITE_GA4_ID win over .env.local (dev proxy settings).
 npm ci
 npm run build
 test -f dist/index.html

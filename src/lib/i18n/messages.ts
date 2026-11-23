@@ -564,6 +564,7 @@ export const ru = {
   "footer.refundNote": "У платного события есть и условия организатора, они показаны перед оплатой.",
   "footer.disclaimer":
     "Учебный проект CSCI 361, Nazarbayev University. Оплата симулируется, деньги не списываются.",
+  "footer.analytics": "Сайт использует Google Analytics для обезличенной статистики.",
   "static.faqTitle": "Частые вопросы",
   "checkout.refundRulesLink": "Общие условия возврата",
   "admin.title": "Администрирование",
@@ -1116,6 +1117,7 @@ export const kk: Messages = {
   "footer.refundNote": "Ақылы іс-шараның ұйымдастырушы шарттары да бар, олар төлем алдында көрсетіледі.",
   "footer.disclaimer":
     "CSCI 361 оқу жобасы, Nazarbayev University. Төлем симуляцияланады, ақша есептен шығарылмайды.",
+  "footer.analytics": "Сайт иесіздендірілген статистика үшін Google Analytics қолданады.",
   "static.faqTitle": "Жиі қойылатын сұрақтар",
   "checkout.refundRulesLink": "Жалпы қайтару шарттары",
 

@@ -39,7 +39,7 @@ export function PromoQrDialog({
   const linkRef = useRef<HTMLInputElement>(null);
   const png = useCodeQrPng(eventId, code.campaign_id, code.id, true);
   const src = useObjectUrl(png.data);
-  const link = promoLink(eventId, code.qr_token);
+  const link = promoLink(eventId, code.qr_token, code.campaign_id);
   const [copy, setCopy] = useState<"copied" | "failed" | null>(null);
 
   // The "copied" note goes away after a moment; a failure stays until the next try.
