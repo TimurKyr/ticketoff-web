@@ -1,39 +1,67 @@
+import { Check, ChevronDown, MapPin } from "lucide-react";
 import { useEffect } from "react";
 
+import { useMenu } from "@/components/ui/useMenu";
 import { useI18n } from "@/lib/i18n";
 
 import { useVenues } from "../api";
 import { setCity, useCities, useCity } from "../city";
 
 /** "Все города / Алматы / Астана" in the header; filters the home rows and /events. */
-export function CitySelect() {
+export function CitySelect({ className = "" }: { className?: string }) {
   const { t } = useI18n();
   const city = useCity();
   const venues = useVenues();
   const cities = useCities();
+  const menu = useMenu();
 
   // A saved city that no venue has any more (renamed, demo data reset) falls back to all.
   useEffect(() => {
     if (venues.isSuccess && city && !cities.includes(city)) setCity("");
   }, [venues.isSuccess, city, cities]);
 
+  // Keep the saved value listed while venues load.
+  const options = ["", ...cities, ...(city && !cities.includes(city) ? [city] : [])];
+
+  function choose(value: string) {
+    setCity(value);
+    menu.close(true);
+  }
+
   return (
-    <label className="flex items-center text-sm">
-      <span className="sr-only">{t("city.label")}</span>
-      <select
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        className="max-w-[11rem] rounded-[10px] border border-[#8F8C85] bg-white py-1 pl-2 pr-7 text-sm font-medium text-[#1A1A18]"
+    <div className={`relative ${className}`}>
+      <button
+        {...menu.buttonProps}
+        aria-label={`${t("city.label")}: ${city || t("city.all")}`}
+        data-testid="city-menu-button"
+        className="flex h-10 max-w-[12rem] items-center gap-1.5 rounded-full px-3 text-sm font-medium text-[#1A1A18] hover:bg-[#F2F1EE] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A1A18]"
       >
-        <option value="">{t("city.all")}</option>
-        {cities.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-        {/* Keep the saved value selectable while venues load. */}
-        {city && !cities.includes(city) && <option value={city}>{city}</option>}
-      </select>
-    </label>
+        <MapPin aria-hidden="true" className="h-4 w-4 shrink-0" />
+        <span className="truncate">{city || t("city.all")}</span>
+        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-[#5C5A55]" />
+      </button>
+      {menu.open && (
+        <div
+          {...menu.menuProps}
+          aria-label={t("city.label")}
+          className="absolute left-0 z-50 mt-2 max-h-80 w-56 overflow-auto rounded-xl border border-[#E4E1DA] bg-white p-1 shadow-lg"
+        >
+          {options.map((value) => (
+            <button
+              key={value || "all"}
+              type="button"
+              role="menuitemradio"
+              aria-checked={value === city}
+              tabIndex={-1}
+              onClick={() => choose(value)}
+              className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm text-[#1A1A18] hover:bg-[#F2F1EE] focus:bg-[#F2F1EE] focus:outline-none"
+            >
+              <span>{value || t("city.all")}</span>
+              {value === city && <Check aria-hidden="true" className="h-4 w-4" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

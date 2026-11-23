@@ -76,7 +76,7 @@ function FooterLanguages() {
 export function Footer() {
   const { t } = useI18n();
   return (
-    <footer className="mt-12 border-t border-gray-200 bg-gray-50 pb-[calc(env(safe-area-inset-bottom)+var(--bottom-bar-h,0px))] text-sm">
+    <footer className="mt-12 border-t border-[#E4E1DA] bg-white pb-[calc(env(safe-area-inset-bottom)+var(--bottom-bar-h,0px))] text-sm">
       <nav aria-label={t("footer.title")} className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 py-8 sm:grid-cols-2 md:grid-cols-4">
         {COLUMNS.map((col) => (
           <div key={col.title}>
