@@ -594,6 +594,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{event_id}/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders and guests of my event, newest first
+         * @description can_refund / can_cancel follow the same rules as POST /orders/{id}/refund and
+         *     POST /orders/{id}/cancel. A pending order keeps its status after its hold ran out;
+         *     hold_expired tells it apart.
+         */
+        get: operations["list_event_orders_events__event_id__orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{ticket_id}": {
         parameters: {
             query?: never;
@@ -1828,6 +1850,81 @@ export interface components {
             cancelled: number;
             /** Ticket Types */
             ticket_types: components["schemas"]["InventoryTicketTypeOut"][];
+        };
+        /**
+         * EventOrderGuestOut
+         * @description One attendee of the order: the person a ticket is (or will be) issued to.
+         */
+        EventOrderGuestOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string | null;
+            /** Ticket Type Id */
+            ticket_type_id: string | null;
+            /** Ticket Type Name */
+            ticket_type_name: string | null;
+            ticket: components["schemas"]["EventOrderTicketOut"] | null;
+        };
+        /** EventOrderOut */
+        EventOrderOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["OrderStatus"];
+            /** Buyer Email */
+            buyer_email: string;
+            /** Total Kzt */
+            total_kzt: number;
+            /** Discount Kzt */
+            discount_kzt: number;
+            /** Promo Code */
+            promo_code: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Hold Expired */
+            hold_expired: boolean;
+            /** Can Refund */
+            can_refund: boolean;
+            /** Can Cancel */
+            can_cancel: boolean;
+            /** Guests */
+            guests: components["schemas"]["EventOrderGuestOut"][];
+        };
+        /**
+         * EventOrderPage
+         * @description One page of an event's orders, newest first. total counts every matching order.
+         */
+        EventOrderPage: {
+            /** Items */
+            items: components["schemas"]["EventOrderOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** EventOrderTicketOut */
+        EventOrderTicketOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["TicketStatus"];
+            /** Checked In At */
+            checked_in_at: string | null;
         };
         /** EventOut */
         EventOut: {
@@ -3422,6 +3519,13 @@ export interface operations {
                     "application/json": components["schemas"]["EventOut"];
                 };
             };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4031,6 +4135,13 @@ export interface operations {
                     "application/json": components["schemas"]["OrderOut"];
                 };
             };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4065,6 +4176,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OrderOut"];
                 };
+            };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -4146,6 +4264,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrderOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_event_orders_events__event_id__orders_get: {
+        parameters: {
+            query?: {
+                /** @description Part of the buyer's email or a guest's name or email (any case), a full order id, or the start of one (4+ hex digits) */
+                q?: string | null;
+                status?: components["schemas"]["OrderStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOrderPage"];
                 };
             };
             /** @description Validation Error */
