@@ -15,6 +15,8 @@ export const EVENTS_PAGE_SIZE = 12;
 export interface EventFilters {
   q?: string;
   category?: string;
+  /** Exact venue city, e.g. "Алматы" ("" = all) */
+  city?: string;
   from_date?: string;
   to_date?: string;
   offset?: number;
@@ -33,6 +35,18 @@ export function useEvents(filters: EventFilters) {
     queryKey: ["events", "list", filters],
     queryFn: () => apiClient.get<EventPage>(`/events?${toQuery(filters)}`),
     placeholderData: (previous) => previous,
+  });
+}
+
+/** Upcoming events for the home rows: one request, rows are built on the client. */
+export const HOME_EVENTS_LIMIT = 100; // the API maximum
+
+export function useHomeEvents(city: string) {
+  const params = new URLSearchParams({ limit: String(HOME_EVENTS_LIMIT) });
+  if (city) params.set("city", city);
+  return useQuery({
+    queryKey: ["events", "home", city],
+    queryFn: () => apiClient.get<EventPage>(`/events?${params.toString()}`),
   });
 }
 

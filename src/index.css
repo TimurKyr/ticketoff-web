@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Sideways rows (home rows, date chips): still scrollable by touch, wheel and keyboard. */
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Event cover tones (FE-12, design brief §7a). Text on bg ≥ 8.6:1, ≥ 7:1 over the pattern. */
+:root {
+  --cover-music-bg: #e4e9f7;
+  --cover-music-fg: #1e2f6b;
+  --cover-theatre-bg: #f4e3de;
+  --cover-theatre-fg: #6b2414;
+  --cover-education-bg: #e2efe6;
+  --cover-education-fg: #14432b;
+  --cover-sport-bg: #f5ebd3;
+  --cover-sport-fg: #5a3b00;
+  --cover-kids-bg: #eee6f4;
+  --cover-kids-fg: #3e2361;
+  --cover-other-bg: #ecebe7;
+  --cover-other-fg: #33322f;
+}
+
+/* Dark values for when the site gets a dark theme (class on <html>); not switched on yet. */
+.dark {
+  --cover-music-bg: #1c2340;
+  --cover-music-fg: #c9d4fa;
+  --cover-theatre-bg: #3a1f19;
+  --cover-theatre-fg: #f3c9bc;
+  --cover-education-bg: #16291e;
+  --cover-education-fg: #bfe3cb;
+  --cover-sport-bg: #2e2614;
+  --cover-sport-fg: #f0d9a2;
+  --cover-kids-bg: #2a2036;
+  --cover-kids-fg: #dccaf0;
+  --cover-other-bg: #262624;
+  --cover-other-fg: #dedcd5;
+}

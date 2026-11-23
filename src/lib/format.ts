@@ -88,6 +88,16 @@ export function formatShortDateTime(iso: string, lang: Language, timeZone?: stri
   return `${w.day} ${MONTHS_SHORT[lang][w.month]}${year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
+/**
+ * A calendar day from the API ("2026-11-21", already in the venue's zone) → "21 ноя"
+ * ("21 қар" in kk), with the year when it is not this year. No time-zone conversion.
+ */
+export function formatDay(day: string, lang: Language): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const year = y !== new Date().getFullYear() ? ` ${y}` : "";
+  return `${d}${NBSP}${MONTHS_SHORT[lang][m - 1]}${year}`;
+}
+
 /** Platform default zone (all venues are in Kazakhstan, UTC+5). */
 export const DEFAULT_TIME_ZONE = "Asia/Almaty";
 

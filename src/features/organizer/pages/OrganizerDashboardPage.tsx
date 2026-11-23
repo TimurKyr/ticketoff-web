@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useVenues } from "@/features/events/api";
+import { EventHistoryList, OverviewCards } from "@/features/organizer-event";
 import { HelpButton } from "@/features/support";
 import type { EventBucket } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
@@ -49,6 +50,8 @@ export function OrganizerDashboardPage() {
           + {t("org.create")}
         </Link>
       </div>
+
+      <OverviewCards />
 
       <nav aria-label={t("org.title")} className="flex flex-wrap gap-2 border-b border-gray-300">
         {BUCKETS.map((b) => (
@@ -128,6 +131,8 @@ export function OrganizerDashboardPage() {
           )}
         </>
       )}
+
+      <EventHistoryList />
     </section>
   );
 }
