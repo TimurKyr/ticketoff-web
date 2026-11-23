@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* FE-20: one warm page background everywhere, content on white cards. */
+@layer base {
+  body {
+    @apply bg-[#F2F1EE] text-[#1A1A18];
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-[#E4E1DA] bg-white shadow-[0_1px_2px_rgba(26,26,24,0.04)];
+  }
+}
+
 /* Sideways rows (home rows, date chips): still scrollable by touch, wheel and keyboard. */
 @layer utilities {
   .no-scrollbar {

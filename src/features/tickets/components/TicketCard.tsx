@@ -35,7 +35,7 @@ export function TicketCard({
   const usable = ticket.status === "valid";
 
   return (
-    <li className="flex flex-col items-center gap-3 rounded-lg border border-gray-300 p-4 sm:flex-row sm:items-start">
+    <li className="flex flex-col items-center gap-3 rounded-lg border border-gray-300 bg-white p-4 sm:flex-row sm:items-start">
       {usable ? (
         <TicketQr token={ticket.qr_token} alt={`${t("ticket.qrAlt")}: ${ticket.attendee.name}`} />
       ) : null}

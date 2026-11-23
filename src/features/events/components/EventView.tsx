@@ -184,61 +184,62 @@ export function EventView({
     <article className="mx-auto flex max-w-3xl flex-col gap-6">
       {backLink}
 
-      <header className="flex flex-col gap-3">
-        {/* The cover shows the translated category; the title stays in the h1 below. */}
-        <EventCover event={data} variant="banner" />
-        <h1 className="text-3xl font-bold">{data.title}</h1>
-        {soldOut && !cancelled && (
-          <div>
-            <AvailabilityBadge availability="sold_out" />
-          </div>
-        )}
-        {/* Only a published event can be asked about (the API refuses the rest). Nothing to
-            act on in the organizer's preview. The calendar menu (FE-16) is for events still
-            ahead: an ended event (end_at, or start_at without one) has no use for it. */}
-        {!preview && data.status === "published" && (
-          <div className="flex flex-wrap gap-2">
-            {!ended && <AddToCalendar links={data.calendar_links} />}
-            <HelpButton context={{ event_id: data.id }} />
-          </div>
-        )}
-      </header>
+      {/* FE-20: cover, tickets and description are separate white cards on the page background. */}
+      <div className="card flex flex-col gap-5 p-3 sm:p-4">
+        <header className="flex flex-col gap-3">
+          {/* The cover shows the translated category; the title stays in the h1 below. */}
+          <EventCover event={data} variant="banner" />
+          <h1 className="px-1 text-2xl font-bold sm:px-2 sm:text-3xl">{data.title}</h1>
+          {soldOut && !cancelled && (
+            <div className="px-1 sm:px-2">
+              <AvailabilityBadge availability="sold_out" />
+            </div>
+          )}
+          {/* Only a published event can be asked about (the API refuses the rest). Nothing to
+              act on in the organizer's preview. The calendar menu (FE-16) is for events still
+              ahead: an ended event (end_at, or start_at without one) has no use for it. */}
+          {!preview && data.status === "published" && (
+            <div className="flex flex-wrap gap-2 px-1 sm:px-2">
+              {!ended && <AddToCalendar links={data.calendar_links} />}
+              <HelpButton context={{ event_id: data.id }} />
+            </div>
+          )}
+        </header>
+
+        <dl className="grid gap-x-6 gap-y-2 px-1 pb-2 sm:grid-cols-[max-content_1fr] sm:px-2">
+          <dt className="text-gray-600">{t("events.when")}</dt>
+          <dd>
+            <time dateTime={data.start_at}>
+              {formatDateTime(data.start_at, lang, venue?.timezone)}
+            </time>
+            {data.end_at && (
+              <>
+                {" "}
+                {t("events.until")}{" "}
+                <time dateTime={data.end_at}>
+                  {formatDateTime(data.end_at, lang, venue?.timezone)}
+                </time>
+              </>
+            )}
+          </dd>
+          {venue && (
+            <>
+              <dt className="text-gray-600">{t("events.where")}</dt>
+              <dd>
+                {venue.name}
+                {venue.address ? `, ${venue.address}` : ""}
+                {venue.city ? `, ${venue.city}` : ""}
+              </dd>
+            </>
+          )}
+          <OrganizerLine event={data} />
+        </dl>
+      </div>
 
       {cancelled && <Alert tone="error">{t("events.cancelled")}</Alert>}
       {notices}
 
-      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
-        <dt className="text-gray-600">{t("events.when")}</dt>
-        <dd>
-          <time dateTime={data.start_at}>
-            {formatDateTime(data.start_at, lang, venue?.timezone)}
-          </time>
-          {data.end_at && (
-            <>
-              {" "}
-              {t("events.until")}{" "}
-              <time dateTime={data.end_at}>
-                {formatDateTime(data.end_at, lang, venue?.timezone)}
-              </time>
-            </>
-          )}
-        </dd>
-        {venue && (
-          <>
-            <dt className="text-gray-600">{t("events.where")}</dt>
-            <dd>
-              {venue.name}
-              {venue.address ? `, ${venue.address}` : ""}
-              {venue.city ? `, ${venue.city}` : ""}
-            </dd>
-          </>
-        )}
-        <OrganizerLine event={data} />
-      </dl>
-
-      {data.description && <p className="whitespace-pre-line leading-relaxed">{data.description}</p>}
-
-      <section className="flex flex-col gap-4 rounded-lg border border-gray-300 p-4">
+      <section className="card flex flex-col gap-4 p-4 sm:p-6">
         <h2 className="text-xl font-semibold">{t("events.tickets")}</h2>
         {ticketTypes.isPending ? (
           <Loading />
@@ -283,6 +284,13 @@ export function EventView({
           </>
         )}
       </section>
+
+      {data.description && (
+        <section className="card flex flex-col gap-3 p-4 sm:p-6">
+          <h2 className="text-xl font-semibold">{t("events.about")}</h2>
+          <p className="whitespace-pre-line leading-relaxed">{data.description}</p>
+        </section>
+      )}
     </article>
   );
 }
