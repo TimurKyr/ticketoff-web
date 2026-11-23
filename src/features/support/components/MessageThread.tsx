@@ -4,6 +4,8 @@ import type { CaseDetailOut } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
+import { AttachmentList } from "./AttachmentList";
+
 /**
  * Messages oldest → newest. Mine are on the right ("Вы"); the customer's are signed with
  * their email when a handler reads; anyone else on the handling side is "Поддержка".
@@ -54,6 +56,7 @@ export function MessageThread({ item, viewerId }: { item: CaseDetailOut; viewerI
               >
                 {message.body}
               </p>
+              <AttachmentList attachments={message.attachments ?? []} />
             </li>
           );
         })}

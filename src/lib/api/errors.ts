@@ -19,6 +19,11 @@ const FE8_DETAILS: Record<string, MessageKey> = {
   "An attendee case needs an event_id, order_id or ticket_id": "err.caseNeedsEvent",
   "The event, order and ticket given belong to different events": "err.caseMixedEvents",
   "Organizer account required": "err.organizerRequired",
+  "At most 3 files per message": "support.attach.tooMany",
+  "A file is empty": "support.attach.empty",
+  "Only PNG, JPEG and PDF files are accepted": "support.attach.type",
+  "Attachment not found": "support.attach.notFound",
+  "The message text must not be empty": "support.reply.required",
 };
 
 // FE-7: refund rule and event staff.
@@ -97,6 +102,7 @@ const KNOWN_DETAILS: Record<string, MessageKey> = {
 
 /** Backend messages with values inside: pattern → translated text with $1, $2. */
 const PATTERNS: [RegExp, MessageKey][] = [
+  [/^A file is larger than (\d+) MB$/, "support.attach.tooBig"],
   [/^Not enough tickets left for (.+)$/, "err.notEnoughTickets"],
   [/^At most (\d+) (.+) tickets per order$/, "err.maxPerOrder"],
   [/^Sales for (.+) have not started$/, "err.salesNotStarted"],

@@ -59,19 +59,24 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   /** Form body, sent as application/x-www-form-urlencoded (e.g. POST /auth/login). */
   form?: Record<string, string>;
+  /** multipart/form-data with files (e.g. a support reply). The browser sets the boundary. */
+  formData?: FormData;
   /** "blob" for files (e.g. GET /tickets/{id}/pdf); default "json". */
   responseType?: "json" | "blob";
 }
 
 async function request<TResponse>(
   path: string,
-  { body, form, headers, responseType = "json", ...options }: RequestOptions = {}
+  { body, form, formData, headers, responseType = "json", ...options }: RequestOptions = {}
 ): Promise<TResponse> {
   const token = getAuthToken();
 
   let payload: BodyInit | undefined;
   const contentType: Record<string, string> = {};
-  if (form !== undefined) {
+  if (formData !== undefined) {
+    // No Content-Type here: fetch adds multipart/form-data with the right boundary.
+    payload = formData;
+  } else if (form !== undefined) {
     payload = new URLSearchParams(form);
     contentType["Content-Type"] = "application/x-www-form-urlencoded";
   } else if (body !== undefined) {
@@ -130,6 +135,9 @@ export const apiClient = {
   /** File download with the same auth and 401 handling, e.g. the ticket PDF. */
   getBlob: (path: string, options?: RequestOptions) =>
     request<Blob>(path, { ...options, method: "GET", responseType: "blob" }),
+  /** multipart/form-data: text fields and files in one request. */
+  postFormData: <TResponse>(path: string, formData: FormData, options?: RequestOptions) =>
+    request<TResponse>(path, { ...options, method: "POST", formData }),
   postForm: <TResponse>(
     path: string,
     form: Record<string, string>,
