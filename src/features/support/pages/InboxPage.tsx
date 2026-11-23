@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { SelectField } from "@/components/ui/FormField";
+import { Pager } from "@/components/ui/Pager";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useAuth } from "@/features/auth";
 import type { CaseOut } from "@/lib/api/types";
@@ -11,7 +12,6 @@ import { pageCount, parsePage } from "@/lib/pagination";
 
 import { SUPPORT_PAGE_SIZE, useInbox } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
-import { Pager } from "../components/Pager";
 import {
   CATEGORY_LABELS,
   isSupportKind,

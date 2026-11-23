@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { SelectField } from "@/components/ui/FormField";
+import { Pager } from "@/components/ui/Pager";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import type { CaseOut } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
@@ -10,7 +11,6 @@ import { pageCount, parsePage } from "@/lib/pagination";
 
 import { SUPPORT_PAGE_SIZE, useMyCases } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
-import { Pager } from "../components/Pager";
 import { CATEGORY_LABELS, isSupportStatus, statusLabel, STATUSES } from "../labels";
 
 function CaseRow({ item }: { item: CaseOut }) {

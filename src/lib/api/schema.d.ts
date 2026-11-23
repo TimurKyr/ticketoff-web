@@ -572,6 +572,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{event_id}/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders and guests of my event, newest first
+         * @description can_refund / can_cancel follow the same rules as POST /orders/{id}/refund and
+         *     POST /orders/{id}/cancel. A pending order keeps its status after its hold ran out;
+         *     hold_expired tells it apart.
+         */
+        get: operations["list_event_orders_events__event_id__orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{ticket_id}": {
         parameters: {
             query?: never;
@@ -1049,6 +1071,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizer/analytics/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Totals over all my events */
+        get: operations["overview_organizer_analytics_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizer/analytics/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Event history: my events, newest first, with their numbers
+         * @description The per-event action log (audit) is GET /events/{event_id}/timeline.
+         */
+        get: operations["event_history_organizer_analytics_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizer/analytics/events/{event_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of my events: numbers, ticket types, promo campaigns and sales per day */
+        get: operations["event_analytics_organizer_analytics_events__event_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/support/cases": {
         parameters: {
             query?: never;
@@ -1378,6 +1454,40 @@ export interface components {
             ends_at: string | null;
         };
         /**
+         * CampaignStatsOut
+         * @description What one promo campaign did on confirmed orders (campaigns with no use show zeros).
+         */
+        CampaignStatsOut: {
+            /**
+             * Campaign Id
+             * Format: uuid
+             */
+            campaign_id: string;
+            /** Name */
+            name: string;
+            discount_type: components["schemas"]["DiscountType"];
+            /** Discount Value */
+            discount_value: number;
+            /** Redemptions */
+            redemptions: number;
+            /** Orders */
+            orders: number;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /**
+             * Gross Kzt
+             * @description Sum of order total - discount of those orders.
+             */
+            gross_kzt: number;
+            /** Discount Total Kzt */
+            discount_total_kzt: number;
+            /**
+             * Net Kzt
+             * @description gross_kzt minus succeeded refunds of those orders.
+             */
+            net_kzt: number;
+        };
+        /**
          * CaseCreate
          * @description Open a case. The first message is the case text; there is no separate title.
          *
@@ -1531,17 +1641,84 @@ export interface components {
              */
             status: "active" | "disabled";
         };
+        /** DailySalesOut */
+        DailySalesOut: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Orders */
+            orders: number;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /**
+             * Sales Kzt
+             * @description Order totals after promo discounts, for revenue charts.
+             */
+            sales_kzt: number;
+        };
         /**
          * DiscountType
          * @enum {string}
          */
         DiscountType: "percent" | "fixed";
+        /** EventAnalyticsOut */
+        EventAnalyticsOut: {
+            event: components["schemas"]["EventStatsOut"];
+            /** Ticket Types */
+            ticket_types: components["schemas"]["TicketTypeStatsOut"][];
+            /** Campaigns */
+            campaigns: components["schemas"]["CampaignStatsOut"][];
+            /**
+             * Daily Sales
+             * @description Confirmed orders per day of creation, in the venue's time zone.
+             */
+            daily_sales: components["schemas"]["DailySalesOut"][];
+            /** Timezone */
+            timezone: string;
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
+        };
         /**
          * EventBucket
          * @description Organizer dashboard grouping, derived from `status` and dates.
          * @enum {string}
          */
         EventBucket: "upcoming" | "active" | "completed" | "cancelled";
+        /**
+         * EventCounts
+         * @description How many of my events fall in each dashboard bucket.
+         *
+         *     Every event is in exactly one bucket, so total = upcoming + active + completed + cancelled.
+         *     `draft` is not a bucket: it says how many of them are still unpublished drafts.
+         */
+        EventCounts: {
+            /** Total */
+            total: number;
+            /** Upcoming */
+            upcoming: number;
+            /** Active */
+            active: number;
+            /** Completed */
+            completed: number;
+            /** Cancelled */
+            cancelled: number;
+            /** Draft */
+            draft: number;
+        };
         /** EventCreate */
         EventCreate: {
             /** Title */
@@ -1575,6 +1752,31 @@ export interface components {
             /** Registration Closes At */
             registration_closes_at?: string | null;
         };
+        /** EventHistoryPage */
+        EventHistoryPage: {
+            /** Items */
+            items: components["schemas"]["EventStatsOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
+        };
         /**
          * EventInventoryOut
          * @description Inventory of one event: per ticket type (hidden ones included) and event totals.
@@ -1604,6 +1806,81 @@ export interface components {
             cancelled: number;
             /** Ticket Types */
             ticket_types: components["schemas"]["InventoryTicketTypeOut"][];
+        };
+        /**
+         * EventOrderGuestOut
+         * @description One attendee of the order: the person a ticket is (or will be) issued to.
+         */
+        EventOrderGuestOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string | null;
+            /** Ticket Type Id */
+            ticket_type_id: string | null;
+            /** Ticket Type Name */
+            ticket_type_name: string | null;
+            ticket: components["schemas"]["EventOrderTicketOut"] | null;
+        };
+        /** EventOrderOut */
+        EventOrderOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["OrderStatus"];
+            /** Buyer Email */
+            buyer_email: string;
+            /** Total Kzt */
+            total_kzt: number;
+            /** Discount Kzt */
+            discount_kzt: number;
+            /** Promo Code */
+            promo_code: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Hold Expired */
+            hold_expired: boolean;
+            /** Can Refund */
+            can_refund: boolean;
+            /** Can Cancel */
+            can_cancel: boolean;
+            /** Guests */
+            guests: components["schemas"]["EventOrderGuestOut"][];
+        };
+        /**
+         * EventOrderPage
+         * @description One page of an event's orders, newest first. total counts every matching order.
+         */
+        EventOrderPage: {
+            /** Items */
+            items: components["schemas"]["EventOrderOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** EventOrderTicketOut */
+        EventOrderTicketOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["TicketStatus"];
+            /** Checked In At */
+            checked_in_at: string | null;
         };
         /** EventOut */
         EventOut: {
@@ -1668,6 +1945,77 @@ export interface components {
             limit: number;
             /** Offset */
             offset: number;
+        };
+        /** EventStatsOut */
+        EventStatsOut: {
+            /**
+             * Orders
+             * @description Paid or free-confirmed orders.
+             */
+            orders: number;
+            /**
+             * Tickets Sold
+             * @description Tickets in those orders (refunded orders excluded).
+             */
+            tickets_sold: number;
+            /** Checked In */
+            checked_in: number;
+            /**
+             * Check In Percent
+             * @description checked_in / tickets_sold, 0 when none sold.
+             */
+            check_in_percent: number;
+            /**
+             * Gross Kzt
+             * @description Succeeded ticket payments, i.e. already after promo discounts.
+             */
+            gross_kzt: number;
+            /**
+             * Discounts Kzt
+             * @description Promo discounts given on those orders: what the promos cost the organizer.
+             */
+            discounts_kzt: number;
+            /** Fees Kzt */
+            fees_kzt: number;
+            /** Refunds Kzt */
+            refunds_kzt: number;
+            /**
+             * Estimated Payout Kzt
+             * @description gross_kzt - fees_kzt - refunds_kzt, the same rule as the payment summary.
+             */
+            estimated_payout_kzt: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Title */
+            title: string;
+            status: components["schemas"]["EventStatus"];
+            /**
+             * Start At
+             * Format: date-time
+             */
+            start_at: string;
+            /** End At */
+            end_at: string | null;
+            /** Capacity */
+            capacity: number | null;
+            /**
+             * Tickets Total
+             * @description Sum of quantity_total over all ticket types (capacity may be empty).
+             */
+            tickets_total: number;
+            /**
+             * Remaining
+             * @description tickets_total - tickets_sold, never below 0.
+             */
+            remaining: number;
+            /**
+             * Percent Sold
+             * @description tickets_sold / tickets_total, 0 without tickets.
+             */
+            percent_sold: number;
         };
         /**
          * EventStatus
@@ -1950,6 +2298,25 @@ export interface components {
             display_name: string;
             verification_status: components["schemas"]["VerificationStatus"];
         };
+        /** OverviewOut */
+        OverviewOut: {
+            events: components["schemas"]["EventCounts"];
+            totals: components["schemas"]["SalesFigures"];
+            /** Fee Percent */
+            fee_percent: number;
+            /**
+             * Currency
+             * @default KZT
+             * @constant
+             */
+            currency: "KZT";
+            /**
+             * Is Simulated
+             * @default true
+             * @constant
+             */
+            is_simulated: true;
+        };
         /**
          * PayOrderIn
          * @description Simulated card result: there is no real payment provider.
@@ -2187,6 +2554,48 @@ export interface components {
             /** Quantity */
             quantity: number;
         };
+        /**
+         * SalesFigures
+         * @description Sales numbers of one event, or the sum over several. Money is whole KZT, simulated.
+         */
+        SalesFigures: {
+            /**
+             * Orders
+             * @description Paid or free-confirmed orders.
+             */
+            orders: number;
+            /**
+             * Tickets Sold
+             * @description Tickets in those orders (refunded orders excluded).
+             */
+            tickets_sold: number;
+            /** Checked In */
+            checked_in: number;
+            /**
+             * Check In Percent
+             * @description checked_in / tickets_sold, 0 when none sold.
+             */
+            check_in_percent: number;
+            /**
+             * Gross Kzt
+             * @description Succeeded ticket payments, i.e. already after promo discounts.
+             */
+            gross_kzt: number;
+            /**
+             * Discounts Kzt
+             * @description Promo discounts given on those orders: what the promos cost the organizer.
+             */
+            discounts_kzt: number;
+            /** Fees Kzt */
+            fees_kzt: number;
+            /** Refunds Kzt */
+            refunds_kzt: number;
+            /**
+             * Estimated Payout Kzt
+             * @description gross_kzt - fees_kzt - refunds_kzt, the same rule as the payment summary.
+             */
+            estimated_payout_kzt: number;
+        };
         /** ScanIn */
         ScanIn: {
             /**
@@ -2422,6 +2831,30 @@ export interface components {
             sold: number;
             /** Available */
             available: number;
+        };
+        /** TicketTypeStatsOut */
+        TicketTypeStatsOut: {
+            /**
+             * Ticket Type Id
+             * Format: uuid
+             */
+            ticket_type_id: string;
+            /** Name */
+            name: string;
+            kind: components["schemas"]["TicketKind"];
+            /** Price Kzt */
+            price_kzt: number;
+            /** Quantity Total */
+            quantity_total: number;
+            /** Sold */
+            sold: number;
+            /**
+             * Sales Kzt
+             * @description sum of unit price x quantity of the sold tickets, before promo discounts.
+             */
+            sales_kzt: number;
+            /** Is Hidden */
+            is_hidden: boolean;
         };
         /**
          * TicketTypeUpdate
@@ -3740,6 +4173,43 @@ export interface operations {
             };
         };
     };
+    list_event_orders_events__event_id__orders_get: {
+        parameters: {
+            query?: {
+                /** @description Part of the buyer's email or a guest's name or email (any case), a full order id, or the start of one (4+ hex digits) */
+                q?: string | null;
+                status?: components["schemas"]["OrderStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOrderPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_my_ticket_tickets__ticket_id__get: {
         parameters: {
             query?: never;
@@ -4681,6 +5151,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    overview_organizer_analytics_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverviewOut"];
+                };
+            };
+        };
+    };
+    event_history_organizer_analytics_events_get: {
+        parameters: {
+            query?: {
+                bucket?: components["schemas"]["EventBucket"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventHistoryPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    event_analytics_organizer_analytics_events__event_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventAnalyticsOut"];
                 };
             };
             /** @description Validation Error */
