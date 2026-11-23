@@ -35,6 +35,15 @@ export class ApiError extends Error {
     }
     return undefined;
   }
+
+  /** Machine-readable `code` some errors carry next to `detail`, e.g. "EMAIL_NOT_VERIFIED". */
+  get code(): string | undefined {
+    if (this.body && typeof this.body === "object" && "code" in this.body) {
+      const code = (this.body as { code: unknown }).code;
+      return typeof code === "string" ? code : undefined;
+    }
+    return undefined;
+  }
 }
 
 // Called when an authenticated request gets 401 (expired or revoked token).

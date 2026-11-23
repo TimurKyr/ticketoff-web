@@ -537,6 +537,12 @@ export const ru = {
   "verifyEmail.resend.tooSoon": "Письмо уже отправлено недавно. Повторить можно через {seconds} с.",
   "verifyEmail.resend.tooSoonMinute": "Письмо уже отправлено недавно. Повторить можно примерно через минуту.",
   "verifyEmail.resend.wait": "Отправить ещё раз через {seconds} с",
+  "verifyEmail.required.buy": "Подтвердите email, чтобы купить билеты или зарегистрироваться на событие",
+  "verifyEmail.required.publish": "Подтвердите email, чтобы опубликовать событие",
+  "verifyEmail.hint.buy": "Покупка станет доступна после подтверждения email.",
+  "verifyEmail.hint.register": "Регистрация станет доступна после подтверждения email.",
+  "verifyEmail.hint.publish": "Публикация станет доступна после подтверждения email. Черновик можно редактировать.",
+  "err.emailNotVerified": "Сначала подтвердите email: откройте ссылку из письма.",
 
   // FE-11: footer and static pages
   "footer.title": "Разделы сайта",
@@ -1026,6 +1032,12 @@ export const kk: Messages = {
   "verifyEmail.resend.tooSoon": "Хат жақында ғана жіберілді. {seconds} секундтан кейін қайталауға болады.",
   "verifyEmail.resend.tooSoonMinute": "Хат жақында ғана жіберілді. Шамамен бір минуттан кейін қайталаңыз.",
   "verifyEmail.resend.wait": "{seconds} с кейін қайта жіберу",
+  "verifyEmail.required.buy": "Билет сатып алу немесе іс-шараға тіркелу үшін email-ді растаңыз",
+  "verifyEmail.required.publish": "Іс-шараны жариялау үшін email-ді растаңыз",
+  "verifyEmail.hint.buy": "Email расталғаннан кейін сатып алуға болады.",
+  "verifyEmail.hint.register": "Email расталғаннан кейін тіркелуге болады.",
+  "verifyEmail.hint.publish": "Email расталғаннан кейін жариялауға болады. Жобаны өңдей бересіз.",
+  "err.emailNotVerified": "Алдымен email-ді растаңыз: хаттағы сілтемені ашыңыз.",
 
   // FE-11: footer and static pages
   "footer.title": "Сайт бөлімдері",

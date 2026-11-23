@@ -4,11 +4,12 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from "reac
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { useAuth, VerifyEmailNotice } from "@/features/auth";
 import { useVenues } from "@/features/events/api";
 import { EventTabs, isEventOver } from "@/features/organizer-event";
 import { PromotionsSection } from "@/features/promotions";
 import { ApiError } from "@/lib/api/client";
-import { errorMessage } from "@/lib/api/errors";
+import { errorMessage, isEmailNotVerified } from "@/lib/api/errors";
 import type { EventStatus } from "@/lib/api/types";
 import { DEFAULT_TIME_ZONE, formatDateTime } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
@@ -81,6 +82,11 @@ function ManageEvent({ eventId }: { eventId: string }) {
   const rawTab = params.get("tab");
   const tab: Tab = isTab(rawTab) ? rawTab : "event";
   const now = useNow();
+  const { user, refresh } = useAuth();
+  // The server refused to publish with EMAIL_NOT_VERIFIED although /auth/me said confirmed.
+  const [refusedUnverified, setRefusedUnverified] = useState(false);
+  const emailVerified = user?.email_verified;
+  useEffect(() => setRefusedUnverified(false), [emailVerified]);
 
   // The notice is read once; clearing the history state stops it from coming back on
   // reload or Back. The query (the open tab) stays.
@@ -122,6 +128,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
     if (name === "cancel" && !window.confirm(t("org.actions.cancelConfirm"))) return;
     setError(null);
     setNotice(null);
+    setRefusedUnverified(false);
     try {
       const result = await action.mutateAsync(name);
       if (name === "duplicate") {
@@ -131,9 +138,17 @@ function ManageEvent({ eventId }: { eventId: string }) {
         setNotice(t(`org.actions.done.${name}`));
       }
     } catch (err) {
+      if (isEmailNotVerified(err)) {
+        setRefusedUnverified(true);
+        void refresh();
+        return;
+      }
       setError(errorMessage(err, t));
     }
   }
+
+  // Early hint only (the server checks again): publishing needs a confirmed email.
+  const publishLocked = data.status === "draft" && user?.email_verified === false;
 
   return (
     <article className="mx-auto flex max-w-4xl flex-col gap-5">
@@ -158,19 +173,27 @@ function ManageEvent({ eventId }: { eventId: string }) {
         )}
       </header>
 
+      {data.status === "draft" && <VerifyEmailNotice reason="publish" force={refusedUnverified} />}
+
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("org.manage")}>
         {ACTIONS[data.status].map((name) => (
           <Button
             key={name}
             variant={name === "publish" ? "primary" : name === "cancel" ? "ghost" : "secondary"}
             onClick={() => run(name)}
-            disabled={action.isPending}
+            disabled={action.isPending || (name === "publish" && publishLocked)}
+            aria-describedby={name === "publish" && publishLocked ? "publish-verify-hint" : undefined}
             className={name === "cancel" ? "text-red-800" : ""}
           >
             {t(`org.actions.${name}`)}
           </Button>
         ))}
       </div>
+      {publishLocked && (
+        <p id="publish-verify-hint" className="text-sm text-amber-900">
+          {t("verifyEmail.hint.publish")}
+        </p>
+      )}
       {notice && <Alert tone="success">{notice}</Alert>}
       {error && <Alert tone="error">{error}</Alert>}
 

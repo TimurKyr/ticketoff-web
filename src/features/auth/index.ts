@@ -5,3 +5,4 @@ export * from "./pages/VerifyEmailPage";
 export { AuthProvider } from "./components/AuthProvider";
 export { RequireAuth, RequireRole, GuestOnly } from "./components/guards";
 export { useAuth } from "./hooks/useAuth";
+export { VerifyEmailNotice, type VerifyEmailReason } from "./components/VerifyEmailNotice";

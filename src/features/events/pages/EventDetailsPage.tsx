@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Alert } from "@/components/ui/Alert";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
+import { VerifyEmailNotice } from "@/features/auth";
 import { usePromoQr } from "@/features/checkout";
 import { HelpButton } from "@/features/support";
 import { ApiError } from "@/lib/api/client";
@@ -235,6 +236,7 @@ export function EventDetailsPage() {
                 </p>
               ) : (
                 <div className="flex flex-col gap-6">
+                  <VerifyEmailNotice reason="buy" />
                   <KindOrder event={data} kind="free" types={types} now={now} />
                   <KindOrder
                     event={data}
