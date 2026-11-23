@@ -76,7 +76,11 @@ export function useCodeQrPng(eventId: string, campaignId: string, codeId: string
   });
 }
 
-/** What the campaign QR leads to; a phone camera opens the event page with the code. */
-export function promoLink(eventId: string, qrToken: string): string {
-  return `${window.location.origin}/events/${eventId}?promo=${encodeURIComponent(qrToken)}`;
+/**
+ * What the campaign QR leads to; a phone camera opens the event page with the code.
+ * The utm_* part lets analytics count opens per campaign (the id only, not the code).
+ */
+export function promoLink(eventId: string, qrToken: string, campaignId: string): string {
+  const utm = `utm_source=campaign_qr&utm_medium=qr&utm_campaign=${encodeURIComponent(campaignId)}`;
+  return `${window.location.origin}/events/${eventId}?promo=${encodeURIComponent(qrToken)}&${utm}`;
 }

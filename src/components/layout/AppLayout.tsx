@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "@/features/auth";
 import { CitySelect } from "@/features/events";
 import { NotificationBell } from "@/features/notifications";
+import { analytics } from "@/lib/analytics";
 import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language } from "@/lib/i18n";
 
 import { Footer } from "./Footer";
@@ -116,8 +118,16 @@ function Header() {
 // Pages already in the new style (design brief §1a): white cards on a light grey page.
 const TINTED = new Set(["/", "/events"]);
 
+/** One GA page_view per route change (the SPA never reloads the page). */
+function usePageViews(pathname: string, search: string) {
+  useEffect(() => {
+    analytics.pageView(document.title);
+  }, [pathname, search]);
+}
+
 export function AppLayout() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  usePageViews(pathname, search);
   return (
     <AuthProvider>
       <div className={`flex min-h-screen flex-col ${TINTED.has(pathname) ? "bg-[#F2F1EE]" : ""}`}>

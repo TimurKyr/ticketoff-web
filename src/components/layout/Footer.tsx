@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import { analytics } from "@/lib/analytics";
 import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language, type MessageKey } from "@/lib/i18n";
 
 interface Column {
@@ -101,9 +102,10 @@ export function Footer() {
       </nav>
       <div className="border-t border-gray-200">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-relaxed text-gray-600">
-            © 2026 ticketoff. {t("footer.disclaimer")}
-          </p>
+          <div className="text-xs leading-relaxed text-gray-600">
+            <p>© 2026 ticketoff. {t("footer.disclaimer")}</p>
+            {analytics.enabled && <p>{t("footer.analytics")}</p>}
+          </div>
           <FooterLanguages />
         </div>
       </div>

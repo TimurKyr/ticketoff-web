@@ -15,6 +15,7 @@ import {
 import { AddToCalendar } from "@/features/events/components/AddToCalendar";
 import { useEvent, usePublicTicketTypes } from "@/features/events/api";
 import { HelpButton } from "@/features/support";
+import { track } from "@/lib/analytics";
 import { ApiError } from "@/lib/api/client";
 import type { OrderOut } from "@/lib/api/types";
 import { formatKzt } from "@/lib/format";
@@ -158,6 +159,13 @@ export function OrderPage() {
               <PaymentPanel
                 order={data}
                 onPaid={() => {
+                  // Amount and ticket count only: no order id.
+                  track("purchase", {
+                    currency: "KZT",
+                    value: amountDue(data),
+                    quantity: data.items.reduce((sum, item) => sum + item.quantity, 0),
+                    ticket_kind: "paid",
+                  });
                   setPaidNow(true);
                   window.scrollTo({ top: 0 });
                 }}
