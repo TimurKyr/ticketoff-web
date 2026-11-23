@@ -167,6 +167,28 @@ export interface paths {
         patch: operations["update_event_events__event_id__patch"];
         trace?: never;
     };
+    "/events/{event_id}/calendar.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The event as an iCalendar (.ics) file
+         * @description No login. Visible like GET /events/{id}, and also cancelled or completed events that
+         *     were published: a cancelled one has STATUS:CANCELLED and the same UID, so a calendar
+         *     that imports it again drops the entry.
+         */
+        get: operations["get_event_calendar_events__event_id__calendar_ics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/duplicate": {
         parameters: {
             query?: never;
@@ -1415,6 +1437,28 @@ export interface components {
              */
             client_secret?: string | null;
         };
+        /**
+         * CalendarLinks
+         * @description Add-to-calendar (BE-31). Nothing is written to anyone's calendar: these open the
+         *     user's own calendar app or download a file.
+         */
+        CalendarLinks: {
+            /**
+             * Google
+             * @description Google Calendar 'create event' page, times in UTC
+             */
+            google: string;
+            /**
+             * Outlook
+             * @description Outlook.com 'new event' page, times in UTC
+             */
+            outlook: string;
+            /**
+             * Ics
+             * @description GET /events/{id}/calendar.ics: iCalendar file in the venue's time zone
+             */
+            ics: string;
+        };
         /** CampaignCreate */
         CampaignCreate: {
             /** Name */
@@ -1934,6 +1978,7 @@ export interface components {
             price_from?: number | null;
             /** @description sold_out: nothing left; few_left: at most 10 left or at most 10% of the on-sale quantity */
             availability?: components["schemas"]["Availability"] | null;
+            calendar_links: components["schemas"]["CalendarLinks"];
         };
         /** EventPage */
         EventPage: {
@@ -3385,6 +3430,44 @@ export interface operations {
             };
         };
     };
+    get_event_calendar_events__event_id__calendar_ics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/calendar": string;
+                };
+            };
+            /** @description No such event, or a draft or private one */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     duplicate_event_events__event_id__duplicate_post: {
         parameters: {
             query?: never;
@@ -3435,6 +3518,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["EventOut"];
                 };
+            };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -4045,6 +4135,13 @@ export interface operations {
                     "application/json": components["schemas"]["OrderOut"];
                 };
             };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4079,6 +4176,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OrderOut"];
                 };
+            };
+            /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

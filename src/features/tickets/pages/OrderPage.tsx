@@ -12,6 +12,7 @@ import {
   timeLeft,
   useHoldExpiry,
 } from "@/features/checkout";
+import { AddToCalendar } from "@/features/events/components/AddToCalendar";
 import { useEvent, usePublicTicketTypes } from "@/features/events/api";
 import { HelpButton } from "@/features/support";
 import { ApiError } from "@/lib/api/client";
@@ -130,7 +131,13 @@ export function OrderPage() {
         <Link to={`/events/${data.event_id}`} className="text-sm underline">
           {t("order.toEvent")}
         </Link>
-        <HelpButton context={{ order_id: data.id }} className="mt-1" />
+        <div className="mt-1 flex flex-wrap gap-2">
+          {/* For tickets that will be used: a confirmed order of an event still ahead. */}
+          {event.data && !started && (data.status === "paid" || data.status === "free_confirmed") && (
+            <AddToCalendar links={event.data.calendar_links} />
+          )}
+          <HelpButton context={{ order_id: data.id }} />
+        </div>
       </header>
 
       <OrderSummary order={data} payable={payable} typeName={typeName} />
