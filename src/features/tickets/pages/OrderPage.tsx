@@ -14,6 +14,7 @@ import {
 } from "@/features/checkout";
 import { AddToCalendar } from "@/features/events/components/AddToCalendar";
 import { useEvent, usePublicTicketTypes } from "@/features/events/api";
+import { eventPath } from "@/features/events/paths";
 import { HelpButton } from "@/features/support";
 import { track } from "@/lib/analytics";
 import { ApiError } from "@/lib/api/client";
@@ -118,6 +119,8 @@ export function OrderPage() {
   // The API refuses to cancel once the event has started or a ticket was used at the door.
   const started = event.data ? Date.parse(event.data.start_at) <= now : true;
   const used = data.tickets.some((ticket) => ticket.status === "checked_in");
+  // By slug once the event has loaded; the id link works too (the event page moves it).
+  const eventLink = eventPath(event.data ?? { id: data.event_id });
   const cancellable = !started && !used && (payable || data.status === "free_confirmed");
 
   return (
@@ -129,7 +132,7 @@ export function OrderPage() {
         <p className="text-sm text-gray-700">
           {t("order.status")}: <strong>{expired ? t("order.status.expired") : t(`order.status.${data.status}`)}</strong>
         </p>
-        <Link to={`/events/${data.event_id}`} className="text-sm underline">
+        <Link to={eventLink} className="text-sm underline">
           {t("order.toEvent")}
         </Link>
         <div className="mt-1 flex flex-wrap gap-2">
@@ -182,7 +185,7 @@ export function OrderPage() {
       {payError && data.status === "cancelled" && (
         <Alert tone="error">
           {payError}{" "}
-          <Link to={`/events/${data.event_id}`} className="underline">
+          <Link to={eventLink} className="underline">
             {t("order.startAgain")}
           </Link>
         </Alert>
@@ -190,7 +193,7 @@ export function OrderPage() {
       {expired && (
         <Alert tone="error">
           {t("order.expired")}{" "}
-          <Link to={`/events/${data.event_id}`} className="underline">
+          <Link to={eventLink} className="underline">
             {t("order.startAgain")}
           </Link>
         </Alert>

@@ -159,7 +159,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Public event page */
+        /**
+         * Public event page
+         * @description By id or by slug: /events/dzhaz-vecher-almaty. Private events have no slug.
+         */
         get: operations["get_event_events__event_id__get"];
         put?: never;
         post?: never;
@@ -1967,6 +1970,11 @@ export interface components {
             venue_id: string;
             /** Title */
             title: string;
+            /**
+             * Slug
+             * @description Readable link: GET /events/{slug} works like GET /events/{id}. Null for private events
+             */
+            slug: string | null;
             /** Description */
             description: string | null;
             /** Refund Policy */
@@ -3728,6 +3736,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The event's id (UUID) or its slug (BE-35) */
                 event_id: string;
             };
             cookie?: never;

@@ -4,6 +4,7 @@ import type { Availability, EventOut, VenueOut } from "@/lib/api/types";
 import { formatKzt, formatShortDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
+import { eventPath } from "../paths";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { EventCover } from "./EventCover";
 
@@ -38,7 +39,7 @@ export function EventCard({
   return (
     <li className={className}>
       <Link
-        to={`/events/${event.id}`}
+        to={eventPath(event)}
         className="flex h-full flex-col gap-2 rounded-2xl bg-white p-3 ring-1 ring-transparent transition-shadow hover:ring-[#8F8C85] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2448C9]"
       >
         <EventCover event={event} />

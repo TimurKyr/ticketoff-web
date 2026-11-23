@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useAuth, VerifyEmailNotice } from "@/features/auth";
 import { useVenues } from "@/features/events/api";
+import { eventPath } from "@/features/events/paths";
 import { EventTabs, isEventOver } from "@/features/organizer-event";
 import { PromotionsSection } from "@/features/promotions";
 import { ApiError } from "@/lib/api/client";
@@ -167,7 +168,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
           {venue ? ` · ${venue.name}` : ""}
         </p>
         {data.status === "published" && data.visibility !== "private" && (
-          <Link to={`/events/${data.id}`} className="text-sm underline">
+          <Link to={eventPath(data)} className="text-sm underline">
             {t("org.openPublic")}
           </Link>
         )}

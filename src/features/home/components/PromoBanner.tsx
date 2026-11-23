@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { useEvents } from "@/features/events/api";
+import { eventPath } from "@/features/events/paths";
 import { useI18n } from "@/lib/i18n";
 
 import { HOME_PROMO } from "../promo";
@@ -32,7 +33,7 @@ export function PromoBanner() {
         })}
       </p>
       <Link
-        to={`/events/${event.id}`}
+        to={eventPath(event)}
         className="inline-flex h-11 shrink-0 items-center justify-center rounded-[10px] bg-[#2448C9] px-5 text-sm font-medium text-white hover:bg-[#1C3AA6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2448C9]"
       >
         {t("home.promo.cta")}
