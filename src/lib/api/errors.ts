@@ -29,10 +29,22 @@ const FE7_DETAILS: Record<string, MessageKey> = {
   "This user is not staff for the event": "err.staffNotStaff",
 };
 
+// FE-14 (backend BE-29): campaign ticket types and organizer contacts.
+const FE14_DETAILS: Record<string, MessageKey> = {
+  "This promo code does not apply to the selected tickets": "err.promoNotApplicable",
+  "Use the international format, e.g. +7 701 123 45 67": "err.phoneInternational",
+  "Phone may contain only digits, spaces, dashes, brackets and a leading +": "err.phoneChars",
+  "Phone must have 10 to 15 digits": "err.phoneDigits",
+  "Website must be an http:// or https:// address": "err.websiteHttp",
+  "Website must be at most 255 characters": "err.websiteLong",
+  "Organizer profile not found": "err.profileNotFound",
+};
+
 /** Backend `detail` strings that have a translated message. */
 const KNOWN_DETAILS: Record<string, MessageKey> = {
   ...FE8_DETAILS,
   ...FE7_DETAILS,
+  ...FE14_DETAILS,
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",
@@ -97,6 +109,9 @@ const PATTERNS: [RegExp, MessageKey][] = [
   [/^Ticket types cannot be changed on a (\w+) event$/, "err.ticketTypesClosed"],
   [/^Paid sales cannot be activated on a (\w+) event$/, "err.activationClosed"],
   [/^quantity_total cannot be lower than tickets already sold \((\d+)\)$/, "err.quantityBelowSold"],
+  [/^ticket_type_ids must be ticket types of this event; not found: (.+)$/, "err.campaignTypesUnknown"],
+  [/^Ticket type not found for this event: (.+)$/, "err.ticketTypeNotFound"],
+  [/^value is not a valid email address/, "err.emailInvalid"],
 ];
 
 function translateDetail(detail: string, t: (key: MessageKey) => string): string {

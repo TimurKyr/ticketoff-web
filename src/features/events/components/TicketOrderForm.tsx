@@ -226,7 +226,12 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
 
       {paid && (
         <>
-          <PromoCodeField eventId={eventId} value={promo} onChange={setPromo} />
+          <PromoCodeField
+            eventId={eventId}
+            value={promo}
+            onChange={setPromo}
+            items={chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) }))}
+          />
           <RefundPolicy policy={refundPolicy} />
           <p className="text-xs text-gray-600">{t("checkout.holdNote")}</p>
         </>

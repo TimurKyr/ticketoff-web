@@ -3,6 +3,7 @@ import type {
   MeOut,
   OrganizerProfileIn,
   OrganizerProfileOut,
+  OrganizerProfileUpdate,
   TokenOut,
   UserOut,
   UserRegister,
@@ -37,4 +38,18 @@ export function createOrganizerProfile(
   payload: OrganizerProfileIn
 ): Promise<OrganizerProfileOut> {
   return apiClient.post<OrganizerProfileOut>("/organizer/profile", payload);
+}
+
+
+export const organizerProfileKey = ["organizer", "profile"] as const;
+
+export function getOrganizerProfile(): Promise<OrganizerProfileOut> {
+  return apiClient.get<OrganizerProfileOut>("/organizer/profile");
+}
+
+/** Partial: only the fields sent change; null clears a contact. */
+export function updateOrganizerProfile(
+  payload: OrganizerProfileUpdate
+): Promise<OrganizerProfileOut> {
+  return apiClient.patch<OrganizerProfileOut>("/organizer/profile", payload);
 }

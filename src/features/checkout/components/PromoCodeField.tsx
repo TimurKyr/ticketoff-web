@@ -7,24 +7,40 @@ import type { PromoCheckOut } from "@/lib/api/types";
 import { formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
-import { checkPromoCode } from "../api";
+import { checkPromoCode, type PromoCheckItem } from "../api";
 
 interface Props {
   eventId: string;
   value: string;
   onChange: (code: string) => void;
+  /** The tickets picked so far: the check then gives the exact discount on them. */
+  items?: PromoCheckItem[];
+}
+
+/** Same basket, same answer: a change of quantities or types makes an old result stale. */
+function basketKey(items: PromoCheckItem[] | undefined): string {
+  return (items ?? [])
+    .map((item) => `${item.ticket_type_id}:${item.quantity}`)
+    .sort()
+    .join(",");
 }
 
 /**
- * Promo code input with a "check" button. The check only shows the campaign's terms;
- * the real discount on this order is worked out by the server at checkout.
+ * Promo code input with a "check" button. With tickets picked, the server works out the
+ * exact discount on them (the same calculation as checkout); without, only the terms.
  */
-export function PromoCodeField({ eventId, value, onChange }: Props) {
+export function PromoCodeField({ eventId, value, onChange, items }: Props) {
   const { t, lang } = useI18n();
   const [checking, setChecking] = useState(false);
-  // The result belongs to the code it was checked for: typing something else hides it.
-  const [result, setResult] = useState<{ code: string; ok?: PromoCheckOut; error?: string } | null>(null);
-  const shown = result && result.code === value.trim() ? result : null;
+  // The result belongs to the code and the basket it was checked for: changing either hides it.
+  const [result, setResult] = useState<{
+    code: string;
+    basket: string;
+    ok?: PromoCheckOut;
+    error?: string;
+  } | null>(null);
+  const basket = basketKey(items);
+  const shown = result && result.code === value.trim() && result.basket === basket ? result : null;
   // Answers can arrive out of order (SAVE10, then SAVE20): only the latest check may set the result.
   const lastCheck = useRef(0);
 
@@ -34,10 +50,10 @@ export function PromoCodeField({ eventId, value, onChange }: Props) {
     const id = ++lastCheck.current;
     setChecking(true);
     try {
-      const ok = await checkPromoCode(eventId, code);
-      if (id === lastCheck.current) setResult({ code, ok });
+      const ok = await checkPromoCode(eventId, code, items);
+      if (id === lastCheck.current) setResult({ code, basket, ok });
     } catch (err) {
-      if (id === lastCheck.current) setResult({ code, error: errorMessage(err, t) });
+      if (id === lastCheck.current) setResult({ code, basket, error: errorMessage(err, t) });
     } finally {
       if (id === lastCheck.current) setChecking(false);
     }
@@ -64,10 +80,14 @@ export function PromoCodeField({ eventId, value, onChange }: Props) {
       {shown?.ok && (
         <Alert tone="success">
           {t("checkout.promoOk")} «{shown.ok.campaign_name}»:{" "}
-          {shown.ok.discount_type === "percent"
-            ? `−${shown.ok.discount_value}%`
-            : `−${formatKzt(shown.ok.discount_value, lang)}`}
-          . {t("checkout.promoFinal")}
+          {shown.ok.discount_kzt != null
+            ? // The server's discount on exactly the tickets picked (only the matching ones).
+              `−${formatKzt(shown.ok.discount_kzt, lang)}. ${t("checkout.promoOnSelection")}`
+            : `${
+                shown.ok.discount_type === "percent"
+                  ? `−${shown.ok.discount_value}%`
+                  : `−${formatKzt(shown.ok.discount_value, lang)}`
+              }. ${t("checkout.promoFinal")}`}
         </Alert>
       )}
       {shown?.error && <Alert tone="error">{shown.error}</Alert>}
