@@ -2210,6 +2210,24 @@ export interface components {
             body: string;
         };
         /** MessageOut */
+        AttachmentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
+            /**
+             * Url
+             * @description Download path (needs the login token).
+             */
+            readonly url: string;
+        };
         MessageOut: {
             /**
              * Id
@@ -2228,6 +2246,11 @@ export interface components {
             sender_id: string;
             /** Body */
             body: string;
+            /**
+             * Attachments
+             * @default []
+             */
+            attachments?: components["schemas"]["AttachmentOut"][];
             /**
              * Created At
              * Format: date-time

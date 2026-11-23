@@ -62,6 +62,7 @@ export type CaseDetailOut = Schemas["CaseDetailOut"];
 export type CasePage = Schemas["CasePage"];
 export type MessageCreate = Schemas["MessageCreate"];
 export type MessageOut = Schemas["MessageOut"];
+export type AttachmentOut = Schemas["AttachmentOut"];
 export type SupportStatusUpdate = Schemas["StatusUpdate"];
 // Admin (BE-22)
 export type AdminUserOut = Schemas["AdminUserOut"];

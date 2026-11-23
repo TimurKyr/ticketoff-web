@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "@/lib/api/client";
 import type {
+  AttachmentOut,
   CaseCreate,
   CaseDetailOut,
   CasePage,
@@ -93,14 +94,39 @@ function useInvalidateCase(caseId: string) {
     ]);
 }
 
-/** A reply. It may change the status too (a customer reply reopens a resolved case). */
+/**
+ * A reply with up to 3 files. It is a multipart form (BE-33), not JSON. It may change the
+ * status too (a customer reply reopens a resolved case).
+ */
 export function useReply(caseId: string) {
   const invalidate = useInvalidateCase(caseId);
   return useMutation({
-    mutationFn: (body: string) =>
-      apiClient.post<MessageOut>(`/support/cases/${caseId}/messages`, { body }),
+    mutationFn: ({ body, files = [] }: { body: string; files?: File[] }) => {
+      const form = new FormData();
+      form.append("body", body);
+      for (const file of files) form.append("files", file);
+      return apiClient.postFormData<MessageOut>(`/support/cases/${caseId}/messages`, form);
+    },
     onSuccess: invalidate,
   });
+}
+
+/** A file of a message as a Blob. The download needs the login token, so a plain link fails. */
+export function fetchAttachment(attachment: AttachmentOut): Promise<Blob> {
+  return apiClient.getBlob(attachment.url);
+}
+
+/** Fetch the file and hand it to the browser as a download under its own name. */
+export async function downloadAttachment(attachment: AttachmentOut): Promise<void> {
+  const blob = await fetchAttachment(attachment);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = attachment.filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 /** Take the case (handlers). 409 when someone else has it, unless I am a platform admin. */
