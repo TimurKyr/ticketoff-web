@@ -205,6 +205,14 @@ function ManageEvent({ eventId }: { eventId: string }) {
       >
         {tab === "event" && (
           <div className="flex flex-col gap-5">
+            <div className="flex justify-end">
+              <Link
+                to={`/organizer/events/${data.id}/preview`}
+                className="rounded border border-gray-400 px-3 py-1.5 text-sm font-medium hover:bg-gray-100"
+              >
+                {t("preview.open")}
+              </Link>
+            </div>
             <TicketTypesSection eventId={data.id} tz={tz} editable={open} />
             {data.status !== "draft" && <InventorySection eventId={data.id} />}
             {hasPaid && <ActivationSection eventId={data.id} editable={open} />}

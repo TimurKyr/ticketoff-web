@@ -110,7 +110,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Edit my organizer profile */
+        /**
+         * Edit my organizer profile
+         * @description Partial update of my profile: send only what changes (null clears a contact).
+         */
         patch: operations["update_organizer_profile_organizer_profile_patch"];
         trace?: never;
     };
@@ -1472,6 +1475,8 @@ export interface components {
             starts_at?: string | null;
             /** Ends At */
             ends_at?: string | null;
+            /** Ticket Type Ids */
+            ticket_type_ids?: string[];
         };
         /** CampaignOut */
         CampaignOut: {
@@ -1496,6 +1501,8 @@ export interface components {
             starts_at: string | null;
             /** Ends At */
             ends_at: string | null;
+            /** Ticket Type Ids */
+            ticket_type_ids: string[];
         };
         /**
          * CampaignStatsOut
@@ -1926,6 +1933,21 @@ export interface components {
             /** Checked In At */
             checked_in_at: string | null;
         };
+        /**
+         * EventOrganizerOut
+         * @description Who runs the event, as buyers see it. Never the phone, payout or verification data.
+         */
+        EventOrganizerOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Display Name */
+            display_name: string;
+            /** Contact Email */
+            contact_email: string | null;
+        };
         /** EventOut */
         EventOut: {
             /**
@@ -1979,6 +2001,8 @@ export interface components {
             /** @description sold_out: nothing left; few_left: at most 10 left or at most 10% of the on-sale quantity */
             availability?: components["schemas"]["Availability"] | null;
             calendar_links: components["schemas"]["CalendarLinks"];
+            /** @description Who runs the event: display name and public contact email */
+            organizer?: components["schemas"]["EventOrganizerOut"] | null;
         };
         /** EventPage */
         EventPage: {
@@ -2327,10 +2351,19 @@ export interface components {
          * @enum {string}
          */
         OrderStatus: "pending" | "paid" | "free_confirmed" | "cancelled" | "refunded";
-        /** OrganizerProfileIn */
+        /**
+         * OrganizerProfileIn
+         * @description Becoming an organizer. The contacts are optional and never block publishing.
+         */
         OrganizerProfileIn: {
             /** Display Name */
             display_name: string;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Website */
+            website?: string | null;
         };
         /** OrganizerProfileOut */
         OrganizerProfileOut: {
@@ -2341,7 +2374,29 @@ export interface components {
             id: string;
             /** Display Name */
             display_name: string;
+            /** Contact Email */
+            contact_email: string | null;
+            /** Contact Phone */
+            contact_phone: string | null;
+            /** Website */
+            website: string | null;
             verification_status: components["schemas"]["VerificationStatus"];
+            payout_status: components["schemas"]["PayoutAccountStatus"] | null;
+        };
+        /**
+         * OrganizerProfileUpdate
+         * @description Partial: only the fields sent change. An explicit null clears a contact; the display
+         *     name cannot be cleared.
+         */
+        OrganizerProfileUpdate: {
+            /** Display Name */
+            display_name?: string | null;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Website */
+            website?: string | null;
         };
         /** OverviewOut */
         OverviewOut: {
@@ -2448,6 +2503,11 @@ export interface components {
             is_simulated: true;
         };
         /**
+         * PayoutAccountStatus
+         * @enum {string}
+         */
+        PayoutAccountStatus: "pending" | "verified" | "rejected";
+        /**
          * PlatformSettingsOut
          * @description Read-only: these come from the server configuration (env), not from the database.
          */
@@ -2475,6 +2535,8 @@ export interface components {
         PromoCheckIn: {
             /** Code */
             code: string;
+            /** Items */
+            items?: components["schemas"]["RegistrationItemIn"][] | null;
         };
         /**
          * PromoCheckOut
@@ -2488,6 +2550,12 @@ export interface components {
             discount_type: components["schemas"]["DiscountType"];
             /** Discount Value */
             discount_value: number;
+            /** Ticket Type Ids */
+            ticket_type_ids: string[];
+            /** Eligible Subtotal Kzt */
+            eligible_subtotal_kzt?: number | null;
+            /** Discount Kzt */
+            discount_kzt?: number | null;
         };
         /**
          * PromoCodeStatus
@@ -3248,7 +3316,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["OrganizerProfileIn"];
+                "application/json": components["schemas"]["OrganizerProfileUpdate"];
             };
         };
         responses: {

@@ -2,6 +2,7 @@ import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "@/features/auth";
 import { CitySelect } from "@/features/events";
+import { NotificationBell } from "@/features/notifications";
 import { LANGUAGE_LABELS, LANGUAGES, useI18n, type Language } from "@/lib/i18n";
 
 import { Footer } from "./Footer";
@@ -76,6 +77,7 @@ function Header() {
           <LanguageSwitch />
           {isLoading ? null : user ? (
             <>
+              <NotificationBell />
               <NavLink
                 to="/account"
                 className={navClass}

@@ -3,11 +3,13 @@ import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { ErrorState, Loading } from "@/components/ui/States";
-import type { CampaignOut } from "@/lib/api/types";
+import { useTicketTypes } from "@/features/organizer/api";
+import type { CampaignOut, TicketTypeOut } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { useCampaigns } from "../api";
+import { campaignTypesText } from "../campaignTypes";
 import { CampaignForm } from "./CampaignForm";
 import { CodesTable } from "./CodesTable";
 
@@ -16,11 +18,13 @@ function CampaignRow({
   campaign,
   tz,
   editable,
+  ticketTypes,
 }: {
   eventId: string;
   campaign: CampaignOut;
   tz: string;
   editable: boolean;
+  ticketTypes: TicketTypeOut[];
 }) {
   const { t, lang } = useI18n();
   const discount =
@@ -54,6 +58,10 @@ function CampaignRow({
         <p className="text-sm text-gray-700">
           {limit} · {dates}
         </p>
+        <p className="text-sm text-gray-700">
+          {t("promo.campaign.appliesTo")}:{" "}
+          {campaignTypesText(campaign, ticketTypes, t("promo.campaign.allTypes"))}
+        </p>
       </div>
       <CodesTable eventId={eventId} campaignId={campaign.id} editable={editable} />
     </li>
@@ -73,6 +81,8 @@ export function PromotionsSection({
 }) {
   const { t } = useI18n();
   const campaigns = useCampaigns(eventId);
+  const ticketTypes = useTicketTypes(eventId);
+  const types = ticketTypes.data ?? [];
   const [adding, setAdding] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -90,7 +100,14 @@ export function PromotionsSection({
           {campaigns.data.length === 0 && <p className="text-gray-700">{t("promo.empty")}</p>}
           <ul className="flex flex-col">
             {campaigns.data.map((campaign) => (
-              <CampaignRow key={campaign.id} eventId={eventId} campaign={campaign} tz={tz} editable={editable} />
+              <CampaignRow
+                key={campaign.id}
+                eventId={eventId}
+                campaign={campaign}
+                tz={tz}
+                editable={editable}
+                ticketTypes={types}
+              />
             ))}
           </ul>
           {editable &&
@@ -98,6 +115,7 @@ export function PromotionsSection({
               <CampaignForm
                 eventId={eventId}
                 tz={tz}
+                ticketTypes={types}
                 onDone={(created) => {
                   setAdding(false);
                   if (created) setNotice(t("promo.campaign.created"));

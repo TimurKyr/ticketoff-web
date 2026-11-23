@@ -26,9 +26,20 @@ export function cancelOrder(orderId: string): Promise<OrderOut> {
 }
 
 /** Does the code work for this event? Does not use it up; the discount is set at checkout. */
-export function checkPromoCode(eventId: string, code: string): Promise<PromoCheckOut> {
-  return apiClient.post<PromoCheckOut>(`/events/${eventId}/promo-codes/check`, { code });
+/**
+ * Check a code. With `items` (the buyer's current selection) the answer has the exact
+ * discount on them, and a code that applies to none of them is a 409 (code_not_applicable).
+ */
+export function checkPromoCode(
+  eventId: string,
+  code: string,
+  items?: PromoCheckItem[]
+): Promise<PromoCheckOut> {
+  const body = items && items.length > 0 ? { code, items } : { code };
+  return apiClient.post<PromoCheckOut>(`/events/${eventId}/promo-codes/check`, body);
 }
+
+export type PromoCheckItem = { ticket_type_id: string; quantity: number };
 
 /**
  * Code behind a campaign QR link (`/events/{id}?promo=<token>`). 404/409 are final

@@ -4,7 +4,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField, SelectField } from "@/components/ui/FormField";
 import { errorMessage } from "@/lib/api/errors";
-import type { CampaignCreate, CampaignOut, DiscountType } from "@/lib/api/types";
+import type { CampaignCreate, CampaignOut, DiscountType, TicketTypeOut } from "@/lib/api/types";
 import { localInputToIso } from "@/lib/format";
 import { isWholeInRange, MAX_PRICE_KZT, MAX_QUANTITY } from "@/lib/forms";
 import { useI18n, type MessageKey } from "@/lib/i18n";
@@ -46,7 +46,7 @@ function validate(v: Values): MessageKey | null {
   return null;
 }
 
-function toPayload(v: Values, tz: string): CampaignCreate {
+function toPayload(v: Values, tz: string, ticketTypeIds: string[]): CampaignCreate {
   return {
     name: v.name.trim(),
     discount_type: v.discount_type,
@@ -55,16 +55,63 @@ function toPayload(v: Values, tz: string): CampaignCreate {
     // The venue's wall-clock time → UTC ISO with "Z" (the API wants aware datetimes).
     starts_at: localInputToIso(v.starts_at, tz),
     ends_at: localInputToIso(v.ends_at, tz),
+    // None checked = every type of the event (the API's empty list).
+    ticket_type_ids: ticketTypeIds,
   };
+}
+
+/** "Действует на типы билетов": none checked means every type. Hidden types can be chosen. */
+function TicketTypePicker({
+  types,
+  selected,
+  onToggle,
+}: {
+  types: TicketTypeOut[];
+  selected: ReadonlySet<string>;
+  onToggle: (id: string) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <fieldset className="flex flex-col gap-1">
+      <legend className="text-sm font-medium">{t("promo.campaign.types")}</legend>
+      <p className="text-xs text-gray-600">{t("promo.campaign.typesHint")}</p>
+      {types.length === 0 ? (
+        <p className="text-sm text-gray-700">{t("promo.campaign.typesNone")}</p>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {types.map((type) => (
+            <li key={type.id}>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selected.has(type.id)}
+                  onChange={() => onToggle(type.id)}
+                />
+                <span className={type.is_hidden ? "text-gray-500" : ""}>{type.name}</span>
+                {type.is_hidden && (
+                  <span className="rounded bg-gray-200 px-1.5 text-xs text-gray-700">
+                    {t("preview.hiddenType")}
+                  </span>
+                )}
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+    </fieldset>
+  );
 }
 
 export function CampaignForm({
   eventId,
   tz,
+  ticketTypes,
   onDone,
 }: {
   eventId: string;
   tz: string;
+  /** The event's ticket types, hidden ones included (the organizer may target them). */
+  ticketTypes: TicketTypeOut[];
   onDone: (created?: CampaignOut) => void;
 }) {
   const { t } = useI18n();
@@ -72,6 +119,14 @@ export function CampaignForm({
   const [values, setValues] = useState<Values>(EMPTY);
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<Values>) => setValues((prev) => ({ ...prev, ...patch }));
+  const [typeIds, setTypeIds] = useState<ReadonlySet<string>>(new Set());
+  const toggleType = (id: string) =>
+    setTypeIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -79,7 +134,9 @@ export function CampaignForm({
     const invalid = validate(values);
     if (invalid) return setError(t(invalid));
     try {
-      onDone(await create.mutateAsync(toPayload(values, tz)));
+      // Only ids that are still types of this event (a type may have been deleted meanwhile).
+      const ids = ticketTypes.filter((type) => typeIds.has(type.id)).map((type) => type.id);
+      onDone(await create.mutateAsync(toPayload(values, tz, ids)));
     } catch (err) {
       setError(errorMessage(err, t));
     }
@@ -139,6 +196,7 @@ export function CampaignForm({
           onChange={(e) => set({ ends_at: e.target.value })}
         />
       </div>
+      <TicketTypePicker types={ticketTypes} selected={typeIds} onToggle={toggleType} />
       <div className="flex gap-2">
         <Button type="submit" disabled={create.isPending}>
           {create.isPending ? t("common.loading") : t("promo.campaign.save")}

@@ -7,6 +7,7 @@ import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
 
 import { createOrganizerProfile } from "../api";
+import { OrganizerProfileSection } from "../components/OrganizerProfileSection";
 import { VerifyEmailNotice } from "../components/VerifyEmailNotice";
 import { useAuth } from "../hooks/useAuth";
 
@@ -63,6 +64,8 @@ export function AccountPage() {
       </dl>
 
       {done && <Alert tone="success">{t("account.becomeOrganizer.done")}</Alert>}
+
+      {user.is_organizer && <OrganizerProfileSection />}
 
       {!user.is_organizer && (
         <form
