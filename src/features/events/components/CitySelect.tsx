@@ -7,8 +7,12 @@ import { useI18n } from "@/lib/i18n";
 import { useVenues } from "../api";
 import { setCity, useCities, useCity } from "../city";
 
-/** "Все города / Алматы / Астана" in the header; filters the home rows and /events. */
-export function CitySelect({ className = "" }: { className?: string }) {
+/**
+ * "Все города / Алматы / Астана" in the header; filters the home rows and /events.
+ * `inline`: the list opens in the page flow instead of floating, for the mobile menu, whose
+ * scrolling panel would clip a floating list (FE-22 #2: «Астана» could not be reached).
+ */
+export function CitySelect({ className = "", inline = false }: { className?: string; inline?: boolean }) {
   const { t } = useI18n();
   const city = useCity();
   const venues = useVenues();
@@ -29,7 +33,7 @@ export function CitySelect({ className = "" }: { className?: string }) {
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`${inline ? "min-w-0 flex-1" : "relative"} ${className}`}>
       <button
         {...menu.buttonProps}
         aria-label={`${t("city.label")}: ${city || t("city.all")}`}
@@ -44,7 +48,11 @@ export function CitySelect({ className = "" }: { className?: string }) {
         <div
           {...menu.menuProps}
           aria-label={t("city.label")}
-          className="absolute left-0 z-50 mt-2 max-h-80 w-56 overflow-auto rounded-xl border border-[#E4E1DA] bg-white p-1 shadow-lg"
+          className={
+            inline
+              ? "mt-2 w-full max-w-xs rounded-xl border border-[#E4E1DA] bg-white p-1"
+              : "absolute left-0 z-50 mt-2 max-h-80 w-56 overflow-auto rounded-xl border border-[#E4E1DA] bg-white p-1 shadow-lg"
+          }
         >
           {options.map((value) => (
             <button
