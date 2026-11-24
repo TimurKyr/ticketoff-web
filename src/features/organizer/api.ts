@@ -94,12 +94,23 @@ export function useUpdateEvent(eventId: string) {
 
 export type EventAction = "publish" | "unpublish" | "cancel" | "duplicate";
 
+/**
+ * Body of POST /events/{id}/cancel since BE-37 (optional, reason ≤ 500 characters). Local
+ * until schema.d.ts is regenerated from an API that has it.
+ */
+interface EventCancel {
+  reason?: string | null;
+}
+
 export function useEventAction(eventId: string) {
   const invalidate = useInvalidate();
   return useMutation({
-    // `reason` goes only with "cancel", and only once the API takes it (CancelEventDialog).
+    // `reason` goes only with "cancel" (EventCancel, BE-37); no body when there is none.
     mutationFn: ({ name, reason }: { name: EventAction; reason?: string | null }) =>
-      apiClient.post<EventOut>(`/events/${eventId}/${name}`, reason ? { reason } : undefined),
+      apiClient.post<EventOut>(
+        `/events/${eventId}/${name}`,
+        name === "cancel" && reason ? ({ reason } satisfies EventCancel) : undefined
+      ),
     onSuccess: invalidate,
   });
 }

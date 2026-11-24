@@ -54,6 +54,39 @@ describe("errorMessage, FE-22", () => {
   });
 });
 
+describe("errorMessage, BE-37 codes", () => {
+  const coded = (code: string, detail: string) => new ApiError(409, { detail, code });
+
+  it("translates each code, keeping the values from a known detail", () => {
+    expect(errorMessage(coded("SALES_SUSPENDED", "Sales are suspended for this event by the platform"), t)).toBe(
+      "err.salesSuspended"
+    );
+    expect(errorMessage(coded("NOT_ENOUGH_CAPACITY", "Not enough capacity left"), t)).toBe("err.noCapacity");
+    const tr = (key: MessageKey) => (key === "err.capacityExceeded" ? "всего $1 из $2" : key);
+    expect(
+      errorMessage(
+        coded("TICKET_QUANTITY_EXCEEDS_CAPACITY", "Total ticket quantity (90) exceeds event capacity (80)"),
+        tr
+      )
+    ).toBe("всего 90 из 80");
+  });
+
+  it("falls back to the code's own text when the detail wording changed", () => {
+    expect(errorMessage(coded("NOT_ENOUGH_TICKETS", "Only 2 Партер tickets remain"), t)).toBe(
+      "err.code.notEnoughTickets"
+    );
+    expect(errorMessage(coded("TICKET_QUANTITY_EXCEEDS_CAPACITY", "Too many"), t)).toBe(
+      "err.code.quantityExceedsCapacity"
+    );
+    expect(errorMessage(coded("CAPACITY_BELOW_TICKET_QUANTITY", "x"), t)).toBe("err.code.capacityBelowTypes");
+    expect(errorMessage(coded("CAPACITY_BELOW_SOLD", "x"), t)).toBe("err.code.capacityBelowSold");
+  });
+
+  it("shows the detail for an unknown code, as before", () => {
+    expect(errorMessage(coded("SOMETHING_NEW", "Something new"), t)).toBe("Something new");
+  });
+});
+
 describe("ApiError.code", () => {
   it("reads a string code and ignores anything else", () => {
     expect(notVerified.code).toBe("EMAIL_NOT_VERIFIED");

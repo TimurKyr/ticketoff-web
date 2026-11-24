@@ -911,6 +911,12 @@ export const ru = {
   "organizers.cta.guest": "Зарегистрируйтесь, чтобы провести своё событие.",
   "organizers.cta.user": "Станьте организатором: это одно поле в профиле.",
   "organizers.cta.organizer": "Вы организатор. Создайте событие или откройте кабинет.",
+  "err.code.notEnoughTickets": "Билетов этого типа осталось меньше, чем вы выбрали. Уменьшите количество.",
+  "err.code.quantityExceedsCapacity": "Всего билетов больше вместимости события. Уменьшите количество или увеличьте вместимость.",
+  "err.code.capacityBelowTypes": "Вместимость меньше общего количества билетов всех типов.",
+  "err.code.capacityBelowSold": "Вместимость меньше числа уже проданных билетов.",
+  "org.cancelDialog.reasonCount": "$1 из $2",
+  "org.cancelDialog.reasonTooLong": "Не больше $1 символов.",
 } as const;
 
 export type MessageKey = keyof typeof ru;
@@ -1809,6 +1815,12 @@ export const kk: Messages = {
   "organizers.cta.guest": "Өз іс-шараңызды өткізу үшін тіркеліңіз.",
   "organizers.cta.user": "Ұйымдастырушы болыңыз: бұл профильдегі бір ғана жол.",
   "organizers.cta.organizer": "Сіз ұйымдастырушысыз. Іс-шара құрыңыз немесе кабинетті ашыңыз.",
+  "err.code.notEnoughTickets": "Бұл түрдегі билеттер сіз таңдағаннан аз қалды. Санын азайтыңыз.",
+  "err.code.quantityExceedsCapacity": "Билеттер саны іс-шараның сыйымдылығынан көп. Санын азайтыңыз немесе сыйымдылықты көбейтіңіз.",
+  "err.code.capacityBelowTypes": "Сыйымдылық барлық түрдегі билеттердің жалпы санынан аз.",
+  "err.code.capacityBelowSold": "Сыйымдылық сатылып кеткен билеттер санынан аз.",
+  "org.cancelDialog.reasonCount": "$2 ішінен $1",
+  "org.cancelDialog.reasonTooLong": "$1 таңбадан аспауы керек.",
 };
 
 export const LANGUAGES = { ru, kk } as const;

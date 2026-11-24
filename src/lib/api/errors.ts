@@ -45,7 +45,8 @@ const FE14_DETAILS: Record<string, MessageKey> = {
   "Organizer profile not found": "err.profileNotFound",
 };
 
-// FE-22: messages seen in the UX walkthrough. Matched by text until the API sends codes (BE-37).
+// FE-22: messages seen in the UX walkthrough. Matched by text: an API from before BE-37 sends
+// no code for them (with a code, CODE_MESSAGES below decides).
 const FE22_DETAILS: Record<string, MessageKey> = {
   "Sales are suspended for this event by the platform": "err.salesSuspended",
   "Account is suspended": "err.accountSuspended",
@@ -139,6 +140,31 @@ function translateDetail(detail: string, t: (key: MessageKey) => string): string
 }
 
 /**
+ * 409 `{"detail", "code"}` from BE-37: the code says what went wrong, the English detail still
+ * carries the numbers and names. The detail's own translation (with those values) is used when
+ * it is known; otherwise a text for the code without them. Without a code (an API from before
+ * BE-37, or another 409) the detail is translated by text as before.
+ */
+const CODE_MESSAGES: Record<string, MessageKey> = {
+  SALES_SUSPENDED: "err.salesSuspended",
+  NOT_ENOUGH_TICKETS: "err.code.notEnoughTickets",
+  NOT_ENOUGH_CAPACITY: "err.noCapacity",
+  TICKET_QUANTITY_EXCEEDS_CAPACITY: "err.code.quantityExceedsCapacity",
+  CAPACITY_BELOW_TICKET_QUANTITY: "err.code.capacityBelowTypes",
+  CAPACITY_BELOW_SOLD: "err.code.capacityBelowSold",
+};
+
+function translateCoded(code: string, detail: unknown, t: (key: MessageKey) => string): string | null {
+  const key = CODE_MESSAGES[code];
+  if (!key) return null;
+  if (typeof detail === "string") {
+    const fromDetail = translateDetail(detail, t);
+    if (fromDetail !== detail) return fromDetail;
+  }
+  return t(key);
+}
+
+/**
  * 403 `{"code": "EMAIL_NOT_VERIFIED"}`: buying tickets, registering for free tickets and
  * publishing an event need a confirmed email (backend BE-18).
  */
@@ -159,6 +185,8 @@ export function errorMessage(error: unknown, t: (key: MessageKey) => string): st
   if (error instanceof ApiError) {
     if (isEmailNotVerified(error)) return t("err.emailNotVerified");
     const detail = error.detail;
+    const coded = error.code ? translateCoded(error.code, detail, t) : null;
+    if (coded) return coded;
     if (typeof detail === "string") return translateDetail(detail, t);
     if (Array.isArray(detail)) {
       const parts = (detail as ValidationIssue[])
