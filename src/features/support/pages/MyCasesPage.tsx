@@ -11,6 +11,7 @@ import { pageCount, parsePage } from "@/lib/pagination";
 
 import { SUPPORT_PAGE_SIZE, useMyCases } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
+import { NewCaseButton } from "../components/NewCaseButton";
 import { CATEGORY_LABELS, isSupportStatus, statusLabel, STATUSES } from "../labels";
 
 function CaseRow({ item }: { item: CaseOut }) {
@@ -63,7 +64,10 @@ export function MyCasesPage() {
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-5">
-      <h1 className="text-2xl font-semibold">{t("support.my.title")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">{t("support.my.title")}</h1>
+        <NewCaseButton />
+      </div>
 
       <div className="max-w-xs">
         <SelectField

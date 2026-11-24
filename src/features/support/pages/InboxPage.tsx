@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import { SelectField } from "@/components/ui/FormField";
 import { Pager } from "@/components/ui/Pager";
@@ -38,10 +38,13 @@ function assigneeKey(item: CaseOut, userId: string): MessageKey {
 
 function InboxRow({ item, userId, showKind }: { item: CaseOut; userId: string; showKind: boolean }) {
   const { t, lang } = useI18n();
+  const location = useLocation();
   return (
     <li>
       <Link
         to={`/support/cases/${item.id}`}
+        // The case page's "back" returns to this inbox with its filters (FE-22 #9).
+        state={{ from: `${location.pathname}${location.search}` }}
         className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2"
       >
         <div className="flex min-w-0 flex-col gap-1">

@@ -5,3 +5,5 @@ export * from "./components/PaymentPanel";
 export * from "./components/RefundPolicy";
 export * from "./components/CancelOrderButton";
 export * from "./useHoldExpiry";
+export * from "./summary";
+export * from "./components/OrderSummaryBox";

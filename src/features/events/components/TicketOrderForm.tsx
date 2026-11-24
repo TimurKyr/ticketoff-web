@@ -6,7 +6,13 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { useAuth, VerifyEmailNotice } from "@/features/auth";
-import { PromoCodeField, RefundPolicy, startCheckout } from "@/features/checkout";
+import {
+  OrderSummaryBox,
+  orderSummary,
+  PromoCodeField,
+  RefundPolicy,
+  startCheckout,
+} from "@/features/checkout";
 import { track } from "@/lib/analytics";
 import { errorMessage, isEmailNotVerified } from "@/lib/api/errors";
 import type { AttendeeIn, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
@@ -59,6 +65,8 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
   }, [error]);
   const [submitting, setSubmitting] = useState(false);
   const [promo, setPromo] = useState("");
+  // The discount the promo check found for the current code and tickets (order summary).
+  const [discount, setDiscount] = useState<number | null>(null);
   const paid = kind === "paid";
   // The server refused with EMAIL_NOT_VERIFIED although the cached /auth/me said confirmed.
   const [refusedUnverified, setRefusedUnverified] = useState(false);
@@ -126,6 +134,10 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
     }),
   }));
   const rows = groups.flatMap((group) => group.rows);
+  const summary = orderSummary(
+    chosen.map((type) => ({ id: type.id, name: type.name, quantity: quantity(type), price_kzt: type.price_kzt })),
+    discount
+  );
 
   function setRow(typeId: string, index: number, patch: Partial<AttendeeIn>) {
     const current = groups.find((group) => group.type.id === typeId)?.rows ?? [];
@@ -242,7 +254,9 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
             value={promo}
             onChange={setPromo}
             items={chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) }))}
+            onDiscountChange={setDiscount}
           />
+          <OrderSummaryBox summary={summary} promoUnchecked={Boolean(promo.trim()) && discount == null} />
           <RefundPolicy policy={refundPolicy} />
           <p className="text-xs text-gray-600">{t("checkout.holdNote")}</p>
         </>

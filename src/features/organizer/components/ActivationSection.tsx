@@ -8,6 +8,7 @@ import { formatKzt } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 
 import { useActivation, useActivationStep, type ActivationStep } from "../api";
+import { ActivationFeeDialog, PaidSalesTermsDialog } from "./PaidSalesTermsDialog";
 
 /** Checklist for turning on paid sales. Every step is simulated (no real KYC or money). */
 export function ActivationSection({ eventId, editable }: { eventId: string; editable: boolean }) {
@@ -15,6 +16,8 @@ export function ActivationSection({ eventId, editable }: { eventId: string; edit
   const activation = useActivation(eventId, true);
   const step = useActivationStep(eventId);
   const [error, setError] = useState<string | null>(null);
+  // Accepting the terms and paying the fee first show what is being agreed to (FE-22 #7).
+  const [dialog, setDialog] = useState<"accept-terms" | "pay" | null>(null);
 
   async function run(name: ActivationStep) {
     setError(null);
@@ -22,7 +25,14 @@ export function ActivationSection({ eventId, editable }: { eventId: string; edit
       await step.mutateAsync(name);
     } catch (err) {
       setError(errorMessage(err, t));
+    } finally {
+      setDialog(null);
     }
+  }
+
+  function start(name: ActivationStep) {
+    if (name === "accept-terms" || name === "pay") setDialog(name);
+    else void run(name);
   }
 
   if (activation.isPending) return <Loading />;
@@ -51,13 +61,38 @@ export function ActivationSection({ eventId, editable }: { eventId: string; edit
               <span className="sr-only"> — {done ? t("org.act.done") : t("org.act.todo")}</span>
             </span>
             {!done && action && actionLabel && editable && (
-              <Button variant="secondary" onClick={() => run(action)} disabled={step.isPending}>
+              <Button variant="secondary" onClick={() => start(action)} disabled={step.isPending}>
                 {t(actionLabel)}
               </Button>
             )}
           </li>
         ))}
       </ul>
+      {!c.terms_accepted && editable && (
+        <button
+          type="button"
+          onClick={() => setDialog("accept-terms")}
+          className="self-start text-sm underline"
+        >
+          {t("org.terms.read")}
+        </button>
+      )}
+      {dialog === "accept-terms" && (
+        <PaidSalesTermsDialog
+          feeKzt={c.activation_fee_kzt}
+          pending={step.isPending}
+          onAccept={() => void run("accept-terms")}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "pay" && (
+        <ActivationFeeDialog
+          feeKzt={c.activation_fee_kzt}
+          pending={step.isPending}
+          onPay={() => void run("pay")}
+          onClose={() => setDialog(null)}
+        />
+      )}
     </section>
   );
 }
