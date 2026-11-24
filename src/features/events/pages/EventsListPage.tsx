@@ -7,6 +7,7 @@ import { EmptyState, ErrorState } from "@/components/ui/States";
 import { dayEndIso, dayStartIso } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { EVENTS_PAGE_SIZE, useEvents, useVenues } from "../api";
 import { CATEGORIES, categoryLabelKey } from "../categories";
@@ -20,6 +21,7 @@ import type { DayRange } from "../dateRanges";
 // the back button works. The city comes from the header (saved in localStorage).
 export function EventsListPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("events.title"));
   const [params, setParams] = useSearchParams();
   const q = params.get("q") ?? "";
   const category = params.get("category") ?? "";

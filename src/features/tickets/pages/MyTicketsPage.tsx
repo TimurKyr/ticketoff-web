@@ -7,6 +7,7 @@ import type { OrderOut } from "@/lib/api/types";
 import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useMyOrders } from "../api";
 import { groupOrders, type OrderTab } from "../orderGroups";
@@ -41,6 +42,7 @@ function OrderRow({ order, now }: { order: OrderOut; now: number }) {
 
 export function MyTicketsPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("myTickets.title"));
   const orders = useMyOrders();
   // Pending checkouts show a countdown; otherwise a slow tick is enough.
   const holding = orders.data?.some((order) => order.status === "pending") ?? false;

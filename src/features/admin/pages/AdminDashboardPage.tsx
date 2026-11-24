@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useI18n, type MessageKey } from "@/lib/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { ActivationFeeTab } from "../components/ActivationFeeTab";
 import { ActivationsTab } from "../components/ActivationsTab";
@@ -22,6 +23,7 @@ type TabId = (typeof TABS)[number]["id"];
 /** Admin portal (platform_admin only, guarded in router.tsx). */
 export function AdminDashboardPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("admin.title"));
   const [active, setActive] = useState<TabId>("search");
 
   return (

@@ -842,7 +842,7 @@ export const ru = {
   "orgProfile.phone": "Телефон",
   "orgProfile.phoneHint": "Покупатели его не видят. Например, +7 701 123 45 67 или 8 701 123 45 67.",
   "orgProfile.website": "Сайт",
-  "orgProfile.websiteHint": "Адрес с http:// или https://.",
+  "orgProfile.websiteHint": "Например: jazz.kz или https://jazz.kz. Без https:// добавим сами.",
   "orgProfile.save": "Сохранить",
   "orgProfile.saved": "Профиль сохранён.",
   "events.salesSuspended.title": "Продажи приостановлены платформой",
@@ -901,6 +901,13 @@ export const ru = {
   "support.case.backInbox": "К входящим",
   "admin.role.attendee": "Покупатель",
   "admin.role.platform_admin": "Администратор платформы",
+  "orgEvent.analytics.absentLater": "Посчитаем после начала события",
+  "history.key.code": "Код",
+  "history.key.cancelled_orders": "Отменено заказов",
+  "history.key.refunded_orders": "Возвращено заказов",
+  "history.key.pending_cancelled": "Отменено неоплаченных",
+  "history.key.ticket_count": "Билетов",
+  "history.key.method": "Способ",
 } as const;
 
 export type MessageKey = keyof typeof ru;
@@ -1730,7 +1737,7 @@ export const kk: Messages = {
   "orgProfile.phone": "Телефон",
   "orgProfile.phoneHint": "Сатып алушылар оны көрмейді. Мысалы, +7 701 123 45 67 немесе 8 701 123 45 67.",
   "orgProfile.website": "Сайт",
-  "orgProfile.websiteHint": "http:// немесе https:// бар мекенжай.",
+  "orgProfile.websiteHint": "Мысалы: jazz.kz немесе https://jazz.kz. https:// жоқ болса, өзіміз қосамыз.",
   "orgProfile.save": "Сақтау",
   "orgProfile.saved": "Профиль сақталды.",
   "events.salesSuspended.title": "Сатылымды платформа тоқтатты",
@@ -1789,6 +1796,13 @@ export const kk: Messages = {
   "support.case.backInbox": "Кіріс өтініштерге",
   "admin.role.attendee": "Сатып алушы",
   "admin.role.platform_admin": "Платформа әкімшісі",
+  "orgEvent.analytics.absentLater": "Іс-шара басталғаннан кейін есептейміз",
+  "history.key.code": "Код",
+  "history.key.cancelled_orders": "Болдырылмаған тапсырыстар",
+  "history.key.refunded_orders": "Қайтарылған тапсырыстар",
+  "history.key.pending_cancelled": "Болдырылмаған төленбегендер",
+  "history.key.ticket_count": "Билеттер",
+  "history.key.method": "Тәсіл",
 };
 
 export const LANGUAGES = { ru, kk } as const;

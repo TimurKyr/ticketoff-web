@@ -192,6 +192,12 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
   }
 
   let rowNumber = 0;
+  // "(Партер)" tells tickets of several types apart; one type, or a type called «Участник»
+  // itself, says nothing new (FE-22 #24: «Участник 1 (Участник)»).
+  const typeNote = (name: string) =>
+    ticketTypes.length > 1 && name.trim().toLowerCase() !== t("register.attendee").toLowerCase()
+      ? ` (${name})`
+      : "";
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
@@ -227,7 +233,7 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
               return (
                 <div key={`${type.id}-${i}`} className="grid gap-2 rounded-md bg-gray-50 p-3 sm:grid-cols-2">
                   <FormField
-                    label={`${t("register.attendee")} ${rowNumber} (${type.name}): ${t("register.name")}`}
+                    label={`${t("register.attendee")} ${rowNumber}${typeNote(type.name)}: ${t("register.name")}`}
                     autoComplete={rowNumber === 1 ? "name" : "off"}
                     required
                     value={row.name}

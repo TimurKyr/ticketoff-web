@@ -37,7 +37,9 @@ describe("checkEmail and checkWebsite", () => {
   it("accepts only http(s) addresses", () => {
     expect(checkWebsite(" https://jazz.kz/a ")).toEqual({ value: "https://jazz.kz/a" });
     expect(checkWebsite("ftp://jazz.kz")).toEqual({ error: "err.websiteHttp" });
-    expect(checkWebsite("jazz.kz")).toEqual({ error: "err.websiteHttp" });
+    expect(checkWebsite("jazz.kz")).toEqual({ value: "https://jazz.kz" });
+    expect(checkWebsite("www.jazz.kz/afisha")).toEqual({ value: "https://www.jazz.kz/afisha" });
+    expect(checkWebsite("jazz kz")).toEqual({ error: "err.websiteHttp" });
     expect(checkWebsite(`https://jazz.kz/${"a".repeat(260)}`)).toEqual({ error: "err.websiteLong" });
   });
 });

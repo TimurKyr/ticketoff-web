@@ -8,6 +8,7 @@ import type { CaseOut } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { SUPPORT_PAGE_SIZE, useMyCases } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
@@ -42,6 +43,7 @@ function CaseRow({ item }: { item: CaseOut }) {
 /** /support: cases I opened, newest first (?status=…&page=N). */
 export function MyCasesPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("support.my.title"));
   const [params, setParams] = useSearchParams();
   const rawStatus = params.get("status");
   const status = isSupportStatus(rawStatus) ? rawStatus : null;

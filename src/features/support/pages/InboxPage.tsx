@@ -9,6 +9,7 @@ import type { CaseOut } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { SUPPORT_PAGE_SIZE, useInbox } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
@@ -74,6 +75,7 @@ function InboxRow({ item, userId, showKind }: { item: CaseOut; userId: string; s
  */
 export function InboxPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("support.inbox.title"));
   const { user } = useAuth();
   const isAdmin = user?.system_role === "platform_admin";
   const [params, setParams] = useSearchParams();

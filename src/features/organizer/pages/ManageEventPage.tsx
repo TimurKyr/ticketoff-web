@@ -16,6 +16,7 @@ import type { EventStatus } from "@/lib/api/types";
 import { DEFAULT_TIME_ZONE, formatDateTime } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useEventAction, useMyEvent, useTicketTypes, useUpdateEvent, type EventAction } from "../api";
 import { ActivationSection } from "../components/ActivationSection";
@@ -75,6 +76,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
   const initialNotice = (location.state as { notice?: MessageKey } | null)?.notice;
 
   const event = useMyEvent(eventId);
+  useDocumentTitle(event.data?.title);
   const venues = useVenues();
   const ticketTypes = useTicketTypes(eventId);
   const update = useUpdateEvent(eventId);
@@ -247,7 +249,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
         )}
         <Suspense fallback={<Loading />}>
           {tab === "orders" && <OrdersTab eventId={data.id} tz={tz} readOnly={over} />}
-          {tab === "analytics" && <AnalyticsTab eventId={data.id} />}
+          {tab === "analytics" && <AnalyticsTab eventId={data.id} startAt={data.start_at} />}
           {tab === "history" && <HistoryTab eventId={data.id} tz={tz} />}
           {tab === "staff" && <StaffTab eventId={data.id} readOnly={over} />}
         </Suspense>

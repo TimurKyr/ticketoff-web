@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { createOrganizerProfile } from "../api";
 import { OrganizerProfileSection } from "../components/OrganizerProfileSection";
@@ -13,6 +14,7 @@ import { useAuth } from "../hooks/useAuth";
 
 export function AccountPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("account.title"));
   const { user, refresh, justRegistered } = useAuth();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);

@@ -12,6 +12,7 @@ import type { EventBucket } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { ORGANIZER_PAGE_SIZE, useMyEvents } from "../api";
 import { OrganizerOnboarding } from "../components/OrganizerOnboarding";
@@ -22,6 +23,7 @@ const BUCKETS: EventBucket[] = ["upcoming", "active", "completed", "cancelled"];
 /** "My events" by tab (?tab=upcoming|active|completed|cancelled&page=N). */
 export function OrganizerDashboardPage() {
   const { t, lang } = useI18n();
+  useDocumentTitle(t("org.title"));
   const [params, setParams] = useSearchParams();
   const bucket = (BUCKETS as string[]).includes(params.get("tab") ?? "")
     ? (params.get("tab") as EventBucket)

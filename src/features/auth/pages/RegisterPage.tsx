@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { errorMessage } from "@/lib/api/errors";
 import { useI18n, type MessageKey } from "@/lib/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -19,6 +20,7 @@ interface FieldErrors {
 
 export function RegisterPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("auth.register.title"));
   const { register } = useAuth();
 
   const [email, setEmail] = useState("");
