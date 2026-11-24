@@ -32,6 +32,28 @@ describe("errorMessage", () => {
   });
 });
 
+describe("errorMessage, FE-22", () => {
+  it("translates the sales suspension and capacity messages", () => {
+    expect(
+      errorMessage(new ApiError(409, { detail: "Sales are suspended for this event by the platform" }), t)
+    ).toBe("err.salesSuspended");
+    const tr = (key: MessageKey) => (key === "err.capacityExceeded" ? "всего $1 из $2" : key);
+    expect(
+      errorMessage(new ApiError(409, { detail: "Total ticket quantity (90) exceeds event capacity (80)" }), tr)
+    ).toBe("всего 90 из 80");
+  });
+
+  it("drops the field name from a translated validation error, keeps it otherwise", () => {
+    const error = new ApiError(422, {
+      detail: [
+        { loc: ["body", "email"], msg: "value is not a valid email address: An email address must have an @-sign." },
+        { loc: ["body", "name"], msg: "Field required" },
+      ],
+    });
+    expect(errorMessage(error, t)).toBe("err.emailInvalid; name: Field required");
+  });
+});
+
 describe("ApiError.code", () => {
   it("reads a string code and ignores anything else", () => {
     expect(notVerified.code).toBe("EMAIL_NOT_VERIFIED");

@@ -45,11 +45,18 @@ const FE14_DETAILS: Record<string, MessageKey> = {
   "Organizer profile not found": "err.profileNotFound",
 };
 
+// FE-22: messages seen in the UX walkthrough. Matched by text until the API sends codes (BE-37).
+const FE22_DETAILS: Record<string, MessageKey> = {
+  "Sales are suspended for this event by the platform": "err.salesSuspended",
+  "Account is suspended": "err.accountSuspended",
+};
+
 /** Backend `detail` strings that have a translated message. */
 const KNOWN_DETAILS: Record<string, MessageKey> = {
   ...FE8_DETAILS,
   ...FE7_DETAILS,
   ...FE14_DETAILS,
+  ...FE22_DETAILS,
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",
@@ -118,6 +125,7 @@ const PATTERNS: [RegExp, MessageKey][] = [
   [/^ticket_type_ids must be ticket types of this event; not found: (.+)$/, "err.campaignTypesUnknown"],
   [/^Ticket type not found for this event: (.+)$/, "err.ticketTypeNotFound"],
   [/^value is not a valid email address/, "err.emailInvalid"],
+  [/^Total ticket quantity \((\d+)\) exceeds event capacity \((\d+)\)$/, "err.capacityExceeded"],
 ];
 
 function translateDetail(detail: string, t: (key: MessageKey) => string): string {
@@ -156,7 +164,11 @@ export function errorMessage(error: unknown, t: (key: MessageKey) => string): st
       const parts = (detail as ValidationIssue[])
         .map((issue) => {
           // Pydantic prefixes model-level errors with "Value error, ".
-          const msg = translateDetail((issue.msg ?? "").replace(/^Value error, /, ""), t);
+          const raw = (issue.msg ?? "").replace(/^Value error, /, "");
+          const msg = translateDetail(raw, t);
+          // A translated message already says what is wrong ("Некорректный email"), so the
+          // field name ("email: …", FE-22 #17) is kept only for the untranslated ones.
+          if (msg !== raw) return msg;
           const field = issue.loc?.filter((p) => p !== "body").join(".");
           return field ? `${field}: ${msg}` : msg;
         })

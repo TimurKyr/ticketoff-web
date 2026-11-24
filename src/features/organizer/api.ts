@@ -97,8 +97,9 @@ export type EventAction = "publish" | "unpublish" | "cancel" | "duplicate";
 export function useEventAction(eventId: string) {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: (action: EventAction) =>
-      apiClient.post<EventOut>(`/events/${eventId}/${action}`),
+    // `reason` goes only with "cancel", and only once the API takes it (CancelEventDialog).
+    mutationFn: ({ name, reason }: { name: EventAction; reason?: string | null }) =>
+      apiClient.post<EventOut>(`/events/${eventId}/${name}`, reason ? { reason } : undefined),
     onSuccess: invalidate,
   });
 }
