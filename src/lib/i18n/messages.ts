@@ -908,6 +908,9 @@ export const ru = {
   "history.key.pending_cancelled": "Отменено неоплаченных",
   "history.key.ticket_count": "Билетов",
   "history.key.method": "Способ",
+  "organizers.cta.guest": "Зарегистрируйтесь, чтобы провести своё событие.",
+  "organizers.cta.user": "Станьте организатором: это одно поле в профиле.",
+  "organizers.cta.organizer": "Вы организатор. Создайте событие или откройте кабинет.",
 } as const;
 
 export type MessageKey = keyof typeof ru;
@@ -1803,6 +1806,9 @@ export const kk: Messages = {
   "history.key.pending_cancelled": "Болдырылмаған төленбегендер",
   "history.key.ticket_count": "Билеттер",
   "history.key.method": "Тәсіл",
+  "organizers.cta.guest": "Өз іс-шараңызды өткізу үшін тіркеліңіз.",
+  "organizers.cta.user": "Ұйымдастырушы болыңыз: бұл профильдегі бір ғана жол.",
+  "organizers.cta.organizer": "Сіз ұйымдастырушысыз. Іс-шара құрыңыз немесе кабинетті ашыңыз.",
 };
 
 export const LANGUAGES = { ru, kk } as const;

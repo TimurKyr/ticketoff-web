@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/i18n";
 
 import { STATIC_TEXTS, type StaticTexts } from "../content";
+import { OrganizersCta } from "../components/OrganizersCta";
 import { StaticPage, StaticSection } from "../components/StaticPage";
 
 type TextKey = "about" | "organizers" | "refund";
@@ -9,7 +10,11 @@ function TextPage({ page }: { page: TextKey }) {
   const { lang } = useI18n();
   const text: StaticTexts[TextKey] = STATIC_TEXTS[lang][page];
   return (
-    <StaticPage title={text.title} lead={text.lead}>
+    <StaticPage
+      title={text.title}
+      lead={text.lead}
+      actions={page === "organizers" ? <OrganizersCta /> : undefined}
+    >
       {text.sections.map((section) => (
         <StaticSection key={section.title} section={section} />
       ))}
