@@ -1,3 +1,4 @@
+import { formatDecimal } from "@/lib/format";
 import type { Language } from "@/lib/i18n";
 
 /** The API's limits for the files of one message (BE-33). */
@@ -48,17 +49,16 @@ export function addFiles(
   return { files, problem };
 }
 
-/** "850 Б", "12 КБ", "4,2 МБ": one decimal below 10, the same in ru and kk. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function formatFileSize(bytes: number, _lang?: Language): string {
-  const units = ["Б", "КБ", "МБ"]; // the same abbreviations in ru and kk
+/** "850 Б", "12 КБ", "4,2 МБ" (the same in ru and kk), "4.2 MB" in en: one decimal below 10. */
+export function formatFileSize(bytes: number, lang?: Language): string {
+  const units = lang === "en" ? ["B", "KB", "MB"] : ["Б", "КБ", "МБ"];
   let value = bytes;
   let unit = 0;
   while (value >= 1024 && unit < units.length - 1) {
     value /= 1024;
     unit += 1;
   }
-  const text = unit === 0 || value >= 10 ? String(Math.round(value)) : value.toFixed(1).replace(".", ",");
+  const text = unit === 0 || value >= 10 ? String(Math.round(value)) : formatDecimal(value, lang ?? "ru");
   return `${text}\u00a0${units[unit]}`;
 }
 

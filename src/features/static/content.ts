@@ -33,7 +33,7 @@ const ru: StaticTexts = {
   about: {
     title: "О проекте",
     lead:
-      "ticketoff — сервис билетов на события в Казахстане: концерты, лекции, спорт, театр, события для детей. Цены в тенге, интерфейс на казахском и русском.",
+      "ticketoff — сервис билетов на события в Казахстане: концерты, лекции, спорт, театр, события для детей. Цены в тенге, интерфейс на казахском, русском и английском.",
     sections: [
       {
         title: "Для зрителей",
@@ -240,7 +240,7 @@ const kk: StaticTexts = {
   about: {
     title: "Жоба туралы",
     lead:
-      "ticketoff — Қазақстандағы іс-шараларға билет сататын сервис: концерттер, дәрістер, спорт, театр, балаларға арналған іс-шаралар. Бағалар теңгемен, интерфейс қазақ және орыс тілдерінде.",
+      "ticketoff — Қазақстандағы іс-шараларға билет сататын сервис: концерттер, дәрістер, спорт, театр, балаларға арналған іс-шаралар. Бағалар теңгемен, интерфейс қазақ, орыс және ағылшын тілдерінде.",
     sections: [
       {
         title: "Көрермендерге",
@@ -443,4 +443,211 @@ const kk: StaticTexts = {
   },
 };
 
-export const STATIC_TEXTS: Record<Language, StaticTexts> = { ru, kk };
+const en: StaticTexts = {
+  about: {
+    title: "About",
+    lead:
+      "ticketoff sells tickets to events in Kazakhstan: concerts, talks, sports, theatre and events for kids. Prices are in tenge, the interface is in Kazakh, Russian and English.",
+    sections: [
+      {
+        title: "For attendees",
+        items: [
+          "Find events by title, date and category.",
+          "Free tickets are booked by registering, paid tickets by placing and paying for an order.",
+          "Every ticket carries the attendee's name and a QR code. All your tickets are in “My tickets”, and any of them can be downloaded as a PDF.",
+          "Organizer promo codes: type one in or open the link from a Campaign QR.",
+          "Questions about an event, order or ticket go through the “Help” button.",
+        ],
+      },
+      {
+        title: "For organizers",
+        items: [
+          "An event starts as a draft: venue, time, capacity, visibility and ticket types.",
+          "Publish, unpublish, duplicate or cancel an event.",
+          "Paid sales, promo campaigns, ticket availability, revenue and refunds.",
+          "Gate staff and buyer support cases in one organizer dashboard.",
+        ],
+      },
+      {
+        title: "At the entrance",
+        paragraphs: [
+          "Gate staff scan the ticket's QR code with the ticketoff scanner app. A ticket can be checked in only once: scanning it again shows it has already been used. Staff can undo a check-in made by mistake.",
+        ],
+      },
+      {
+        title: "A student project",
+        paragraphs: [
+          "ticketoff was built by a team of students in CSCI 361 at Nazarbayev University, 2026.",
+          "Payments are simulated: no card details are needed, and no real money is charged or refunded. The organizer fee and identity check are demo steps too.",
+        ],
+      },
+    ],
+  },
+
+  organizers: {
+    title: "For organizers",
+    lead: "How to run an event on ticketoff, from a draft to checking tickets at the door.",
+    sections: [
+      {
+        title: "1. Organizer profile",
+        paragraphs: [
+          "Sign up and open your “Profile”. Enter an organizer name, and “Organizer dashboard” appears in the menu.",
+        ],
+      },
+      {
+        title: "2. Event and tickets",
+        items: [
+          "Create a draft: title, category, description, venue, start and end. Times are in the venue's time zone.",
+          "Visibility: public (listed for everyone), unlisted (link only) or private. You can also set a capacity and a registration window.",
+          "Add ticket types: free or paid, price, quantity, max per order and sales period. A type can be hidden from buyers.",
+          "Publish the event; it needs at least one visible ticket type. To create a similar event quickly, use “Duplicate”.",
+        ],
+      },
+      {
+        title: "3. Paid sales",
+        paragraphs: [
+          "Free tickets are available as soon as you publish. To sell paid tickets, complete the checklist on the event page:",
+        ],
+        items: [
+          "add a paid ticket type;",
+          "verify your identity and payout account (demo);",
+          "accept the paid sales terms;",
+          "pay the 5,000 ₸ activation fee (simulated).",
+        ],
+      },
+      {
+        title: "4. Fees and revenue",
+        paragraphs: [
+          "The platform fee is 3% of paid orders. The event overview shows what was paid, the fee, refunds and the expected payout.",
+        ],
+      },
+      {
+        title: "5. Promo codes",
+        paragraphs: [
+          "Create a campaign with a percentage or fixed discount, dates and a usage limit. Every code has a Campaign QR link: the buyer scans it and the code is applied to the order automatically.",
+        ],
+      },
+      {
+        title: "6. Check-in and gate staff",
+        paragraphs: [
+          "Add gate staff by email. They see your event in the ticketoff scanner app and scan QR codes. “Sales and availability” shows how many guests have already checked in.",
+        ],
+      },
+      {
+        title: "7. Refunds, cancellation and buyer questions",
+        items: [
+          "You refund paid orders yourself, always in full.",
+          "When you cancel an event, all orders are cancelled and paid ones are refunded automatically.",
+          "Buyers' questions about your events arrive in your “Support inbox”.",
+        ],
+      },
+    ],
+  },
+
+  help: {
+    title: "Help",
+    lead: "Answers to common questions from buyers.",
+    faq: [
+      {
+        q: "How do I buy a ticket?",
+        a: [
+          "Log in or sign up, open an event, choose ticket types and quantities, and enter an attendee name for each ticket.",
+          "Free tickets are booked right away. Paid tickets create an order that you then pay for. Payment is simulated in this project, so no card details are needed.",
+        ],
+      },
+      {
+        q: "Where is my ticket?",
+        a: [
+          "In “My tickets”. Open the order to see each ticket's QR code and a “Download PDF” button. At the entrance, show the QR code on your screen or on paper.",
+        ],
+      },
+      {
+        q: "What if I don't pay in time?",
+        a: [
+          "After you place an order, the tickets are held for you for 15 minutes. If you don't pay within that time, the hold is released and the tickets go back on sale. You can place the order again.",
+        ],
+      },
+      {
+        q: "How do I use a promo code?",
+        a: [
+          "Enter it in the “Promo code” field when you place a paid order, and we'll check right away whether it's valid. If you opened a link from an organizer's QR code, the code is filled in for you.",
+          "A promo code may be limited by dates and number of uses. The final discount is calculated when the order is placed.",
+        ],
+      },
+      {
+        q: "Can I buy tickets for other people?",
+        a: [
+          "Yes. One order can include several tickets, each with its own attendee name printed on it. The organizer sets the maximum number of tickets per order.",
+        ],
+      },
+      {
+        q: "How do I return a ticket?",
+        a: [
+          "You can cancel a free registration yourself on the order page before the event starts. You can also cancel an unpaid order.",
+          "Paid orders are refunded by the organizer: message them with the “Help” button on the order page. See the “Refund policy” for details.",
+        ],
+      },
+      {
+        q: "How do I contact support?",
+        a: [
+          "Click “Help” on an event, order or ticket page, and the event organizer gets your support case. Replies appear in “Support”, together with the whole conversation and the case status.",
+        ],
+      },
+      {
+        q: "What does the gate staff do?",
+        a: [
+          "Gate staff scan your ticket's QR code with the scanner app. A ticket works once: after check-in it is marked as used. Cancelled or refunded tickets won't get in.",
+        ],
+      },
+    ],
+    contact: {
+      title: "Didn't find an answer?",
+      paragraphs: [
+        "Log in and open “Support”, or click “Help” next to the event, order or ticket in question.",
+      ],
+    },
+  },
+
+  refund: {
+    title: "Refund policy",
+    lead:
+      "General refund rules on ticketoff. Every paid event also has the organizer's own terms, shown on the event page before payment.",
+    sections: [
+      {
+        title: "Free registration",
+        paragraphs: [
+          "You can cancel a registration yourself on the order page before the event starts, as long as the ticket hasn't been used. The tickets become invalid and go back on sale.",
+        ],
+      },
+      {
+        title: "Unpaid order",
+        paragraphs: [
+          "You can cancel an order before paying. If you don't pay within 15 minutes, the hold is released automatically and the tickets go back on sale.",
+        ],
+      },
+      {
+        title: "Paid order",
+        items: [
+          "Buyers can't cancel a paid order themselves: the event organizer issues the refund.",
+          "Message the organizer with the “Help” button on the order page.",
+          "The order is refunded in full and all its tickets become invalid. There are no partial refunds.",
+          "The organizer decides on refunds under their own terms, including after the event has started.",
+        ],
+      },
+      {
+        title: "Cancelled event",
+        paragraphs: [
+          "If the organizer cancels the event, all orders are cancelled and paid ones are refunded in full automatically.",
+        ],
+      },
+      {
+        title: "Money",
+        paragraphs: [
+          "This is a student project: payments and refunds are simulated, no real money is charged or credited. After a refund, the order's status becomes “Refunded”.",
+        ],
+      },
+    ],
+  },
+};
+
+export const STATIC_TEXTS: Record<Language, StaticTexts> = { ru, kk, en };

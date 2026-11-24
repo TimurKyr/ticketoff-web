@@ -5,7 +5,7 @@ import { Pager } from "@/components/ui/Pager";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useAuth } from "@/features/auth";
 import type { TimelineItemOut } from "@/lib/api/types";
-import { dayEndIso, dayStartIso, formatDateTime, formatKzt } from "@/lib/format";
+import { dayEndIso, dayStartIso, formatDateTime, formatKzt, formatPercent } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { pageCount } from "@/lib/pagination";
 
@@ -38,7 +38,7 @@ function Details({ details }: { details: Record<string, unknown> }) {
     if (key === "discount_value" && typeof value === "number") {
       // A campaign: "−10 %" or "−1 000 ₸".
       parts.push(
-        details.discount_type === "percent" ? `−${value}\u00a0%` : `−${formatKzt(value, lang)}`
+        details.discount_type === "percent" ? `−${formatPercent(value, lang)}` : `−${formatKzt(value, lang)}`
       );
     } else if (PLAIN_KEYS.includes(key) && typeof value !== "object") {
       parts.push(String(value));
@@ -75,7 +75,7 @@ function TimelineRow({ item, tz, viewerId }: { item: TimelineItemOut; tz: string
           {label ? t(label) : <span className="font-mono text-sm">{item.action_type}</span>}
           {item.entity_type === "order" && item.entity_id && (
             <span className="ml-2 text-sm text-gray-700">
-              № <span className="font-mono">{shortOrderId(item.entity_id)}</span>
+              {t("common.numberSign")}<span className="font-mono">{shortOrderId(item.entity_id)}</span>
             </span>
           )}
         </span>

@@ -1,5 +1,5 @@
 import { ErrorState, Loading } from "@/components/ui/States";
-import { formatKzt } from "@/lib/format";
+import { formatKzt, formatPercent } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { useOrganizerOverview } from "../api";
@@ -31,7 +31,7 @@ export function OverviewCards() {
         <StatCard label={t("orgEvent.analytics.sold")} value={totals.tickets_sold} hint={`${t("orgEvent.analytics.orders")}: ${totals.orders}`} />
         <StatCard label={t("orgEvent.money.gross")} value={formatKzt(totals.gross_kzt, lang)} />
         <StatCard label={t("orgEvent.money.discounts")} value={formatKzt(totals.discounts_kzt, lang)} />
-        <StatCard label={`${t("orgEvent.money.fees")} (${fee_percent}\u00a0%)`} value={formatKzt(totals.fees_kzt, lang)} />
+        <StatCard label={`${t("orgEvent.money.fees")} (${formatPercent(fee_percent, lang)})`} value={formatKzt(totals.fees_kzt, lang)} />
         <StatCard label={t("orgEvent.money.refunds")} value={formatKzt(totals.refunds_kzt, lang)} />
         <StatCard label={t("orgEvent.money.payout")} value={formatKzt(totals.estimated_payout_kzt, lang)} />
         <StatCard
