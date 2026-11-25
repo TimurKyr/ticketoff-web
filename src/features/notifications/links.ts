@@ -13,6 +13,8 @@ export const NOTIFICATION_LABELS: Record<NotificationType, MessageKey> = {
   payment_failed: "notif.type.payment_failed",
   support_status: "notif.type.support_status",
   password_reset: "notif.type.password_reset",
+  payout_status: "notif.type.payout_status",
+  support_assignment: "notif.type.support_assignment",
 };
 
 function str(payload: NotificationOut["payload"], key: string): string | null {
@@ -38,7 +40,8 @@ export function notificationLink(item: NotificationOut): string | null {
       return order ? `/orders/${order}` : null;
     }
     case "support_reply":
-    case "support_status": {
+    case "support_status":
+    case "support_assignment": {
       const caseId = str(payload, "case_id");
       return caseId ? `/support/cases/${caseId}` : null;
     }

@@ -298,6 +298,9 @@ export interface paths {
         /**
          * Cancel an event: its orders are cancelled and paid ones refunded
          * @description One transaction: free and pending orders cancelled, paid orders fully refunded.
+         *
+         *     The body is optional: {"reason": "..."} (up to 500 characters) is shown to buyers in the
+         *     cancellation email and kept in the audit row.
          */
         post: operations["cancel_event_events__event_id__cancel_post"];
         delete?: never;
@@ -1462,6 +1465,7 @@ export interface components {
         /**
          * AdminPaymentOut
          * @description event_id: the activation's event, or the event of a ticket payment's order.
+         *     event_title: that event's title (BE-37), null when there is no event.
          */
         AdminPaymentOut: {
             /**
@@ -1475,6 +1479,8 @@ export interface components {
             order_id: string | null;
             /** Event Id */
             event_id: string | null;
+            /** Event Title */
+            event_title?: string | null;
             /** Amount Kzt */
             amount_kzt: number;
             /** Is Simulated */
@@ -1501,6 +1507,8 @@ export interface components {
             order_id: string | null;
             /** Event Id */
             event_id: string | null;
+            /** Event Title */
+            event_title?: string | null;
             /** Amount Kzt */
             amount_kzt: number;
             status: components["schemas"]["RefundStatus"];
@@ -1943,6 +1951,17 @@ export interface components {
          * @enum {string}
          */
         EventBucket: "upcoming" | "active" | "completed" | "cancelled";
+        /**
+         * EventCancel
+         * @description Optional body of POST /events/{id}/cancel (BE-37): why the event is called off.
+         *
+         *     The reason goes into the event_cancelled email to buyers and into the audit row. Blank
+         *     text counts as no reason.
+         */
+        EventCancel: {
+            /** Reason */
+            reason?: string | null;
+        };
         /**
          * EventCounts
          * @description How many of my events fall in each dashboard bucket.
@@ -2387,7 +2406,7 @@ export interface components {
          *     (e.g. "kk") is a one-line migration.
          * @enum {string}
          */
-        Language: "ru" | "en";
+        Language: "ru" | "en" | "kk";
         /**
          * MeOut
          * @description `/auth/me`: the user plus the roles that come from other tables.
@@ -2513,7 +2532,7 @@ export interface components {
          * NotificationType
          * @enum {string}
          */
-        NotificationType: "order_confirmed" | "ticket_issued" | "event_updated" | "event_cancelled" | "refund_processed" | "support_reply" | "account_verification" | "payment_failed" | "support_status" | "password_reset";
+        NotificationType: "order_confirmed" | "ticket_issued" | "event_updated" | "event_cancelled" | "refund_processed" | "support_reply" | "account_verification" | "payment_failed" | "support_status" | "password_reset" | "payout_status" | "support_assignment";
         /** OfflinePackOut */
         OfflinePackOut: {
             /**
@@ -4070,7 +4089,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventCancel"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -4699,6 +4722,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description A business rule failed: {"detail": "...", "code": "..."}. Stable codes (BE-37): SALES_SUSPENDED (an admin stopped sales), NOT_ENOUGH_TICKETS (a ticket type has fewer left than asked), NOT_ENOUGH_CAPACITY (the event capacity is full). Other 409s have no code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4736,6 +4766,13 @@ export interface operations {
             };
             /** @description Email not confirmed: {"detail": "...", "code": "EMAIL_NOT_VERIFIED"}. A new link: POST /auth/verify-email/resend. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A business rule failed: {"detail": "...", "code": "..."}. Stable codes (BE-37): SALES_SUSPENDED (an admin stopped sales), NOT_ENOUGH_TICKETS (a ticket type has fewer left than asked), NOT_ENOUGH_CAPACITY (the event capacity is full). Other 409s have no code. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

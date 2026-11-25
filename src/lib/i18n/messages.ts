@@ -935,6 +935,8 @@ export const ru = {
   "auth.reset.done": "Пароль изменён. Войдите с новым паролем.",
   "auth.reset.invalid": "Ссылка недействительна или устарела.",
   "auth.reset.requestNew": "Запросить новое письмо",
+  "notif.type.payout_status": "Статус выплаты",
+  "notif.type.support_assignment": "Обращение назначено вам",
 } as const;
 
 
@@ -1858,6 +1860,8 @@ export const kk: Messages = {
   "auth.reset.done": "Құпиясөз өзгертілді. Жаңа құпиясөзбен кіріңіз.",
   "auth.reset.invalid": "Сілтеме жарамсыз немесе ескірген.",
   "auth.reset.requestNew": "Жаңа хат сұрау",
+  "notif.type.payout_status": "Аударым мәртебесі өзгерді",
+  "notif.type.support_assignment": "Өтініш сізге тағайындалды",
 };
 
 // English (FE-23): complete, the demo at the defence runs in it. Every ru key must be here,
@@ -2788,6 +2792,8 @@ export const en: Record<MessageKey, string> = {
   "support.category.seating": "Seating",
   "support.category.technical": "Technical problem",
   "support.kind.report": "Report",
+  "notif.type.payout_status": "Payout status",
+  "notif.type.support_assignment": "Support case assigned",
 };
 
 // Key order is the order of the switcher in the header and footer: Қаз · Рус · Eng.
