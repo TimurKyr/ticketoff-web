@@ -4,12 +4,12 @@ import { useSearchParams } from "react-router-dom";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
-import { ActivationFeeTab } from "../components/ActivationFeeTab";
 import { ActivationsTab } from "../components/ActivationsTab";
 import { FailedPaymentsTab } from "../components/FailedPaymentsTab";
 import { RefundsTab } from "../components/RefundsTab";
 import { ReportsTab } from "../components/ReportsTab";
 import { SearchTab } from "../components/SearchTab";
+import { SettingsTab } from "../components/SettingsTab";
 
 const TABS = [
   { id: "search", label: "admin.tab.search" },
@@ -17,7 +17,7 @@ const TABS = [
   { id: "refunds", label: "admin.tab.refunds" },
   { id: "reports", label: "admin.tab.reports" },
   { id: "activations", label: "admin.tab.activations" },
-  { id: "activationFee", label: "admin.tab.activationFee" },
+  { id: "settings", label: "admin.tab.settings" },
 ] as const satisfies readonly { id: string; label: MessageKey }[];
 
 type TabId = (typeof TABS)[number]["id"];
@@ -71,7 +71,7 @@ export function AdminDashboardPage() {
         {active === "refunds" && <RefundsTab />}
         {active === "reports" && <ReportsTab />}
         {active === "activations" && <ActivationsTab />}
-        {active === "activationFee" && <ActivationFeeTab />}
+        {active === "settings" && <SettingsTab />}
       </div>
     </div>
   );

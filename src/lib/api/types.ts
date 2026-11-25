@@ -75,6 +75,9 @@ export type AdminRefundOut = Schemas["AdminRefundOut"];
 export type RefundPage = Schemas["RefundPage"];
 export type RefundStatus = Schemas["RefundStatus"];
 export type PlatformSettingsOut = Schemas["PlatformSettingsOut"];
+export type PlatformSettingsUpdate = Schemas["PlatformSettingsUpdate"];
+export type PromoActivityOut = Schemas["PromoActivityOut"];
+export type PromoActivityPage = Schemas["PromoActivityPage"];
 
 // FE-7: organizer analytics, event orders, staff, timeline, payment summary
 export type OverviewOut = Schemas["OverviewOut"];
