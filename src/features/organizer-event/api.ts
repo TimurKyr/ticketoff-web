@@ -16,6 +16,8 @@ import type {
   TimelinePage,
 } from "@/lib/api/types";
 
+import { analyticsQuery, NO_FILTERS, type AnalyticsFilters } from "./analytics/filters";
+
 export const ORDERS_PAGE_SIZE = 20;
 export const TIMELINE_PAGE_SIZE = 20;
 export const HISTORY_PAGE_SIZE = 10;
@@ -106,10 +108,13 @@ export function usePaymentSummary(eventId: string) {
 
 // --- «Аналитика» --------------------------------------------------------------------------
 
-export function useEventAnalytics(eventId: string) {
+/** Narrowed on the server by period and ticket type (R-118); the last page stays while loading. */
+export function useEventAnalytics(eventId: string, filters: AnalyticsFilters = NO_FILTERS) {
   return useQuery({
-    queryKey: eventKeys.analytics(eventId),
-    queryFn: () => apiClient.get<EventAnalyticsOut>(`/organizer/analytics/events/${eventId}`),
+    queryKey: [...eventKeys.analytics(eventId), filters] as const,
+    queryFn: () =>
+      apiClient.get<EventAnalyticsOut>(`/organizer/analytics/events/${eventId}${analyticsQuery(filters)}`),
+    placeholderData: (previous) => previous,
   });
 }
 
@@ -183,10 +188,13 @@ export function useRemoveStaff(eventId: string) {
 
 // --- dashboard: overview and event history ------------------------------------------------
 
-export function useOrganizerOverview() {
+/** A period narrows `totals` only (R-118); event counts are never narrowed. */
+export function useOrganizerOverview(period: AnalyticsFilters = NO_FILTERS) {
+  const filters = { from_date: period.from_date, to_date: period.to_date };
   return useQuery({
-    queryKey: [...analyticsKey, "overview"] as const,
-    queryFn: () => apiClient.get<OverviewOut>("/organizer/analytics/overview"),
+    queryKey: [...analyticsKey, "overview", filters] as const,
+    queryFn: () => apiClient.get<OverviewOut>(`/organizer/analytics/overview${analyticsQuery(filters)}`),
+    placeholderData: (previous) => previous,
   });
 }
 

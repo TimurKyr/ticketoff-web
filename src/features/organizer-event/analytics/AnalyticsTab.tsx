@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { FormField, SelectField } from "@/components/ui/FormField";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
@@ -10,6 +10,7 @@ import { useCheckinStats, useEventAnalytics } from "../api";
 import { Percent, SimulationBadge, StatCard, StatGrid } from "../components/Stats";
 import { DailySalesChart } from "./DailySalesChart";
 import { fillDays } from "./days";
+import { isReversed, NO_FILTERS, type AnalyticsFilters } from "./filters";
 
 /** A table that scrolls sideways inside its own box on a narrow screen. */
 function ScrollTable({ children, caption }: { children: ReactNode; caption: string }) {
@@ -92,35 +93,72 @@ function CampaignsTable({ campaigns }: { campaigns: CampaignStatsOut[] }) {
 
 /**
  * «Аналитика»: every number comes from GET /organizer/analytics/events/{id} (sales, money,
- * types, campaigns, days) and GET /checkin/events/{id}/stats (attendance), as given.
- * The date and type filters only narrow what is shown: the API has no such parameters.
+ * types, campaigns, days) and GET /checkin/events/{id}/stats (attendance), as given. The
+ * period and ticket type are sent to the API (R-118), which narrows the figures; capacity,
+ * remaining and percent sold stay all-time and are shown as the API gives them.
  */
 export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: string }) {
   const { t, lang } = useI18n();
   // Nobody can be a no-show before the doors open (FE-22 #21).
   const started = !startAt || Date.parse(startAt) <= Date.now();
-  const analytics = useEventAnalytics(eventId);
+  const [form, setForm] = useState<AnalyticsFilters>(NO_FILTERS);
+  // What was sent: a reversed period is not (the API answers 422), the last good figures stay.
+  const [filters, setFilters] = useState<AnalyticsFilters>(NO_FILTERS);
+  const analytics = useEventAnalytics(eventId, filters);
   const stats = useCheckinStats(eventId);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [typeId, setTypeId] = useState("");
+  // The type select lists every type of the event, also while one is chosen (then the
+  // response has only that one).
+  const [typeOptions, setTypeOptions] = useState<{ id: string; name: string }[]>([]);
+  const unfiltered = !filters.ticket_type_id ? analytics.data : undefined;
+  useEffect(() => {
+    if (unfiltered && !analytics.isPlaceholderData) {
+      setTypeOptions(unfiltered.ticket_types.map((tt) => ({ id: tt.ticket_type_id, name: tt.name })));
+    }
+  }, [unfiltered, analytics.isPlaceholderData]);
 
-  const days = useMemo(() => {
-    const all = analytics.data?.daily_sales ?? [];
-    // "YYYY-MM-DD" strings compare as dates.
-    return fillDays(all.filter((d) => (!from || d.day >= from) && (!to || d.day <= to)));
-  }, [analytics.data, from, to]);
+  function change(patch: Partial<AnalyticsFilters>) {
+    const next = { ...form, ...patch };
+    setForm(next);
+    if (!isReversed(next)) setFilters(next);
+  }
 
   if (analytics.isPending) return <Loading />;
   if (analytics.isError) return <ErrorState error={analytics.error} onRetry={() => analytics.refetch()} />;
 
   const { event, ticket_types, campaigns, daily_sales, fee_percent } = analytics.data;
-  const types = typeId ? ticket_types.filter((tt) => tt.ticket_type_id === typeId) : ticket_types;
-  const firstDay = daily_sales[0]?.day ?? "";
-  const lastDay = daily_sales[daily_sales.length - 1]?.day ?? "";
+  const days = fillDays(daily_sales);
+  const filtered = Boolean(filters.from_date || filters.to_date || filters.ticket_type_id);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div
+      className={`flex flex-col gap-6 transition-opacity ${analytics.isPlaceholderData ? "opacity-60" : ""}`}
+      aria-busy={analytics.isPlaceholderData}
+    >
+      <section aria-labelledby="filters-title" className="flex flex-col gap-3 rounded-lg border border-gray-300 p-4">
+        <h2 id="filters-title" className="text-lg font-semibold">{t("orgEvent.analytics.filters")}</h2>
+        <div className="grid gap-3 sm:grid-cols-3 [&>*]:min-w-0">
+          <FormField label={t("orgEvent.analytics.from")} type="date" value={form.from_date} onChange={(e) => change({ from_date: e.target.value })} />
+          <FormField
+            label={t("orgEvent.analytics.to")}
+            type="date"
+            value={form.to_date}
+            onChange={(e) => change({ to_date: e.target.value })}
+            error={isReversed(form) ? t("admin.period.invalid") : undefined}
+          />
+          {typeOptions.length > 1 && (
+            <SelectField label={t("orgEvent.analytics.typeFilter")} value={form.ticket_type_id ?? ""} onChange={(e) => change({ ticket_type_id: e.target.value })}>
+              <option value="">{t("orgEvent.analytics.allTypes")}</option>
+              {typeOptions.map((tt) => (
+                <option key={tt.id} value={tt.id}>
+                  {tt.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
+        </div>
+        <p className="text-xs text-gray-600">{t("orgEvent.analytics.filtersHint")}</p>
+      </section>
+
       <section aria-labelledby="sales-title" className="flex flex-col gap-3">
         <h2 id="sales-title" className="text-lg font-semibold">{t("orgEvent.analytics.sales")}</h2>
         <StatGrid>
@@ -151,6 +189,7 @@ export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: 
 
       <section aria-labelledby="attendance-title" className="flex flex-col gap-3">
         <h2 id="attendance-title" className="text-lg font-semibold">{t("orgEvent.analytics.attendance")}</h2>
+        {filtered && <p className="text-xs text-gray-600">{t("orgEvent.analytics.attendanceAllTime")}</p>}
         {stats.isPending ? (
           <Loading />
         ) : stats.isError ? (
@@ -171,20 +210,12 @@ export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: 
 
       <section aria-labelledby="dynamics-title" className="flex flex-col gap-3">
         <h2 id="dynamics-title" className="text-lg font-semibold">{t("orgEvent.analytics.dynamics")}</h2>
-        {daily_sales.length === 0 ? (
-          <EmptyState>{t("orgEvent.analytics.noSales")}</EmptyState>
+        {days.length === 0 ? (
+          <EmptyState>{t(filtered ? "orgEvent.analytics.noSalesInRange" : "orgEvent.analytics.noSales")}</EmptyState>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
-              <FormField label={t("orgEvent.analytics.from")} type="date" min={firstDay} max={lastDay} value={from} onChange={(e) => setFrom(e.target.value)} />
-              <FormField label={t("orgEvent.analytics.to")} type="date" min={firstDay} max={lastDay} value={to} onChange={(e) => setTo(e.target.value)} />
-            </div>
             <p className="text-xs text-gray-600">{t("orgEvent.analytics.daysHint").replace("$1", analytics.data.timezone)}</p>
-            {days.length === 0 ? (
-              <EmptyState>{t("orgEvent.analytics.noSalesInRange")}</EmptyState>
-            ) : (
-              <DailySalesChart days={days} />
-            )}
+            <DailySalesChart days={days} />
           </>
         )}
       </section>
@@ -195,19 +226,7 @@ export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: 
           <EmptyState>{t("orgEvent.analytics.noTypes")}</EmptyState>
         ) : (
           <>
-            {ticket_types.length > 1 && (
-              <div className="sm:w-72">
-                <SelectField label={t("orgEvent.analytics.typeFilter")} value={typeId} onChange={(e) => setTypeId(e.target.value)}>
-                  <option value="">{t("orgEvent.analytics.allTypes")}</option>
-                  {ticket_types.map((tt) => (
-                    <option key={tt.ticket_type_id} value={tt.ticket_type_id}>
-                      {tt.name}
-                    </option>
-                  ))}
-                </SelectField>
-              </div>
-            )}
-            <TicketTypesTable types={types} />
+            <TicketTypesTable types={ticket_types} />
             <p className="text-xs text-gray-600">{t("orgEvent.analytics.typeSalesHint")}</p>
           </>
         )}
