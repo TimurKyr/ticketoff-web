@@ -23,6 +23,8 @@ import {
   RequireAuth,
   RequireRole,
   VerifyEmailPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
 } from "@/features/auth";
 
 export const router = createBrowserRouter([
@@ -36,6 +38,8 @@ export const router = createBrowserRouter([
       { path: "login", element: <GuestOnly><LoginPage /></GuestOnly> },
       { path: "register", element: <GuestOnly redirectTo="/account"><RegisterPage /></GuestOnly> },
       { path: "verify-email", element: <VerifyEmailPage /> },
+        { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "reset-password", element: <ResetPasswordPage /> },
       { path: "account", element: <RequireAuth><AccountPage /></RequireAuth> },
       { path: "tickets", element: <RequireAuth><MyTicketsPage /></RequireAuth> },
       { path: "orders/:orderId", element: <RequireAuth><OrderPage /></RequireAuth> },

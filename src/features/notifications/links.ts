@@ -12,6 +12,7 @@ export const NOTIFICATION_LABELS: Record<NotificationType, MessageKey> = {
   account_verification: "notif.type.account_verification",
   payment_failed: "notif.type.payment_failed",
   support_status: "notif.type.support_status",
+  password_reset: "notif.type.password_reset",
 };
 
 function str(payload: NotificationOut["payload"], key: string): string | null {

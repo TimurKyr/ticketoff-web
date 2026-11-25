@@ -11,6 +11,9 @@ export const CATEGORY_LABELS: Record<SupportCategory, MessageKey> = {
   event: "support.category.event",
   account: "support.category.account",
   other: "support.category.other",
+  seating: "support.category.seating",
+  check_in: "support.category.check_in",
+  technical: "support.category.technical",
 };
 
 export const STATUS_LABELS: Record<SupportStatus, MessageKey> = {
@@ -23,6 +26,7 @@ export const STATUS_LABELS: Record<SupportStatus, MessageKey> = {
 export const KIND_LABELS: Record<SupportKind, MessageKey> = {
   attendee: "support.kind.attendee",
   organizer: "support.kind.organizer",
+  report: "support.kind.report",
 };
 
 /**

@@ -2,6 +2,8 @@ export * from "./pages/LoginPage";
 export * from "./pages/RegisterPage";
 export * from "./pages/AccountPage";
 export * from "./pages/VerifyEmailPage";
+export * from "./pages/ForgotPasswordPage";
+export * from "./pages/ResetPasswordPage";
 export { AuthProvider } from "./components/AuthProvider";
 export { RequireAuth, RequireRole, GuestOnly } from "./components/guards";
 export { useAuth } from "./hooks/useAuth";
