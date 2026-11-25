@@ -12,12 +12,14 @@ import { RefundsTab } from "../components/RefundsTab";
 import { ReportsTab } from "../components/ReportsTab";
 import { SearchTab } from "../components/SearchTab";
 import { SettingsTab } from "../components/SettingsTab";
+import { SupportInboxTab } from "../components/SupportInboxTab";
 
 const TABS = [
   { id: "search", label: "admin.tab.search" },
   { id: "failedPayments", label: "admin.tab.failedPayments" },
   { id: "refunds", label: "admin.tab.refunds" },
   { id: "reports", label: "admin.tab.reports" },
+  { id: "inbox", label: "admin.tab.inbox" },
   { id: "activations", label: "admin.tab.activations" },
   { id: "exports", label: "admin.tab.exports" },
   { id: "promo", label: "admin.tab.promo" },
@@ -74,6 +76,7 @@ export function AdminDashboardPage() {
         {active === "failedPayments" && <FailedPaymentsTab />}
         {active === "refunds" && <RefundsTab />}
         {active === "reports" && <ReportsTab />}
+        {active === "inbox" && <SupportInboxTab />}
         {active === "activations" && <ActivationsTab />}
         {active === "exports" && <ExportsTab />}
         {active === "promo" && <PromoActivityTab />}
