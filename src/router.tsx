@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
       { path: "login", element: <GuestOnly><LoginPage /></GuestOnly> },
       { path: "register", element: <GuestOnly redirectTo="/account"><RegisterPage /></GuestOnly> },
       { path: "verify-email", element: <VerifyEmailPage /> },
-        { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
       { path: "reset-password", element: <ResetPasswordPage /> },
       { path: "account", element: <RequireAuth><AccountPage /></RequireAuth> },
       { path: "tickets", element: <RequireAuth><MyTicketsPage /></RequireAuth> },

@@ -2771,6 +2771,23 @@ export const en: Record<MessageKey, string> = {
   "err.code.capacityBelowSold": "Capacity is less than the number of tickets already sold.",
   "org.cancelDialog.reasonCount": "$1 of $2",
   "org.cancelDialog.reasonTooLong": "At most $1 characters.",
+  "auth.forgot.link": "Forgot your password?",
+  "auth.forgot.sent": "If this account exists, we’ve sent an email with a link to reset your password.",
+  "auth.forgot.submit": "Send link",
+  "auth.forgot.text": "Enter your account email and we’ll send you a link to reset your password.",
+  "auth.forgot.title": "Reset your password",
+  "auth.forgot.toLogin": "Back to sign in",
+  "auth.reset.done": "Password changed. Sign in with your new password.",
+  "auth.reset.invalid": "This link is invalid or has expired.",
+  "auth.reset.password": "New password",
+  "auth.reset.requestNew": "Request a new email",
+  "auth.reset.submit": "Save password",
+  "auth.reset.title": "New password",
+  "notif.type.password_reset": "Password reset",
+  "support.category.check_in": "Event entry",
+  "support.category.seating": "Seating",
+  "support.category.technical": "Technical problem",
+  "support.kind.report": "Report",
 };
 
 // Key order is the order of the switcher in the header and footer: Қаз · Рус · Eng.
