@@ -4,20 +4,26 @@ import { useSearchParams } from "react-router-dom";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
-import { ActivationFeeTab } from "../components/ActivationFeeTab";
 import { ActivationsTab } from "../components/ActivationsTab";
+import { ExportsTab } from "../components/ExportsTab";
 import { FailedPaymentsTab } from "../components/FailedPaymentsTab";
+import { PromoActivityTab } from "../components/PromoActivityTab";
 import { RefundsTab } from "../components/RefundsTab";
 import { ReportsTab } from "../components/ReportsTab";
 import { SearchTab } from "../components/SearchTab";
+import { SettingsTab } from "../components/SettingsTab";
+import { SupportInboxTab } from "../components/SupportInboxTab";
 
 const TABS = [
   { id: "search", label: "admin.tab.search" },
   { id: "failedPayments", label: "admin.tab.failedPayments" },
   { id: "refunds", label: "admin.tab.refunds" },
   { id: "reports", label: "admin.tab.reports" },
+  { id: "inbox", label: "admin.tab.inbox" },
   { id: "activations", label: "admin.tab.activations" },
-  { id: "activationFee", label: "admin.tab.activationFee" },
+  { id: "exports", label: "admin.tab.exports" },
+  { id: "promo", label: "admin.tab.promo" },
+  { id: "settings", label: "admin.tab.settings" },
 ] as const satisfies readonly { id: string; label: MessageKey }[];
 
 type TabId = (typeof TABS)[number]["id"];
@@ -70,8 +76,11 @@ export function AdminDashboardPage() {
         {active === "failedPayments" && <FailedPaymentsTab />}
         {active === "refunds" && <RefundsTab />}
         {active === "reports" && <ReportsTab />}
+        {active === "inbox" && <SupportInboxTab />}
         {active === "activations" && <ActivationsTab />}
-        {active === "activationFee" && <ActivationFeeTab />}
+        {active === "exports" && <ExportsTab />}
+        {active === "promo" && <PromoActivityTab />}
+        {active === "settings" && <SettingsTab />}
       </div>
     </div>
   );

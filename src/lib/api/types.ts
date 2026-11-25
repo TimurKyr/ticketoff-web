@@ -12,7 +12,11 @@ export type OrganizerProfileIn = Schemas["OrganizerProfileIn"];
 export type OrganizerProfileOut = Schemas["OrganizerProfileOut"];
 export type LoginForm = Schemas["Body_login_auth_login_post"];
 
-export type EventOut = Schemas["EventOut"];
+/**
+ * `image_url` (R-12): absolute URL of the cover on the API, null without one. Local until
+ * schema.d.ts is regenerated from an API that has it; then the intersection is a no-op.
+ */
+export type EventOut = Schemas["EventOut"] & { image_url?: string | null };
 export type EventPage = Schemas["EventPage"];
 export type VenueOut = Schemas["VenueOut"];
 export type Availability = Schemas["Availability"];
@@ -75,6 +79,9 @@ export type AdminRefundOut = Schemas["AdminRefundOut"];
 export type RefundPage = Schemas["RefundPage"];
 export type RefundStatus = Schemas["RefundStatus"];
 export type PlatformSettingsOut = Schemas["PlatformSettingsOut"];
+export type PlatformSettingsUpdate = Schemas["PlatformSettingsUpdate"];
+export type PromoActivityOut = Schemas["PromoActivityOut"];
+export type PromoActivityPage = Schemas["PromoActivityPage"];
 
 // FE-7: organizer analytics, event orders, staff, timeline, payment summary
 export type OverviewOut = Schemas["OverviewOut"];

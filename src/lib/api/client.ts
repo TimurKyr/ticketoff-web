@@ -138,6 +138,9 @@ export const apiClient = {
   /** multipart/form-data: text fields and files in one request. */
   postFormData: <TResponse>(path: string, formData: FormData, options?: RequestOptions) =>
     request<TResponse>(path, { ...options, method: "POST", formData }),
+  /** multipart/form-data with PUT, e.g. the event cover (R-12). */
+  putFormData: <TResponse>(path: string, formData: FormData, options?: RequestOptions) =>
+    request<TResponse>(path, { ...options, method: "PUT", formData }),
   postForm: <TResponse>(
     path: string,
     form: Record<string, string>,

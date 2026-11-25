@@ -16,6 +16,7 @@ import { pageCount } from "@/lib/pagination";
 import { useSuspendEvent } from "../hooks/useSuspension";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { EventCell } from "./EventCell";
+import { HistoryLink } from "./HistoryLink";
 
 /** Admin tab «Жалобы» (FE-15): event reports, oldest first, with a quick "suspend the event". */
 export function ReportsTab() {
@@ -111,6 +112,7 @@ export function ReportsTab() {
                   >
                     {t("support.form.open")}
                   </Link>
+                  {item.event_id && <HistoryLink eventId={item.event_id} title={item.event_title} />}
                   {item.event_id &&
                     (suspended.has(item.event_id) ? (
                       <span className="text-sm text-gray-700">{t("admin.reports.suspended")}</span>

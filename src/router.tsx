@@ -12,7 +12,7 @@ import {
   OrganizerDashboardPage,
 } from "@/features/organizer";
 import { AttendeeDashboardPage } from "@/features/attendee";
-import { AdminDashboardPage } from "@/features/admin";
+import { AdminDashboardPage, AdminEventHistoryPage } from "@/features/admin";
 import { CasePage, InboxPage, MyCasesPage } from "@/features/support";
 import { AboutPage, HelpPage, OrganizersPage, RefundPolicyPage } from "@/features/static";
 import {
@@ -69,6 +69,10 @@ export const router = createBrowserRouter([
       {
         path: "admin",
         element: <RequireRole role="platform_admin"><AdminDashboardPage /></RequireRole>,
+      },
+      {
+        path: "admin/events/:eventId/history",
+        element: <RequireRole role="platform_admin"><AdminEventHistoryPage /></RequireRole>,
       },
       { path: "about", element: <AboutPage /> },
       { path: "organizers", element: <OrganizersPage /> },

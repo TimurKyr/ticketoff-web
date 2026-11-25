@@ -1,10 +1,10 @@
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import { useI18n } from "@/lib/i18n";
 
 import { categoryLabelKey, toCategory, type Category } from "../categories";
 
-// Generated cover (events have no images): the category's tone (--cover-<cat>-bg/fg in
+// The event's own image (R-12) when it has one and it loads; otherwise a generated cover: the category's tone (--cover-<cat>-bg/fg in
 // index.css, contrast ≥ 7:1 even over the pattern), a thin pattern of the category and the
 // title. The pattern's angle and offset come from a hash of the event id, so covers of one
 // category differ but stay the same between reloads. Decorative: the card repeats the text.
@@ -73,13 +73,33 @@ const PATTERNS: Record<Category, { width: number; height: number; shape: ReactNo
 };
 
 interface EventCoverProps {
-  event: { id: string; title: string; category?: string | null };
+  event: { id: string; title: string; category?: string | null; image_url?: string | null };
   /** "card": 16:9 on top of a card; "banner": wide strip on the event page */
   variant?: "card" | "banner";
   className?: string;
 }
 
 export function EventCover({ event, variant = "card", className = "" }: EventCoverProps) {
+  // A broken image (e.g. a private event's URL without a token) falls back to the generated one.
+  const [failed, setFailed] = useState<string | null>(null);
+  if (event.image_url && failed !== event.image_url) {
+    return (
+      <img
+        src={event.image_url}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        onError={() => setFailed(event.image_url ?? null)}
+        className={`w-full rounded-xl object-cover ${
+          variant === "card" ? "aspect-video" : "aspect-[3/1] sm:aspect-[4/1]"
+        } ${className}`}
+      />
+    );
+  }
+  return <GeneratedCover event={event} variant={variant} className={className} />;
+}
+
+function GeneratedCover({ event, variant = "card", className = "" }: EventCoverProps) {
   const { t } = useI18n();
   // useId gives ":r1:"; colons are awkward inside url(#…)
   const patternId = `cover${useId().replace(/:/g, "")}`;

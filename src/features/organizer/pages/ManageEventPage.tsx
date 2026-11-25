@@ -21,6 +21,7 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { useEventAction, useMyEvent, useTicketTypes, useUpdateEvent, type EventAction } from "../api";
 import { ActivationSection } from "../components/ActivationSection";
 import { CancelEventDialog } from "../components/CancelEventDialog";
+import { CoverSection } from "../cover/CoverSection";
 import { EventForm } from "../components/EventForm";
 import { InventorySection } from "../components/InventorySection";
 import { StatusBadge } from "../components/StatusBadge";
@@ -229,6 +230,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
                 {t("preview.open")}
               </Link>
             </div>
+            <CoverSection event={data} editable={open} />
             <TicketTypesSection eventId={data.id} tz={tz} editable={open} />
             {data.status !== "draft" && <InventorySection eventId={data.id} />}
             {hasPaid && <ActivationSection eventId={data.id} editable={open} />}

@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "@/lib/api/client";
 import type {
   PaymentPage,
   PaymentStatus,
   PlatformSettingsOut,
+  PlatformSettingsUpdate,
+  PromoActivityPage,
   RefundPage,
   SearchPage,
   SearchType,
@@ -51,5 +53,27 @@ export function useAdminSettings() {
   return useQuery({
     queryKey: ["admin", "settings"],
     queryFn: () => apiClient.get<PlatformSettingsOut>("/admin/settings"),
+  });
+}
+
+/** PATCH /admin/settings (R-127): only the fields sent change. */
+export function useUpdateSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: PlatformSettingsUpdate) =>
+      apiClient.patch<PlatformSettingsOut>("/admin/settings", patch),
+    onSuccess: (data) => queryClient.setQueryData(["admin", "settings"], data),
+  });
+}
+
+/** Promo code activity across the platform (R-128), biggest discount first. */
+export function usePromoActivity(fromDate: string, toDate: string, limit: number, offset: number) {
+  return useQuery({
+    queryKey: ["admin", "promo-activity", fromDate, toDate, limit, offset],
+    queryFn: () =>
+      apiClient.get<PromoActivityPage>(
+        `/admin/promo-activity?${qs({ from_date: fromDate, to_date: toDate, limit, offset })}`
+      ),
+    placeholderData: (previous) => previous,
   });
 }
