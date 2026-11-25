@@ -64,9 +64,10 @@ export function SearchTab() {
   };
 
   // Events: their status; users: their role («Покупатель», not "attendee", FE-22 #16).
+  // Orders (R-122): the order status.
+  const STATUS_PREFIX = { event: "status", user: "admin.role", order: "order.status" } as const;
   const statusLabel = (item: SearchItemOut) =>
-    t((item.type === "event" ? `status.${item.status}` : `admin.role.${item.status}`) as MessageKey) ||
-    item.status;
+    t(`${STATUS_PREFIX[item.type]}.${item.status}` as MessageKey) || item.status;
 
   return (
     <div>
@@ -83,6 +84,7 @@ export function SearchTab() {
           >
             <option value="user">{t("admin.search.type.user")}</option>
             <option value="event">{t("admin.search.type.event")}</option>
+            <option value="order">{t("admin.search.type.order")}</option>
           </select>
         </label>
         <label className="min-w-[16rem] flex-1 text-sm">
@@ -90,7 +92,7 @@ export function SearchTab() {
           <input
             type="search"
             className="w-full rounded border px-2 py-1.5"
-            placeholder={t("admin.search.placeholder")}
+            placeholder={t(type === "order" ? "admin.search.placeholder.order" : "admin.search.placeholder")}
             value={text}
             onChange={(e) => {
               setText(e.target.value);
@@ -127,23 +129,34 @@ export function SearchTab() {
                   <tbody>
                     {data.items.map((item) => (
                       <tr key={`${item.type}-${item.id}`} className="border-b">
-                        <td className="py-2 pr-4">{item.label}</td>
                         <td className="py-2 pr-4">
-                          {statusLabel(item)}
-                          {item.suspended && (
-                            <span className="ml-2 inline-block rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
-                              {t("admin.suspended")}
+                          {item.label}
+                          {item.type === "order" && (
+                            // The full id, selectable: support and refunds look an order up by it.
+                            <span className="block select-all font-mono text-xs text-gray-600">
+                              {t("common.numberSign")}
+                              {item.id}
                             </span>
                           )}
                         </td>
                         <td className="py-2 pr-4">
-                          <button
-                            type="button"
-                            className="rounded border px-3 py-1"
-                            onClick={() => openDialog(item)}
-                          >
-                            {item.suspended ? t("admin.resume") : t("admin.suspend")}
-                          </button>
+                          {statusLabel(item)}
+                          {item.suspended && (
+                            <span className="ml-2 inline-block rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
+                              {t(item.type === "order" ? "admin.search.orderSuspended" : "admin.suspended")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2 pr-4">
+                          {item.type !== "order" && (
+                            <button
+                              type="button"
+                              className="rounded border px-3 py-1"
+                              onClick={() => openDialog(item)}
+                            >
+                              {item.suspended ? t("admin.resume") : t("admin.suspend")}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
