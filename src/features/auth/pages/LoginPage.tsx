@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 
 interface LoginState {
   expired?: boolean;
+  passwordReset?: boolean;
 }
 
 export function LoginPage() {
@@ -46,6 +47,7 @@ export function LoginPage() {
     <section className="mx-auto w-full max-w-sm">
       <h1 className="mb-4 text-2xl font-semibold">{t("auth.login.title")}</h1>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        {state.passwordReset && !error && <Alert>{t("auth.reset.done")}</Alert>}
         {state.expired && !error && <Alert>{t("auth.sessionExpired")}</Alert>}
         {error && <Alert tone="error">{error}</Alert>}
         <FormField
@@ -64,6 +66,10 @@ export function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <Link to="/forgot-password" className="text-sm underline">
+          {t("auth.forgot.link")}
+        </Link>
+        
         <Button type="submit" disabled={submitting}>
           {submitting ? t("common.loading") : t("auth.login.submit")}
         </Button>

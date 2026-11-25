@@ -58,6 +58,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Email me a password reset link
+         * @description No login needed. Always 204, whether or not the address has an account.
+         */
+        post: operations["forgot_password_auth_forgot_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set a new password from the emailed link
+         * @description No login needed: the link's token says who it is. A link works once.
+         */
+        post: operations["reset_password_auth_reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -443,6 +483,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/checkin/events/{event_id}/offline-pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download tickets for offline scanning
+         * @description For the event owner or assigned staff (404 otherwise): every ticket of the event with its status, attendee name and ticket type, plus `generated_at` (server time). Store it on the device and scan against it while there is no network; send the scans later with `POST /checkin/sync`. Download it again shortly before the doors open.
+         *
+         *     Getting `ticket_id` from a QR offline: a ticket QR is `tk1.<ticket_uuid>.<signature>`, so `ticket_id` is the part between the first and the last dot. A QR that starts with `pc1.` or contains `promo=pc1.` is a campaign QR, not a ticket: reject it offline too. The signing secret is never sent to devices, so offline the check is: `ticket_id` is in the pack, its status is `valid`, and this device has not scanned it yet.
+         */
+        get: operations["offline_pack_checkin_events__event_id__offline_pack_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/checkin/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload check-ins made offline
+         * @description Sends the scans a device made offline. Each item is checked in exactly like `/scan` (one transaction per item), with `scanned_at` as the check-in time (never later than now). One result per item, in the sent order: `checked_in`; `already_used` with `checked_in_at`, `checked_in_by` and `checked_in_device_id` of the check-in that won (another device or gate); `cancelled` / `refunded` if the ticket was cancelled after the pack was downloaded; `invalid`, `wrong_event`, `campaign_qr_rejected`, `event_cancelled`. Always 200 for an event the caller may scan (404 otherwise). Resending is safe: an item already applied comes back as `already_used` with this device's own `checked_in_device_id`.
+         *
+         *     Getting `ticket_id` from a QR offline: a ticket QR is `tk1.<ticket_uuid>.<signature>`, so `ticket_id` is the part between the first and the last dot. A QR that starts with `pc1.` or contains `promo=pc1.` is a campaign QR, not a ticket: reject it offline too. The signing secret is never sent to devices, so offline the check is: `ticket_id` is in the pack, its status is `valid`, and this device has not scanned it yet.
+         */
+        post: operations["sync_checkin_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/ticket-types": {
         parameters: {
             query?: never;
@@ -788,7 +872,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Audit log of my event, oldest first */
+        /** Audit log of my event (any event for a platform admin), oldest first */
         get: operations["get_timeline_events__event_id__timeline_get"];
         put?: never;
         post?: never;
@@ -987,7 +1071,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Find users or events */
+        /** Find users, events or orders */
         get: operations["search_admin_search_get"];
         put?: never;
         post?: never;
@@ -1055,8 +1139,55 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Platform fees (read-only) */
+        /** Platform fees */
         get: operations["read_settings_admin_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change platform fees
+         * @description Applies from the next request on: new activations pay the new fee (paid ones keep
+         *     theirs), new checkouts hold for the new time. Audited as admin.settings_updated.
+         */
+        patch: operations["update_settings_admin_settings_patch"];
+        trace?: never;
+    };
+    "/admin/reports/{kind}.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download payments, refunds or orders as CSV
+         * @description One row per record created in the period (oldest first); no dates = everything.
+         *     Timestamps are UTC. Every row has is_simulated: all money on the platform is simulated.
+         */
+        get: operations["download_report_admin_reports__kind__csv_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/promo-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Promo code use per campaign, biggest discount first
+         * @description Campaigns with at least one redemption in the period, counted on paid or free
+         *     orders only (as in the organizer's analytics).
+         */
+        get: operations["promo_activity_admin_promo_activity_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1163,7 +1294,7 @@ export interface paths {
         /** Cases I opened, newest first */
         get: operations["list_my_cases_support_cases_get"];
         put?: never;
-        /** Open a support case (the first message is the case text) */
+        /** Open a support case or report an event (the first message is the text) */
         post: operations["open_case_support_cases_post"];
         delete?: never;
         options?: never;
@@ -1178,7 +1309,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cases I handle, oldest first: my events' attendee cases, or all cases for an admin */
+        /** Cases I handle, oldest first: my events' attendee cases, or all cases (and reports, kind=report) for an admin */
         get: operations["list_inbox_support_inbox_get"];
         put?: never;
         post?: never;
@@ -1214,8 +1345,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reply in a case */
+        /**
+         * Reply in a case, with up to 3 files (PNG, JPEG, PDF; 5 MB each)
+         * @description multipart/form-data (a plain form without files works too), not JSON.
+         *
+         *     More than 3 files, a file that is not really a PNG, JPEG or PDF, or an empty one: 422.
+         *     A file over 5 MB: 413. One bad file refuses the whole message.
+         */
         post: operations["add_message_support_cases__case_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/attachments/{attachment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a file of a message (whoever can see the case) */
+        get: operations["download_attachment_support_attachments__attachment_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1373,6 +1527,25 @@ export interface components {
             /** Is Suspended */
             is_suspended: boolean;
         };
+        /**
+         * AttachmentOut
+         * @description A file sent with a message (BE-33). `url` is the download path (needs the login).
+         */
+        AttachmentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
+            /** Url */
+            readonly url: string;
+        };
         /** AttendeeIn */
         AttendeeIn: {
             /** Name */
@@ -1419,6 +1592,19 @@ export interface components {
          * @enum {string}
          */
         Availability: "available" | "few_left" | "sold_out";
+        /** Body_add_message_support_cases__case_id__messages_post */
+        Body_add_message_support_cases__case_id__messages_post: {
+            /**
+             * Body
+             * @description The message text
+             */
+            body: string;
+            /**
+             * Files
+             * @description Up to 3 files
+             */
+            files?: (string)[] | null;
+        };
         /** Body_login_auth_login_post */
         Body_login_auth_login_post: {
             /** Grant Type */
@@ -1548,6 +1734,11 @@ export interface components {
          *     `kind` says who is asking: "attendee" (a ticket buyer, answered by the event's organizer)
          *     or "organizer" (an organizer asking the platform, answered by a platform admin).
          *     An attendee case must point to an event, directly or through an order or ticket.
+         *
+         *     `kind` "report" (BE-27) reports a published event to the platform: it needs `event_id`
+         *     (any published public or unlisted event, bought or not) and the category "event" or
+         *     "other", and takes no order or ticket. Only platform admins handle reports; the event's
+         *     organizer never sees them.
          */
         CaseCreate: {
             kind: components["schemas"]["SupportKind"];
@@ -2132,6 +2323,14 @@ export interface components {
          * @enum {string}
          */
         EventVisibility: "public" | "unlisted" | "private";
+        /** ForgotPasswordIn */
+        ForgotPasswordIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -2212,30 +2411,7 @@ export interface components {
             /** Staff Event Ids */
             staff_event_ids: string[];
         };
-        /** MessageCreate */
-        MessageCreate: {
-            /** Body */
-            body: string;
-        };
         /** MessageOut */
-        AttachmentOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Filename */
-            filename: string;
-            /** Content Type */
-            content_type: string;
-            /** Size */
-            size: number;
-            /**
-             * Url
-             * @description Download path (needs the login token).
-             */
-            readonly url: string;
-        };
         MessageOut: {
             /**
              * Id
@@ -2255,15 +2431,15 @@ export interface components {
             /** Body */
             body: string;
             /**
-             * Attachments
-             * @default []
-             */
-            attachments?: components["schemas"]["AttachmentOut"][];
-            /**
              * Created At
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Attachments
+             * @default []
+             */
+            attachments: components["schemas"]["AttachmentOut"][];
         };
         /**
          * MyEventOut
@@ -2337,7 +2513,42 @@ export interface components {
          * NotificationType
          * @enum {string}
          */
-        NotificationType: "order_confirmed" | "ticket_issued" | "event_updated" | "event_cancelled" | "refund_processed" | "support_reply" | "account_verification" | "payment_failed" | "support_status";
+        NotificationType: "order_confirmed" | "ticket_issued" | "event_updated" | "event_cancelled" | "refund_processed" | "support_reply" | "account_verification" | "payment_failed" | "support_status" | "password_reset";
+        /** OfflinePackOut */
+        OfflinePackOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Event Title */
+            event_title: string;
+            event_status: components["schemas"]["EventStatus"];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Checked In Count */
+            checked_in_count: number;
+            /** Total Count */
+            total_count: number;
+            /** Tickets */
+            tickets: components["schemas"]["OfflineTicket"][];
+        };
+        /** OfflineTicket */
+        OfflineTicket: {
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            status: components["schemas"]["TicketStatus"];
+            /** Attendee Name */
+            attendee_name: string;
+            /** Ticket Type */
+            ticket_type: string;
+        };
         /** OrderItemOut */
         OrderItemOut: {
             /**
@@ -2540,7 +2751,8 @@ export interface components {
         PayoutAccountStatus: "pending" | "verified" | "rejected";
         /**
          * PlatformSettingsOut
-         * @description Read-only: these come from the server configuration (env), not from the database.
+         * @description Platform fees. Saved by a platform admin (PATCH /admin/settings); until then the
+         *     server configuration (env). updated_at is null while the env values apply.
          */
         PlatformSettingsOut: {
             /** Activation Fee Kzt */
@@ -2557,10 +2769,73 @@ export interface components {
             currency: "KZT";
             /**
              * Read Only
-             * @default true
+             * @default false
              * @constant
              */
-            read_only: true;
+            read_only: false;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /**
+         * PlatformSettingsUpdate
+         * @description Only the fields sent change. Bounds as in the server configuration. A new activation
+         *     fee applies to activations paid from now on; paid ones keep their amount.
+         */
+        PlatformSettingsUpdate: {
+            /** Activation Fee Kzt */
+            activation_fee_kzt?: number | null;
+            /** Processing Fee Percent */
+            processing_fee_percent?: number | null;
+            /** Checkout Hold Minutes */
+            checkout_hold_minutes?: number | null;
+        };
+        /**
+         * PromoActivityOut
+         * @description One campaign's redemptions in the period, on confirmed (paid or free) orders.
+         *
+         *     gross_kzt is what those orders were paid (after the discount).
+         */
+        PromoActivityOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Event Title */
+            event_title: string;
+            /**
+             * Campaign Id
+             * Format: uuid
+             */
+            campaign_id: string;
+            /** Campaign Name */
+            campaign_name: string;
+            /** Codes */
+            codes: number;
+            /** Redemptions */
+            redemptions: number;
+            /** Discount Total Kzt */
+            discount_total_kzt: number;
+            /** Gross Kzt */
+            gross_kzt: number;
+        };
+        /**
+         * PromoActivityPage
+         * @description total_redemptions and total_discount_kzt cover every page, not only this one.
+         */
+        PromoActivityPage: {
+            /** Items */
+            items: components["schemas"]["PromoActivityOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total Redemptions */
+            total_redemptions: number;
+            /** Total Discount Kzt */
+            total_discount_kzt: number;
         };
         /** PromoCheckIn */
         PromoCheckIn: {
@@ -2698,6 +2973,13 @@ export interface components {
             /** Quantity */
             quantity: number;
         };
+        /** ResetPasswordIn */
+        ResetPasswordIn: {
+            /** Token */
+            token: string;
+            /** New Password */
+            new_password: string;
+        };
         /**
          * SalesFigures
          * @description Sales numbers of one event, or the sum over several. Money is whole KZT, simulated.
@@ -2781,16 +3063,19 @@ export interface components {
         };
         /**
          * SearchItemOut
-         * @description One search hit. label is the user's email or the event's title; status is the
-         *     user's system role or the event's status; suspended is users.is_suspended or
-         *     events.sales_suspended.
+         * @description One search hit.
+         *
+         *     user: label = email, status = system role, suspended = users.is_suspended.
+         *     event: label = title, status = event status, suspended = events.sales_suspended.
+         *     order: label = "buyer email · amount KZT · status" (amount = what the buyer pays),
+         *     status = order status, suspended = sales_suspended of the order's event.
          */
         SearchItemOut: {
             /**
              * Type
              * @enum {string}
              */
-            type: "user" | "event";
+            type: "user" | "event" | "order";
             /**
              * Id
              * Format: uuid
@@ -2866,17 +3151,63 @@ export interface components {
          * SupportCategory
          * @enum {string}
          */
-        SupportCategory: "payment" | "refund" | "ticket" | "event" | "account" | "other";
+        SupportCategory: "payment" | "refund" | "ticket" | "event" | "account" | "other" | "seating" | "check_in" | "technical";
         /**
          * SupportKind
          * @enum {string}
          */
-        SupportKind: "attendee" | "organizer";
+        SupportKind: "attendee" | "organizer" | "report";
         /**
          * SupportStatus
          * @enum {string}
          */
         SupportStatus: "open" | "in_progress" | "waiting_customer" | "resolved";
+        /** SyncIn */
+        SyncIn: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Items */
+            items: components["schemas"]["SyncItemIn"][];
+        };
+        /** SyncItemIn */
+        SyncItemIn: {
+            /** Ticket Id */
+            ticket_id: string;
+            /**
+             * Scanned At
+             * Format: date-time
+             */
+            scanned_at: string;
+            /** Device Id */
+            device_id: string;
+        };
+        /** SyncItemOut */
+        SyncItemOut: {
+            /** Ticket Id */
+            ticket_id: string;
+            /** Device Id */
+            device_id: string;
+            result: components["schemas"]["ScanResult"];
+            ticket?: components["schemas"]["ScannedTicket"] | null;
+            /** Checked In At */
+            checked_in_at?: string | null;
+            /** Checked In By */
+            checked_in_by?: string | null;
+            /** Checked In Device Id */
+            checked_in_device_id?: string | null;
+        };
+        /** SyncOut */
+        SyncOut: {
+            /** Items */
+            items: components["schemas"]["SyncItemOut"][];
+            /** Checked In Count */
+            checked_in_count: number;
+            /** Total Count */
+            total_count: number;
+        };
         /**
          * SystemRole
          * @enum {string}
@@ -3232,6 +3563,68 @@ export interface operations {
             };
         };
     };
+    forgot_password_auth_forgot_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_password_auth_reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     login_auth_login_post: {
         parameters: {
             query?: never;
@@ -3468,6 +3861,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The event's id (UUID) or its slug (BE-35) */
                 event_id: string;
             };
             cookie?: never;
@@ -3736,7 +4130,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The event's id (UUID) or its slug (BE-35) */
                 event_id: string;
             };
             cookie?: never;
@@ -4034,6 +4427,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    offline_pack_checkin_events__event_id__offline_pack_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfflinePackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_checkin_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SyncIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncOut"];
                 };
             };
             /** @description Validation Error */
@@ -5150,10 +5607,10 @@ export interface operations {
     search_admin_search_get: {
         parameters: {
             query: {
-                /** @description Part of email or title */
+                /** @description Part of email or title, or an order id */
                 q: string;
-                /** @description user (by email) or event (by title) */
-                type: "user" | "event";
+                /** @description user (by email), event (by title) or order (by order id, buyer's email or a guest's email) */
+                type: "user" | "event" | "order";
                 limit?: number;
                 offset?: number;
             };
@@ -5299,6 +5756,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlatformSettingsOut"];
+                };
+            };
+        };
+    };
+    update_settings_admin_settings_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_report_admin_reports__kind__csv_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Kazakhstan time (Asia/Almaty), inclusive */
+                from_date?: string | null;
+                /** @description Day in Kazakhstan time (Asia/Almaty), inclusive */
+                to_date?: string | null;
+            };
+            header?: never;
+            path: {
+                kind: "payments" | "refunds" | "orders";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description UTF-8 CSV with a BOM */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    promo_activity_admin_promo_activity_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Kazakhstan time (Asia/Almaty), inclusive */
+                from_date?: string | null;
+                /** @description Day in Kazakhstan time (Asia/Almaty), inclusive */
+                to_date?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoActivityPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -5594,7 +6156,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MessageCreate"];
+                "multipart/form-data": components["schemas"]["Body_add_message_support_cases__case_id__messages_post"];
             };
         };
         responses: {
@@ -5605,6 +6167,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MessageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_attachment_support_attachments__attachment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
                 };
             };
             /** @description Validation Error */

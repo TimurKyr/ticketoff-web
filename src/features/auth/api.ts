@@ -1,9 +1,11 @@
 import { apiClient } from "@/lib/api/client";
 import type {
+  ForgotPasswordIn,
   MeOut,
   OrganizerProfileIn,
   OrganizerProfileOut,
   OrganizerProfileUpdate,
+  ResetPasswordIn,
   TokenOut,
   UserOut,
   UserRegister,
@@ -52,4 +54,15 @@ export function updateOrganizerProfile(
   payload: OrganizerProfileUpdate
 ): Promise<OrganizerProfileOut> {
   return apiClient.patch<OrganizerProfileOut>("/organizer/profile", payload);
+}
+/** Always 204, whether or not the address has an account. */
+export function requestPasswordReset(email: string): Promise<void> {
+  const body: ForgotPasswordIn = { email };
+  return apiClient.post<void>("/auth/forgot-password", body);
+}
+
+/** The link's token says who it is; a link works once. */
+export function confirmPasswordReset(token: string, newPassword: string): Promise<void> {
+  const body: ResetPasswordIn = { token, new_password: newPassword };
+  return apiClient.post<void>("/auth/reset-password", body);
 }
