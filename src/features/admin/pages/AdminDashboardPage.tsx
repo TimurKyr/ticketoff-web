@@ -5,6 +5,7 @@ import { useI18n, type MessageKey } from "@/lib/i18n";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { ActivationsTab } from "../components/ActivationsTab";
+import { ExportsTab } from "../components/ExportsTab";
 import { FailedPaymentsTab } from "../components/FailedPaymentsTab";
 import { RefundsTab } from "../components/RefundsTab";
 import { ReportsTab } from "../components/ReportsTab";
@@ -17,6 +18,7 @@ const TABS = [
   { id: "refunds", label: "admin.tab.refunds" },
   { id: "reports", label: "admin.tab.reports" },
   { id: "activations", label: "admin.tab.activations" },
+  { id: "exports", label: "admin.tab.exports" },
   { id: "settings", label: "admin.tab.settings" },
 ] as const satisfies readonly { id: string; label: MessageKey }[];
 
@@ -71,6 +73,7 @@ export function AdminDashboardPage() {
         {active === "refunds" && <RefundsTab />}
         {active === "reports" && <ReportsTab />}
         {active === "activations" && <ActivationsTab />}
+        {active === "exports" && <ExportsTab />}
         {active === "settings" && <SettingsTab />}
       </div>
     </div>
