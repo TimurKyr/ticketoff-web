@@ -92,6 +92,24 @@ export function useUpdateEvent(eventId: string) {
   });
 }
 
+/** Cover image (R-12): PUT multipart `image`, DELETE; both answer the updated EventOut. */
+export function useEventImage(eventId: string) {
+  const invalidate = useInvalidate();
+  const upload = useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append("image", file);
+      return apiClient.putFormData<EventOut>(`/events/${eventId}/image`, form);
+    },
+    onSuccess: invalidate,
+  });
+  const remove = useMutation({
+    mutationFn: () => apiClient.delete<EventOut>(`/events/${eventId}/image`),
+    onSuccess: invalidate,
+  });
+  return { upload, remove };
+}
+
 export type EventAction = "publish" | "unpublish" | "cancel" | "duplicate";
 
 /**
