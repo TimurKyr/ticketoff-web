@@ -58,9 +58,6 @@ export function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Link to="/forgot-password" className="text-sm underline">
-          {t("auth.forgot.link")}
-        </Link>
         <FormField
           label={t("auth.password")}
           type="password"
@@ -69,6 +66,10 @@ export function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <Link to="/forgot-password" className="text-sm underline">
+          {t("auth.forgot.link")}
+        </Link>
+        
         <Button type="submit" disabled={submitting}>
           {submitting ? t("common.loading") : t("auth.login.submit")}
         </Button>
