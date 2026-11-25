@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { useAuth, VerifyEmailNotice } from "@/features/auth";
 import { useVenues } from "@/features/events/api";
+import { SalesSuspendedBanner } from "@/features/events/components/SalesSuspendedBanner";
 import { eventPath } from "@/features/events/paths";
 import { EventTabs, isEventOver } from "@/features/organizer-event";
 import { PromotionsSection } from "@/features/promotions";
@@ -15,9 +16,11 @@ import type { EventStatus } from "@/lib/api/types";
 import { DEFAULT_TIME_ZONE, formatDateTime } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useEventAction, useMyEvent, useTicketTypes, useUpdateEvent, type EventAction } from "../api";
 import { ActivationSection } from "../components/ActivationSection";
+import { CancelEventDialog } from "../components/CancelEventDialog";
 import { EventForm } from "../components/EventForm";
 import { InventorySection } from "../components/InventorySection";
 import { StatusBadge } from "../components/StatusBadge";
@@ -73,12 +76,14 @@ function ManageEvent({ eventId }: { eventId: string }) {
   const initialNotice = (location.state as { notice?: MessageKey } | null)?.notice;
 
   const event = useMyEvent(eventId);
+  useDocumentTitle(event.data?.title);
   const venues = useVenues();
   const ticketTypes = useTicketTypes(eventId);
   const update = useUpdateEvent(eventId);
   const action = useEventAction(eventId);
   const [notice, setNotice] = useState<string | null>(initialNotice ? t(initialNotice) : null);
   const [error, setError] = useState<string | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [params, setParams] = useSearchParams();
   const rawTab = params.get("tab");
   const tab: Tab = isTab(rawTab) ? rawTab : "event";
@@ -125,13 +130,12 @@ function ManageEvent({ eventId }: { eventId: string }) {
   // The new tabs (orders, staff) are read-only on a past or cancelled event (R-20).
   const over = isEventOver(data, now);
 
-  async function run(name: EventAction) {
-    if (name === "cancel" && !window.confirm(t("org.actions.cancelConfirm"))) return;
+  async function run(name: EventAction, reason?: string | null) {
     setError(null);
     setNotice(null);
     setRefusedUnverified(false);
     try {
-      const result = await action.mutateAsync(name);
+      const result = await action.mutateAsync({ name, reason });
       if (name === "duplicate") {
         // The copy's page shows the notice, like a newly created event.
         navigate(`/organizer/events/${result.id}`, { state: { notice: "org.actions.done.duplicate" } });
@@ -145,6 +149,8 @@ function ManageEvent({ eventId }: { eventId: string }) {
         return;
       }
       setError(errorMessage(err, t));
+    } finally {
+      setCancelOpen(false);
     }
   }
 
@@ -174,6 +180,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
         )}
       </header>
 
+      {data.sales_suspended && open && <SalesSuspendedBanner audience="organizer" />}
       {data.status === "draft" && <VerifyEmailNotice reason="publish" force={refusedUnverified} />}
 
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("org.manage")}>
@@ -181,7 +188,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
           <Button
             key={name}
             variant={name === "publish" ? "primary" : name === "cancel" ? "ghost" : "secondary"}
-            onClick={() => run(name)}
+            onClick={() => (name === "cancel" ? setCancelOpen(true) : run(name))}
             disabled={action.isPending || (name === "publish" && publishLocked)}
             aria-describedby={name === "publish" && publishLocked ? "publish-verify-hint" : undefined}
             className={name === "cancel" ? "text-red-800" : ""}
@@ -194,6 +201,14 @@ function ManageEvent({ eventId }: { eventId: string }) {
         <p id="publish-verify-hint" className="text-sm text-amber-900">
           {t("verifyEmail.hint.publish")}
         </p>
+      )}
+      {cancelOpen && (
+        <CancelEventDialog
+          title={data.title}
+          pending={action.isPending}
+          onConfirm={(reason) => void run("cancel", reason)}
+          onClose={() => setCancelOpen(false)}
+        />
       )}
       {notice && <Alert tone="success">{notice}</Alert>}
       {error && <Alert tone="error">{error}</Alert>}
@@ -234,7 +249,7 @@ function ManageEvent({ eventId }: { eventId: string }) {
         )}
         <Suspense fallback={<Loading />}>
           {tab === "orders" && <OrdersTab eventId={data.id} tz={tz} readOnly={over} />}
-          {tab === "analytics" && <AnalyticsTab eventId={data.id} />}
+          {tab === "analytics" && <AnalyticsTab eventId={data.id} startAt={data.start_at} />}
           {tab === "history" && <HistoryTab eventId={data.id} tz={tz} />}
           {tab === "staff" && <StaffTab eventId={data.id} readOnly={over} />}
         </Suspense>

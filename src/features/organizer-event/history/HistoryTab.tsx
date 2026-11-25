@@ -14,6 +14,18 @@ import { shortOrderId } from "../orders/orderNumber";
 import { ACTION_GROUPS, ACTION_LABELS } from "./actions";
 
 const MONEY_KEYS = ["amount_kzt", "refunded_kzt"];
+// Shown as the value alone: the action line already says what it is (a campaign's name).
+const PLAIN_KEYS = ["name", "email"];
+// "Ключ: значение" with a translated key (FE-22 #15: raw "discount_type: percent" before).
+const KEY_LABELS: Record<string, MessageKey> = {
+  code: "history.key.code",
+  cancelled_orders: "history.key.cancelled_orders",
+  refunded_orders: "history.key.refunded_orders",
+  pending_cancelled: "history.key.pending_cancelled",
+  ticket_count: "history.key.ticket_count",
+  tickets: "history.key.ticket_count",
+  method: "history.key.method",
+};
 // Ids say nothing to a person; the entity line already names the order.
 const HIDDEN_KEY = /(^|_)ids?$/;
 
@@ -22,8 +34,17 @@ function Details({ details }: { details: Record<string, unknown> }) {
   const parts: string[] = [];
   for (const [key, value] of Object.entries(details)) {
     if (value === null || value === undefined || value === "" || HIDDEN_KEY.test(key)) continue;
-    if (key === "is_simulated" || key === "new") continue;
-    if (key === "old") {
+    if (key === "is_simulated" || key === "new" || key === "discount_type") continue;
+    if (key === "discount_value" && typeof value === "number") {
+      // A campaign: "−10 %" or "−1 000 ₸".
+      parts.push(
+        details.discount_type === "percent" ? `−${value}\u00a0%` : `−${formatKzt(value, lang)}`
+      );
+    } else if (PLAIN_KEYS.includes(key) && typeof value !== "object") {
+      parts.push(String(value));
+    } else if (KEY_LABELS[key] && typeof value !== "object") {
+      parts.push(`${t(KEY_LABELS[key])}: ${String(value)}`);
+    } else if (key === "old") {
       parts.push(`${String(value)} → ${String(details.new)}`);
     } else if (MONEY_KEYS.includes(key) && typeof value === "number") {
       parts.push(formatKzt(value, lang));

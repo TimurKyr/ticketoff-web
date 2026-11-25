@@ -80,7 +80,8 @@ export function CasePage() {
 function CaseView({ caseId }: { caseId: string }) {
   const { t } = useI18n();
   const { user } = useAuth();
-  const justOpened = Boolean((useLocation().state as { justOpened?: boolean } | null)?.justOpened);
+  const navState = useLocation().state as { justOpened?: boolean; from?: string } | null;
+  const justOpened = Boolean(navState?.justOpened);
   const item = useCase(caseId, { poll: true });
   const setStatus = useSetCaseStatus(caseId);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -107,6 +108,13 @@ function CaseView({ caseId }: { caseId: string }) {
   const data = item.data;
   const isOpener = data.opened_by === user.id;
   const resolved = data.status === "resolved";
+  // Back to where the case was opened from: the inbox (with its filters) for a handler, else
+  // the user's own cases (FE-22 #9: a handler was sent to /support, not to the inbox).
+  const backTo = navState?.from?.startsWith("/support/inbox")
+    ? navState.from
+    : isOpener
+      ? "/support"
+      : "/support/inbox";
 
   async function markResolved() {
     setActionError(null);
@@ -120,8 +128,8 @@ function CaseView({ caseId }: { caseId: string }) {
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-5">
-      <Link to="/support" className="text-sm underline">
-        ← {t("support.case.back")}
+      <Link to={backTo} className="text-sm underline">
+        ← {t(backTo.startsWith("/support/inbox") ? "support.case.backInbox" : "support.case.back")}
       </Link>
       {justOpened && <Alert tone="success">{t("support.form.sent")}</Alert>}
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -15,6 +16,7 @@ interface LoginState {
 
 export function LoginPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("auth.login.title"));
   const { login } = useAuth();
   const state = (useLocation().state ?? {}) as LoginState;
 

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 import { apiClient } from "@/lib/api/client";
 import type {
@@ -55,6 +55,25 @@ export function useEvent(eventId: string) {
     queryKey: ["events", "detail", eventId],
     queryFn: () => apiClient.get<EventOut>(`/events/${eventId}`),
     enabled: Boolean(eventId),
+  });
+}
+
+/**
+ * Several events by id, sharing the cache with useEvent: a map of the ones loaded so far.
+ * For lists that sort or group by event date (FE-22 #10: «Мои билеты»).
+ */
+export function useEventsById(eventIds: string[]): Map<string, EventOut> {
+  const unique = [...new Set(eventIds)].filter(Boolean);
+  return useQueries({
+    queries: unique.map((id) => ({
+      queryKey: ["events", "detail", id],
+      queryFn: () => apiClient.get<EventOut>(`/events/${id}`),
+    })),
+    combine: (results) => {
+      const map = new Map<string, EventOut>();
+      results.forEach((result) => result.data && map.set(result.data.id, result.data));
+      return map;
+    },
   });
 }
 

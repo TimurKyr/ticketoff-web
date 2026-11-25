@@ -3,11 +3,19 @@ import { FormEvent, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField, SelectField, TextAreaField } from "@/components/ui/FormField";
+import { CATEGORIES } from "@/features/events/categories";
 import { errorMessage } from "@/lib/api/errors";
 import type { EventCreate, EventOut, EventVisibility, VenueOut } from "@/lib/api/types";
 import { DEFAULT_TIME_ZONE, isoToLocalInput, localInputToIso } from "@/lib/format";
 import { isWholeInRange, MAX_QUANTITY, useSyncedValues } from "@/lib/forms";
 import { useI18n, type MessageKey } from "@/lib/i18n";
+
+const isCategory = (value: string) => (CATEGORIES as readonly string[]).includes(value);
+
+function normalizeCategory(value: string | null | undefined): string {
+  const raw = (value ?? "").trim();
+  return isCategory(raw.toLowerCase()) ? raw.toLowerCase() : raw;
+}
 
 const VISIBILITIES: EventVisibility[] = ["public", "unlisted", "private"];
 
@@ -29,7 +37,8 @@ const DATE_FIELDS = ["start_at", "end_at", "registration_opens_at", "registratio
 function toValues(event: EventOut | undefined, tz: string): Values {
   return {
     title: event?.title ?? "",
-    category: event?.category ?? "",
+    // "Music" from an older form counts as the catalog's "music".
+    category: normalizeCategory(event?.category),
     description: event?.description ?? "",
     venue_id: event?.venue_id ?? "",
     start_at: isoToLocalInput(event?.start_at, tz),
@@ -161,13 +170,24 @@ export function EventForm({ venues, event, submitLabel, disabled, onSubmit, save
         disabled={disabled}
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField
+        {/* The same categories as the catalog filter (FE-22 #5): free text was shown as
+            «Другое». An old event's own value stays listed until the organizer changes it. */}
+        <SelectField
           label={t("org.form.category")}
-          hint={t("org.form.categoryHint")}
           value={values.category}
           onChange={(e) => set({ category: e.target.value })}
           disabled={disabled}
-        />
+        >
+          <option value="">{t("org.form.categoryNone")}</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {t(`category.${c}`)}
+            </option>
+          ))}
+          {values.category && !isCategory(values.category) && (
+            <option value={values.category}>{values.category}</option>
+          )}
+        </SelectField>
         <SelectField
           label={t("org.form.visibility")}
           value={values.visibility}

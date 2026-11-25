@@ -7,6 +7,8 @@ import { PAGE_SIZE } from "../config";
 import { useAdminRefunds } from "../hooks/useAdminQueries";
 import { ListState } from "./ListState";
 import { Pager } from "./Pager";
+import { eventTitleOf } from "../eventTitle";
+import { EventCell } from "./EventCell";
 import { StatusBadge } from "./StatusBadge";
 
 const shortId = (id: string | null) => (id ? id.slice(0, 8) : "—");
@@ -48,7 +50,10 @@ export function RefundsTab() {
                     </td>
                     <td className="py-2 pr-4">{r.reason ?? "—"}</td>
                     <td className="py-2 pr-4 font-mono text-xs">{shortId(r.order_id)}</td>
-                    <td className="py-2 pr-4 font-mono text-xs">{shortId(r.event_id)}</td>
+                    <td className="py-2 pr-4">
+                {/* Title, not the UUID (FE-22 #16). */}
+                <EventCell id={r.event_id} title={eventTitleOf(r)} />
+              </td>
                   </tr>
                 ))}
               </tbody>

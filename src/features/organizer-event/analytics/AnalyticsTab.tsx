@@ -95,8 +95,10 @@ function CampaignsTable({ campaigns }: { campaigns: CampaignStatsOut[] }) {
  * types, campaigns, days) and GET /checkin/events/{id}/stats (attendance), as given.
  * The date and type filters only narrow what is shown: the API has no such parameters.
  */
-export function AnalyticsTab({ eventId }: { eventId: string }) {
+export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: string }) {
   const { t, lang } = useI18n();
+  // Nobody can be a no-show before the doors open (FE-22 #21).
+  const started = !startAt || Date.parse(startAt) <= Date.now();
   const analytics = useEventAnalytics(eventId);
   const stats = useCheckinStats(eventId);
   const [from, setFrom] = useState("");
@@ -157,7 +159,11 @@ export function AnalyticsTab({ eventId }: { eventId: string }) {
           <StatGrid>
             <StatCard label={t("orgEvent.analytics.registered")} value={stats.data.registered} />
             <StatCard label={t("orgEvent.analytics.checkedIn")} value={stats.data.checked_in} />
-            <StatCard label={t("orgEvent.analytics.absent")} value={stats.data.absent} />
+            <StatCard
+              label={t("orgEvent.analytics.absent")}
+              value={started ? stats.data.absent : "—"}
+              hint={started ? undefined : t("orgEvent.analytics.absentLater")}
+            />
             <StatCard label={t("orgEvent.analytics.attendancePercent")} value={<Percent value={stats.data.percent} />} />
           </StatGrid>
         )}

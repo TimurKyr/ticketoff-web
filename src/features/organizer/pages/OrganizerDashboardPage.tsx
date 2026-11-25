@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import { VerifyEmailNotice } from "@/features/auth";
 import { useVenues } from "@/features/events/api";
-import { EventHistoryList, OverviewCards } from "@/features/organizer-event";
+import { SalesSuspendedBadge } from "@/features/events/components/SalesSuspendedBanner";
+import { EventHistoryList, OverviewCards, useOrganizerOverview } from "@/features/organizer-event";
 import { HelpButton } from "@/features/support";
 import type { EventBucket } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { ORGANIZER_PAGE_SIZE, useMyEvents } from "../api";
+import { OrganizerOnboarding } from "../components/OrganizerOnboarding";
 import { StatusBadge } from "../components/StatusBadge";
 
 const BUCKETS: EventBucket[] = ["upcoming", "active", "completed", "cancelled"];
@@ -20,6 +23,7 @@ const BUCKETS: EventBucket[] = ["upcoming", "active", "completed", "cancelled"];
 /** "My events" by tab (?tab=upcoming|active|completed|cancelled&page=N). */
 export function OrganizerDashboardPage() {
   const { t, lang } = useI18n();
+  useDocumentTitle(t("org.title"));
   const [params, setParams] = useSearchParams();
   const bucket = (BUCKETS as string[]).includes(params.get("tab") ?? "")
     ? (params.get("tab") as EventBucket)
@@ -28,6 +32,9 @@ export function OrganizerDashboardPage() {
   const events = useMyEvents(bucket, (page - 1) * ORGANIZER_PAGE_SIZE);
   const venues = useVenues();
   const pages = pageCount(events.data?.total ?? 0, ORGANIZER_PAGE_SIZE);
+  // No events at all yet (drafts count): the three first steps instead of a page of zeros.
+  const overview = useOrganizerOverview();
+  const firstVisit = overview.data?.events.total === 0;
 
   // A page past the end (?page=999, or events moved to another tab) moves to the last page.
   const loaded = events.isSuccess && !events.isPlaceholderData;
@@ -53,7 +60,7 @@ export function OrganizerDashboardPage() {
       </div>
 
       <VerifyEmailNotice reason="publish" />
-      <OverviewCards />
+      {firstVisit ? <OrganizerOnboarding /> : <OverviewCards />}
 
       <nav aria-label={t("org.title")} className="flex flex-wrap gap-2 border-b border-gray-300">
         {BUCKETS.map((b) => (
@@ -96,6 +103,7 @@ export function OrganizerDashboardPage() {
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={event.status} />
+                      {event.sales_suspended && event.status === "published" && <SalesSuspendedBadge />}
                       <span className="font-semibold">{event.title}</span>
                     </div>
                     <p className="text-sm text-gray-700">

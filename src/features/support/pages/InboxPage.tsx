@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import { SelectField } from "@/components/ui/FormField";
 import { Pager } from "@/components/ui/Pager";
@@ -9,6 +9,7 @@ import type { CaseOut } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/lib/i18n";
 import { pageCount, parsePage } from "@/lib/pagination";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { SUPPORT_PAGE_SIZE, useInbox } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
@@ -38,10 +39,13 @@ function assigneeKey(item: CaseOut, userId: string): MessageKey {
 
 function InboxRow({ item, userId, showKind }: { item: CaseOut; userId: string; showKind: boolean }) {
   const { t, lang } = useI18n();
+  const location = useLocation();
   return (
     <li>
       <Link
         to={`/support/cases/${item.id}`}
+        // The case page's "back" returns to this inbox with its filters (FE-22 #9).
+        state={{ from: `${location.pathname}${location.search}` }}
         className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2"
       >
         <div className="flex min-w-0 flex-col gap-1">
@@ -71,6 +75,7 @@ function InboxRow({ item, userId, showKind }: { item: CaseOut; userId: string; s
  */
 export function InboxPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("support.inbox.title"));
   const { user } = useAuth();
   const isAdmin = user?.system_role === "platform_admin";
   const [params, setParams] = useSearchParams();

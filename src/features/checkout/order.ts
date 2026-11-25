@@ -34,9 +34,15 @@ export function amountDue(order: OrderOut): number {
   return order.total_kzt - order.discount_kzt;
 }
 
-/** "mm:ss" left until `iso`, never negative. */
+/** How long the API holds the tickets of a new checkout. */
+export const HOLD_MS = 15 * 60_000;
+
+/**
+ * "mm:ss" left until `iso`, never negative and never more than the hold itself: server time
+ * from the `Date` header is whole seconds behind, so a fresh hold showed 15:01 (FE-22 #20).
+ */
 export function timeLeft(iso: string, now: number): string {
-  const seconds = Math.max(0, Math.ceil((Date.parse(iso) - now) / 1000));
+  const seconds = Math.min(HOLD_MS / 1000, Math.max(0, Math.ceil((Date.parse(iso) - now) / 1000)));
   const mm = Math.floor(seconds / 60);
   const ss = seconds % 60;
   return `${mm}:${String(ss).padStart(2, "0")}`;

@@ -22,6 +22,7 @@ import type { OrderOut } from "@/lib/api/types";
 import { formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useOrder } from "../api";
 import { TicketCard } from "../components/TicketCard";
@@ -95,6 +96,7 @@ export function OrderPage() {
   const order = useOrder(orderId);
   const eventId = order.data?.event_id ?? "";
   const event = useEvent(eventId);
+  useDocumentTitle(event.data?.title ?? t("order.title"));
   const ticketTypes = usePublicTicketTypes(eventId);
   // Every second only while a hold is running.
   const now = useNow(order.data?.status === "pending" ? 1000 : 30_000);

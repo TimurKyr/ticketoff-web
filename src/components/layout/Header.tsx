@@ -309,8 +309,8 @@ function MobilePanel({
           })}
         </ul>
       </nav>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#E4E1DA] pt-3">
-        <CitySelect />
+      <div className="mt-3 flex items-start justify-between gap-3 border-t border-[#E4E1DA] pt-3">
+        <CitySelect inline />
         <LanguageToggle />
       </div>
       <div className="mt-3 border-t border-[#E4E1DA] pt-3">

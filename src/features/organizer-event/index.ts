@@ -4,3 +4,4 @@ export { EventTabs, type TabSpec } from "./components/EventTabs";
 export { isEventOver } from "./readOnly";
 export { OverviewCards } from "./dashboard/OverviewCards";
 export { EventHistoryList } from "./dashboard/EventHistoryList";
+export { useOrganizerOverview } from "./api";

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +15,8 @@ interface Props {
   onChange: (code: string) => void;
   /** The tickets picked so far: the check then gives the exact discount on them. */
   items?: PromoCheckItem[];
+  /** The checked discount on these exact tickets for the code as typed, or null (order summary). */
+  onDiscountChange?: (discountKzt: number | null) => void;
 }
 
 /** Same basket, same answer: a change of quantities or types makes an old result stale. */
@@ -29,7 +31,7 @@ function basketKey(items: PromoCheckItem[] | undefined): string {
  * Promo code input with a "check" button. With tickets picked, the server works out the
  * exact discount on them (the same calculation as checkout); without, only the terms.
  */
-export function PromoCodeField({ eventId, value, onChange, items }: Props) {
+export function PromoCodeField({ eventId, value, onChange, items, onDiscountChange }: Props) {
   const { t, lang } = useI18n();
   const [checking, setChecking] = useState(false);
   // The result belongs to the code and the basket it was checked for: changing either hides it.
@@ -41,6 +43,8 @@ export function PromoCodeField({ eventId, value, onChange, items }: Props) {
   } | null>(null);
   const basket = basketKey(items);
   const shown = result && result.code === value.trim() && result.basket === basket ? result : null;
+  const discount = shown?.ok?.discount_kzt ?? null;
+  useEffect(() => onDiscountChange?.(discount), [discount, onDiscountChange]);
   // Answers can arrive out of order (SAVE10, then SAVE20): only the latest check may set the result.
   const lastCheck = useRef(0);
 

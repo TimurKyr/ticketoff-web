@@ -10,6 +10,7 @@ import { ApiError } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
 import { useNow } from "@/lib/useNow";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { useEvent, usePublicTicketTypes, useVenue } from "../api";
 import { BackToEvents, EventView } from "../components/EventView";
@@ -31,6 +32,7 @@ export function EventDetailsPage() {
   const { t } = useI18n();
 
   const event = useEvent(key);
+  useDocumentTitle(event.data?.title);
   // Everything below works on the id, whichever key the page was opened with.
   const eventId = event.data?.id ?? "";
   const ticketTypes = usePublicTicketTypes(eventId);

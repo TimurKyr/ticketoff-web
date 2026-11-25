@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -6,7 +6,13 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { useAuth, VerifyEmailNotice } from "@/features/auth";
-import { PromoCodeField, RefundPolicy, startCheckout } from "@/features/checkout";
+import {
+  OrderSummaryBox,
+  orderSummary,
+  PromoCodeField,
+  RefundPolicy,
+  startCheckout,
+} from "@/features/checkout";
 import { track } from "@/lib/analytics";
 import { errorMessage, isEmailNotVerified } from "@/lib/api/errors";
 import type { AttendeeIn, PublicTicketTypeOut, TicketKind } from "@/lib/api/types";
@@ -52,8 +58,15 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
   // someone's name onto a ticket of another type.
   const [attendees, setAttendees] = useState<Record<string, AttendeeIn[]>>({});
   const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+  // A new error is scrolled into view (a long list of attendees may push it below the fold).
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }, [error]);
   const [submitting, setSubmitting] = useState(false);
   const [promo, setPromo] = useState("");
+  // The discount the promo check found for the current code and tickets (order summary).
+  const [discount, setDiscount] = useState<number | null>(null);
   const paid = kind === "paid";
   // The server refused with EMAIL_NOT_VERIFIED although the cached /auth/me said confirmed.
   const [refusedUnverified, setRefusedUnverified] = useState(false);
@@ -121,6 +134,10 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
     }),
   }));
   const rows = groups.flatMap((group) => group.rows);
+  const summary = orderSummary(
+    chosen.map((type) => ({ id: type.id, name: type.name, quantity: quantity(type), price_kzt: type.price_kzt })),
+    discount
+  );
 
   function setRow(typeId: string, index: number, patch: Partial<AttendeeIn>) {
     const current = groups.find((group) => group.type.id === typeId)?.rows ?? [];
@@ -167,18 +184,24 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
         return;
       }
       setError(errorMessage(err, t));
-      // Stock may have changed under us (e.g. "Not enough tickets left").
+      // Stock may have changed under us (e.g. "Not enough tickets left"), or the event itself
+      // (cancelled, sales suspended: then the page shows that instead of this form).
       void queryClient.invalidateQueries({ queryKey: ["events", "ticket-types", eventId] });
+      void queryClient.invalidateQueries({ queryKey: ["events", "detail"] });
     }
   }
 
   let rowNumber = 0;
+  // "(Партер)" tells tickets of several types apart; one type, or a type called «Участник»
+  // itself, says nothing new (FE-22 #24: «Участник 1 (Участник)»).
+  const typeNote = (name: string) =>
+    ticketTypes.length > 1 && name.trim().toLowerCase() !== t("register.attendee").toLowerCase()
+      ? ` (${name})`
+      : "";
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <h3 className="text-lg font-semibold">{paid ? t("checkout.title") : t("register.title")}</h3>
-      {error && <Alert tone="error">{error}</Alert>}
-      {refusedUnverified && <VerifyEmailNotice reason="buy" force />}
 
       {ticketTypes.map((type) => (
         <div key={type.id} className="flex items-center justify-between gap-3 text-sm">
@@ -210,7 +233,7 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
               return (
                 <div key={`${type.id}-${i}`} className="grid gap-2 rounded-md bg-gray-50 p-3 sm:grid-cols-2">
                   <FormField
-                    label={`${t("register.attendee")} ${rowNumber} (${type.name}): ${t("register.name")}`}
+                    label={`${t("register.attendee")} ${rowNumber}${typeNote(type.name)}: ${t("register.name")}`}
                     autoComplete={rowNumber === 1 ? "name" : "off"}
                     required
                     value={row.name}
@@ -237,11 +260,22 @@ export function TicketOrderForm({ eventId, kind, ticketTypes, refundPolicy, link
             value={promo}
             onChange={setPromo}
             items={chosen.map((type) => ({ ticket_type_id: type.id, quantity: quantity(type) }))}
+            onDiscountChange={setDiscount}
           />
+          <OrderSummaryBox summary={summary} promoUnchecked={Boolean(promo.trim()) && discount == null} />
           <RefundPolicy policy={refundPolicy} />
           <p className="text-xs text-gray-600">{t("checkout.holdNote")}</p>
         </>
       )}
+
+      {/* Right above the button, so the answer to a click is where the buyer is looking
+          (FE-22 #1: it used to be at the top of a long form, out of view). */}
+      {error && (
+        <div ref={errorRef} tabIndex={-1} className="outline-none">
+          <Alert tone="error">{error}</Alert>
+        </div>
+      )}
+      {refusedUnverified && <VerifyEmailNotice reason="buy" force />}
 
       {/* Early hint only: the server checks again and answers 403 EMAIL_NOT_VERIFIED. */}
       <Button

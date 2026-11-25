@@ -63,8 +63,10 @@ export function SearchTab() {
     }
   };
 
+  // Events: their status; users: their role («Покупатель», not "attendee", FE-22 #16).
   const statusLabel = (item: SearchItemOut) =>
-    (item.type === "event" ? t(`status.${item.status}` as MessageKey) : "") || item.status;
+    t((item.type === "event" ? `status.${item.status}` : `admin.role.${item.status}`) as MessageKey) ||
+    item.status;
 
   return (
     <div>

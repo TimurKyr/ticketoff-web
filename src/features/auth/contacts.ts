@@ -44,8 +44,10 @@ export function checkPhone(input: string): Checked {
 
 /** An http(s) address with a host, at most 255 characters; kept as typed (trimmed). */
 export function checkWebsite(input: string): Checked {
-  const value = input.trim();
-  if (!value) return { value: null };
+  const typed = input.trim();
+  if (!typed) return { value: null };
+  // "jazz.kz" means https://jazz.kz (FE-22 #26); any other scheme is still refused below.
+  const value = /^[a-z][a-z0-9+.-]*:/i.test(typed) ? typed : `https://${typed}`;
   if (value.length > WEBSITE_MAX) return { error: "err.websiteLong" };
   let url: URL;
   try {

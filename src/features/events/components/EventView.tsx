@@ -9,10 +9,11 @@ import type { EventOut, PublicTicketTypeOut, TicketKind, VenueOut } from "@/lib/
 import { formatDateTime, formatKzt } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
-import { FEW_LEFT, registrationState, salesState } from "../availability";
+import { FEW_LEFT, orderBlock, salesState } from "../availability";
 import { AddToCalendar } from "./AddToCalendar";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { EventCover } from "./EventCover";
+import { SalesSuspendedBanner } from "./SalesSuspendedBanner";
 import { TicketOrderForm } from "./TicketOrderForm";
 
 /** A ticket type as the event page shows it; the organizer's preview also knows hidden ones. */
@@ -30,13 +31,16 @@ function TicketTypeRow({
   type,
   now,
   timeZone,
+  eventOver,
 }: {
   type: ViewTicketType;
   now: number;
   timeZone?: string;
+  /** The event has ended: no stock or sales windows, they no longer mean anything. */
+  eventOver: boolean;
 }) {
   const { t, lang } = useI18n();
-  const sales = salesState(type, now);
+  const sales = eventOver ? "ended" : salesState(type, now);
   return (
     <li
       className={`flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-200 py-3 last:border-0 ${
@@ -69,7 +73,9 @@ function TicketTypeRow({
           {type.kind === "free" ? t("events.free") : formatKzt(type.price_kzt, lang)}
         </p>
         <p className="text-sm text-gray-700">
-          {type.available <= 0
+          {eventOver
+            ? t("events.salesEnded")
+            : type.available <= 0
             ? t("events.soldOut")
             : sales === "notStarted" && type.sales_start_at
               ? `${t("events.salesFrom")} ${formatDateTime(type.sales_start_at, lang, timeZone)}`
@@ -175,10 +181,11 @@ export function EventView({
   const { t, lang } = useI18n();
   const cancelled = data.status === "cancelled";
   const types = ticketTypes.data ?? [];
-  // Same checks as the API: event-level registration window, then per-type sales window and stock.
-  const registration = registrationState(data, now);
-  const soldOut = types.length > 0 && types.every((type) => type.available <= 0);
-  const ended = Date.parse(data.end_at ?? data.start_at) <= now;
+  // Same checks as the API: cancellation, platform suspension, event-level registration
+  // window, then (in KindOrder) per-type sales window and stock.
+  const block = orderBlock(data, now);
+  const ended = block === "ended";
+  const soldOut = !ended && types.length > 0 && types.every((type) => type.available <= 0);
 
   return (
     <article className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -200,7 +207,9 @@ export function EventView({
               ahead: an ended event (end_at, or start_at without one) has no use for it. */}
           {!preview && data.status === "published" && (
             <div className="flex flex-wrap gap-2 px-1 sm:px-2">
-              {!ended && <AddToCalendar links={data.calendar_links} />}
+              {Date.parse(data.end_at ?? data.start_at) > now && (
+                <AddToCalendar links={data.calendar_links} />
+              )}
               <HelpButton context={{ event_id: data.id }} />
             </div>
           )}
@@ -251,35 +260,45 @@ export function EventView({
           <>
             <ul>
               {types.map((type) => (
-                <TicketTypeRow key={type.id} type={type} now={now} timeZone={venue?.timezone} />
+                <TicketTypeRow
+                  key={type.id}
+                  type={type}
+                  now={now}
+                  timeZone={venue?.timezone}
+                  eventOver={ended}
+                />
               ))}
             </ul>
             {preview ? (
-              <p className="text-sm text-gray-700">{t("preview.noBuying")}</p>
+              <>
+                {block === "suspended" && <SalesSuspendedBanner audience="buyer" />}
+                <p className="text-sm text-gray-700">{t("preview.noBuying")}</p>
+              </>
+            ) : block === "cancelled" ? null : block === "suspended" ? (
+              <SalesSuspendedBanner audience="buyer" />
+            ) : block === "ended" ? (
+              <p className="font-medium">{t("events.ended")}</p>
+            ) : block === "started" ? (
+              <p className="font-medium">{t("events.regStarted")}</p>
+            ) : block === "closed" ? (
+              <p className="font-medium">{t("events.regClosed")}</p>
+            ) : block === "notOpen" && data.registration_opens_at ? (
+              <p className="font-medium">
+                {t("events.regNotOpen")}{" "}
+                {formatDateTime(data.registration_opens_at, lang, venue?.timezone)}
+              </p>
             ) : (
-              !cancelled &&
-              (registration === "started" ? (
-                <p className="font-medium">{t("events.regStarted")}</p>
-              ) : registration === "closed" ? (
-                <p className="font-medium">{t("events.regClosed")}</p>
-              ) : registration === "notOpen" && data.registration_opens_at ? (
-                <p className="font-medium">
-                  {t("events.regNotOpen")}{" "}
-                  {formatDateTime(data.registration_opens_at, lang, venue?.timezone)}
-                </p>
-              ) : (
-                <div className="flex flex-col gap-6">
-                  <VerifyEmailNotice reason="buy" />
-                  <KindOrder event={data} kind="free" types={types} now={now} />
-                  <KindOrder
-                    event={data}
-                    kind="paid"
-                    types={types}
-                    now={now}
-                    linkPromoCode={linkPromoCode}
-                  />
-                </div>
-              ))
+              <div className="flex flex-col gap-6">
+                <VerifyEmailNotice reason="buy" />
+                <KindOrder event={data} kind="free" types={types} now={now} />
+                <KindOrder
+                  event={data}
+                  kind="paid"
+                  types={types}
+                  now={now}
+                  linkPromoCode={linkPromoCode}
+                />
+              </div>
             )}
           </>
         )}

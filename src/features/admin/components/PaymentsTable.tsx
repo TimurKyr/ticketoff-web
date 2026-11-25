@@ -2,6 +2,8 @@ import { formatDateTime, formatKzt } from "@/lib/format";
 import type { AdminPaymentOut } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
 
+import { eventTitleOf } from "../eventTitle";
+import { EventCell } from "./EventCell";
 import { StatusBadge } from "./StatusBadge";
 
 const shortId = (id: string | null) => (id ? id.slice(0, 8) : "—");
@@ -34,7 +36,10 @@ export function PaymentsTable({ items }: { items: AdminPaymentOut[] }) {
                 <StatusBadge status={p.status} />
               </td>
               <td className="py-2 pr-4 font-mono text-xs">{shortId(p.order_id)}</td>
-              <td className="py-2 pr-4 font-mono text-xs">{shortId(p.event_id)}</td>
+              <td className="py-2 pr-4">
+                {/* Title, not the UUID (FE-22 #16). */}
+                <EventCell id={p.event_id} title={eventTitleOf(p)} />
+              </td>
             </tr>
           ))}
         </tbody>

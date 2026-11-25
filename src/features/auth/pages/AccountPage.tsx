@@ -1,10 +1,12 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { errorMessage } from "@/lib/api/errors";
 import { useI18n } from "@/lib/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 import { createOrganizerProfile } from "../api";
 import { OrganizerProfileSection } from "../components/OrganizerProfileSection";
@@ -13,11 +15,20 @@ import { useAuth } from "../hooks/useAuth";
 
 export function AccountPage() {
   const { t } = useI18n();
+  useDocumentTitle(t("account.title"));
   const { user, refresh, justRegistered } = useAuth();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // /account#become-organizer (from /organizers): straight to the form.
+  const { hash } = useLocation();
+  const showForm = Boolean(user && !user.is_organizer);
+  useEffect(() => {
+    if (hash === "#become-organizer" && showForm) {
+      document.getElementById("become-organizer")?.scrollIntoView({ block: "start" });
+    }
+  }, [hash, showForm]);
 
   if (!user) return null; // route is wrapped in RequireAuth
 
@@ -69,6 +80,7 @@ export function AccountPage() {
 
       {!user.is_organizer && (
         <form
+          id="become-organizer"
           onSubmit={becomeOrganizer}
           noValidate
           className="flex flex-col gap-4 rounded-lg border border-gray-300 p-4"

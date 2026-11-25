@@ -45,11 +45,19 @@ const FE14_DETAILS: Record<string, MessageKey> = {
   "Organizer profile not found": "err.profileNotFound",
 };
 
+// FE-22: messages seen in the UX walkthrough. Matched by text: an API from before BE-37 sends
+// no code for them (with a code, CODE_MESSAGES below decides).
+const FE22_DETAILS: Record<string, MessageKey> = {
+  "Sales are suspended for this event by the platform": "err.salesSuspended",
+  "Account is suspended": "err.accountSuspended",
+};
+
 /** Backend `detail` strings that have a translated message. */
 const KNOWN_DETAILS: Record<string, MessageKey> = {
   ...FE8_DETAILS,
   ...FE7_DETAILS,
   ...FE14_DETAILS,
+  ...FE22_DETAILS,
   "Incorrect email or password": "auth.login.invalid",
   "Email already registered": "auth.register.emailTaken",
   "Organizer profile already exists": "account.becomeOrganizer.exists",
@@ -118,6 +126,7 @@ const PATTERNS: [RegExp, MessageKey][] = [
   [/^ticket_type_ids must be ticket types of this event; not found: (.+)$/, "err.campaignTypesUnknown"],
   [/^Ticket type not found for this event: (.+)$/, "err.ticketTypeNotFound"],
   [/^value is not a valid email address/, "err.emailInvalid"],
+  [/^Total ticket quantity \((\d+)\) exceeds event capacity \((\d+)\)$/, "err.capacityExceeded"],
 ];
 
 function translateDetail(detail: string, t: (key: MessageKey) => string): string {
@@ -128,6 +137,31 @@ function translateDetail(detail: string, t: (key: MessageKey) => string): string
     if (match) return t(patternKey).replace(/\$(\d)/g, (_, n) => match[Number(n)] ?? "");
   }
   return detail;
+}
+
+/**
+ * 409 `{"detail", "code"}` from BE-37: the code says what went wrong, the English detail still
+ * carries the numbers and names. The detail's own translation (with those values) is used when
+ * it is known; otherwise a text for the code without them. Without a code (an API from before
+ * BE-37, or another 409) the detail is translated by text as before.
+ */
+const CODE_MESSAGES: Record<string, MessageKey> = {
+  SALES_SUSPENDED: "err.salesSuspended",
+  NOT_ENOUGH_TICKETS: "err.code.notEnoughTickets",
+  NOT_ENOUGH_CAPACITY: "err.noCapacity",
+  TICKET_QUANTITY_EXCEEDS_CAPACITY: "err.code.quantityExceedsCapacity",
+  CAPACITY_BELOW_TICKET_QUANTITY: "err.code.capacityBelowTypes",
+  CAPACITY_BELOW_SOLD: "err.code.capacityBelowSold",
+};
+
+function translateCoded(code: string, detail: unknown, t: (key: MessageKey) => string): string | null {
+  const key = CODE_MESSAGES[code];
+  if (!key) return null;
+  if (typeof detail === "string") {
+    const fromDetail = translateDetail(detail, t);
+    if (fromDetail !== detail) return fromDetail;
+  }
+  return t(key);
 }
 
 /**
@@ -151,12 +185,18 @@ export function errorMessage(error: unknown, t: (key: MessageKey) => string): st
   if (error instanceof ApiError) {
     if (isEmailNotVerified(error)) return t("err.emailNotVerified");
     const detail = error.detail;
+    const coded = error.code ? translateCoded(error.code, detail, t) : null;
+    if (coded) return coded;
     if (typeof detail === "string") return translateDetail(detail, t);
     if (Array.isArray(detail)) {
       const parts = (detail as ValidationIssue[])
         .map((issue) => {
           // Pydantic prefixes model-level errors with "Value error, ".
-          const msg = translateDetail((issue.msg ?? "").replace(/^Value error, /, ""), t);
+          const raw = (issue.msg ?? "").replace(/^Value error, /, "");
+          const msg = translateDetail(raw, t);
+          // A translated message already says what is wrong ("Некорректный email"), so the
+          // field name ("email: …", FE-22 #17) is kept only for the untranslated ones.
+          if (msg !== raw) return msg;
           const field = issue.loc?.filter((p) => p !== "body").join(".");
           return field ? `${field}: ${msg}` : msg;
         })
