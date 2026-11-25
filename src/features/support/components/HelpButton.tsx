@@ -12,18 +12,27 @@ import { CaseForm } from "./CaseForm";
 
 /**
  * "Помощь": opens a new support case about where it is placed (event, order or ticket),
- * or, with kind "organizer", a question from an organizer to the platform.
+ * or, with kind "organizer", a question from an organizer to the platform. With kind
+ * "report" it is a complaint about an event (FE-15). `asLink` draws it as a text link.
  * A guest gets a link to /login that comes back here afterwards.
  */
 export function HelpButton({
   kind = "attendee",
   context,
   label = "support.help",
+  title = "support.form.title",
+  loginHint = "support.form.loginFirst",
+  asLink = false,
   className = "",
 }: {
   kind?: SupportKind;
   context?: CaseContext;
   label?: MessageKey;
+  /** The dialog's heading. */
+  title?: MessageKey;
+  /** The tooltip of the guest's link to /login. */
+  loginHint?: MessageKey;
+  asLink?: boolean;
   className?: string;
 }) {
   const { t } = useI18n();
@@ -41,8 +50,8 @@ export function HelpButton({
         to="/login"
         // Same mechanism as the route guards: <GuestOnly> sends the user back to `from`.
         state={{ from: `${location.pathname}${location.search}` }}
-        title={t("support.form.loginFirst")}
-        className={`self-start text-sm underline ${className}`}
+        title={t(loginHint)}
+        className={`${asLink ? "" : "self-start "}text-sm underline ${className}`}
       >
         {t(label)}
       </Link>
@@ -51,17 +60,28 @@ export function HelpButton({
 
   return (
     <>
-      <Button
-        type="button"
-        variant="secondary"
-        aria-haspopup="dialog"
-        onClick={() => setOpen(true)}
-        className={`self-start ${className}`}
-      >
-        {t(label)}
-      </Button>
+      {asLink ? (
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          onClick={() => setOpen(true)}
+          className={`text-sm underline ${className}`}
+        >
+          {t(label)}
+        </button>
+      ) : (
+        <Button
+          type="button"
+          variant="secondary"
+          aria-haspopup="dialog"
+          onClick={() => setOpen(true)}
+          className={`self-start ${className}`}
+        >
+          {t(label)}
+        </Button>
+      )}
       {open && (
-        <Dialog title={t("support.form.title")} onClose={() => setOpen(false)} className="max-w-lg">
+        <Dialog title={t(title)} onClose={() => setOpen(false)} className="max-w-lg">
           <CaseForm
             kind={kind}
             context={context}
