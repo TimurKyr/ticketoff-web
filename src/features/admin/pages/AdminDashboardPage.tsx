@@ -7,6 +7,7 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { ActivationsTab } from "../components/ActivationsTab";
 import { ExportsTab } from "../components/ExportsTab";
 import { FailedPaymentsTab } from "../components/FailedPaymentsTab";
+import { PromoActivityTab } from "../components/PromoActivityTab";
 import { RefundsTab } from "../components/RefundsTab";
 import { ReportsTab } from "../components/ReportsTab";
 import { SearchTab } from "../components/SearchTab";
@@ -19,6 +20,7 @@ const TABS = [
   { id: "reports", label: "admin.tab.reports" },
   { id: "activations", label: "admin.tab.activations" },
   { id: "exports", label: "admin.tab.exports" },
+  { id: "promo", label: "admin.tab.promo" },
   { id: "settings", label: "admin.tab.settings" },
 ] as const satisfies readonly { id: string; label: MessageKey }[];
 
@@ -74,6 +76,7 @@ export function AdminDashboardPage() {
         {active === "reports" && <ReportsTab />}
         {active === "activations" && <ActivationsTab />}
         {active === "exports" && <ExportsTab />}
+        {active === "promo" && <PromoActivityTab />}
         {active === "settings" && <SettingsTab />}
       </div>
     </div>
