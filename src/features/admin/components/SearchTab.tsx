@@ -9,6 +9,7 @@ import { useAdminSearch } from "../hooks/useAdminQueries";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { useSuspendEvent, useSuspendUser } from "../hooks/useSuspension";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { HistoryLink } from "./HistoryLink";
 import { ListState } from "./ListState";
 import { Pager } from "./Pager";
 
@@ -148,15 +149,18 @@ export function SearchTab() {
                           )}
                         </td>
                         <td className="py-2 pr-4">
-                          {item.type !== "order" && (
-                            <button
-                              type="button"
-                              className="rounded border px-3 py-1"
-                              onClick={() => openDialog(item)}
-                            >
-                              {item.suspended ? t("admin.resume") : t("admin.suspend")}
-                            </button>
-                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {item.type === "event" && <HistoryLink eventId={item.id} title={item.label} />}
+                            {item.type !== "order" && (
+                              <button
+                                type="button"
+                                className="rounded border px-3 py-1"
+                                onClick={() => openDialog(item)}
+                              >
+                                {item.suspended ? t("admin.resume") : t("admin.suspend")}
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
