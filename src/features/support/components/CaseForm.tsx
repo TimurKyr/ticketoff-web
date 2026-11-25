@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { SelectField } from "@/components/ui/FormField";
+import { ApiError } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/errors";
 import type { SupportCategory, SupportKind } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n";
@@ -46,14 +47,25 @@ export function CaseForm({
       onSent();
       navigate(`/support/cases/${created.id}`, { state: { justOpened: true } });
     } catch (err) {
-      setError(errorMessage(err, t));
+      // 409 on a report: this user already has one open for the event.
+      setError(
+        kind === "report" && err instanceof ApiError && err.status === 409
+          ? t("support.report.duplicate")
+          : errorMessage(err, t)
+      );
     }
   }
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-3">
-      <p className="text-sm text-gray-700">
-        {t(kind === "organizer" ? "support.form.toPlatform" : "support.form.toOrganizer")}
+        <p className="text-sm text-gray-700">
+        {t(
+          kind === "report"
+            ? "support.report.toPlatform"
+            : kind === "organizer"
+              ? "support.form.toPlatform"
+              : "support.form.toOrganizer"
+        )}
       </p>
       {error && <Alert tone="error">{error}</Alert>}
       <SelectField

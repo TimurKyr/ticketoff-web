@@ -206,11 +206,21 @@ export function EventView({
               act on in the organizer's preview. The calendar menu (FE-16) is for events still
               ahead: an ended event (end_at, or start_at without one) has no use for it. */}
           {!preview && data.status === "published" && (
-            <div className="flex flex-wrap gap-2 px-1 sm:px-2">
+            <div className="flex flex-wrap items-center gap-2 px-1 sm:px-2">
               {Date.parse(data.end_at ?? data.start_at) > now && (
                 <AddToCalendar links={data.calendar_links} />
               )}
+
               <HelpButton context={{ event_id: data.id }} />
+
+              <HelpButton
+                kind="report"
+                context={{ event_id: data.id }}
+                label="support.report.link"
+                title="support.report.title"
+                loginHint="support.report.loginFirst"
+                asLink
+              />
             </div>
           )}
         </header>

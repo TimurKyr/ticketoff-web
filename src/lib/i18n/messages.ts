@@ -937,6 +937,17 @@ export const ru = {
   "auth.reset.requestNew": "Запросить новое письмо",
   "notif.type.payout_status": "Статус выплаты",
   "notif.type.support_assignment": "Обращение назначено вам",
+  "support.report.link": "Пожаловаться",
+  "support.report.title": "Жалоба на событие",
+  "support.report.toPlatform": "Жалоба уйдёт команде ticketoff. Организатор её не увидит.",
+  "support.report.duplicate": "Ваша жалоба уже на рассмотрении",
+  "support.report.loginFirst": "Войдите, чтобы пожаловаться",
+  "admin.tab.reports": "Жалобы",
+  "admin.reports.empty": "Жалоб нет",
+  "admin.reports.suspend": "Приостановить событие",
+  "admin.reports.suspended": "Событие приостановлено",
+  "admin.reports.suspendTitle": "Приостановить событие?",
+  "admin.reports.suspendDesc": "Событие будет приостановлено. Вернуть его можно из вкладки «Поиск».",
 } as const;
 
 
@@ -1862,6 +1873,17 @@ export const kk: Messages = {
   "auth.reset.requestNew": "Жаңа хат сұрау",
   "notif.type.payout_status": "Аударым мәртебесі өзгерді",
   "notif.type.support_assignment": "Өтініш сізге тағайындалды",
+  "support.report.link": "Шағымдану",
+  "support.report.title": "Іс-шараға шағым",
+  "support.report.toPlatform": "Шағым ticketoff командасына жіберіледі. Ұйымдастырушы оны көрмейді.",
+  "support.report.duplicate": "Сіздің шағымыңыз қарастырылуда",
+  "support.report.loginFirst": "Шағымдану үшін кіріңіз",
+  "admin.tab.reports": "Шағымдар",
+  "admin.reports.empty": "Шағымдар жоқ",
+  "admin.reports.suspend": "Іс-шараны тоқтата тұру",
+  "admin.reports.suspended": "Іс-шара тоқтатылды",
+  "admin.reports.suspendTitle": "Іс-шараны тоқтата тұру керек пе?",
+  "admin.reports.suspendDesc": "Іс-шара тоқтатылады. Оны «Іздеу» қойындысынан қайта қосуға болады.",
 };
 
 // English (FE-23): complete, the demo at the defence runs in it. Every ru key must be here,
@@ -2794,6 +2816,17 @@ export const en: Record<MessageKey, string> = {
   "support.kind.report": "Report",
   "notif.type.payout_status": "Payout status",
   "notif.type.support_assignment": "Support case assigned",
+  "support.report.link": "Report",
+  "support.report.title": "Report an event",
+  "support.report.toPlatform": "Your report goes to the ticketoff team. The organizer won't see it.",
+  "support.report.duplicate": "Your report is already under review",
+  "support.report.loginFirst": "Log in to report",
+  "admin.tab.reports": "Reports",
+  "admin.reports.empty": "No reports",
+  "admin.reports.suspend": "Suspend event",
+  "admin.reports.suspended": "Event suspended",
+  "admin.reports.suspendTitle": "Suspend this event?",
+  "admin.reports.suspendDesc": "The event will be suspended. You can restore it from the Search tab.",
 };
 
 // Key order is the order of the switcher in the header and footer: Қаз · Рус · Eng.
