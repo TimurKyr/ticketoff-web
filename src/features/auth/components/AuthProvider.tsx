@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { setUnauthorizedHandler } from "@/lib/api/client";
 import { clearAuthToken, getAuthToken, setAuthToken } from "@/lib/auth/token";
+import { useI18n } from "@/lib/i18n";
 
 import * as authApi from "../api";
 import { AuthContext, AuthValue } from "../hooks/useAuth";
@@ -11,6 +12,7 @@ import { AuthContext, AuthValue } from "../hooks/useAuth";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { lang } = useI18n();
   const [hasToken, setHasToken] = useState(() => getAuthToken() !== null);
   // Set when the API rejected our token; protected pages then show "session expired" on /login.
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -64,13 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (email: string, password: string) => {
       // The backend emails a verification link; logging in does not wait for it.
-      // Email language: the API knows ru/en only (no kk yet), so ru for now.
-      await authApi.register({ email, password, language: "ru" });
+      // Email language: the API knows ru/en only (no kk yet), so kk gets ru emails.
+      await authApi.register({ email, password, language: lang === "en" ? "en" : "ru" });
       const me = await login(email, password);
       setJustRegistered(true);
       return me;
     },
-    [login]
+    [login, lang]
   );
 
   const logout = useCallback(() => {

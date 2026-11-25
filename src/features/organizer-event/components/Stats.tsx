@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { formatDecimal, formatPercent } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 /** One number with its label; `hint` is a short line under the number. */
@@ -33,12 +34,13 @@ export function SimulationBadge() {
 }
 
 /**
- * The 0–100 numbers the API gives (one decimal) as "12,5 %". By hand, not Intl: browsers
- * lack reliable "kk" data (see lib/format), and ru and kk both use a decimal comma.
+ * The 0–100 numbers the API gives (one decimal) as "12,5 %" (ru, kk) or "12.5%" (en). By hand,
+ * not Intl: browsers lack reliable "kk" data (see lib/format).
  */
 export function Percent({ value }: { value: number }) {
-  const text = Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
-  return <>{`${text}\u00a0%`}</>;
+  const { lang } = useI18n();
+  const text = Number.isInteger(value) ? String(value) : formatDecimal(value, lang);
+  return <>{formatPercent(text, lang)}</>;
 }
 
 /** Shown at the top of a tab on a past or cancelled event. */

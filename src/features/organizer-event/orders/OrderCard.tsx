@@ -54,7 +54,7 @@ export function OrderCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold">
-            № <span className="font-mono">{shortOrderId(order.id)}</span>
+            {t("common.numberSign")}<span className="font-mono">{shortOrderId(order.id)}</span>
           </span>
           <span
             className={`whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ${ORDER_STATUS_CLASSES[order.status]}`}

@@ -1,5 +1,5 @@
 import { ErrorState, Loading } from "@/components/ui/States";
-import { formatKzt } from "@/lib/format";
+import { formatKzt, formatPercent } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { usePaymentSummary } from "../api";
@@ -24,7 +24,7 @@ export function RevenueBlock({ eventId }: { eventId: string }) {
           <StatGrid>
             <StatCard label={t("orgEvent.money.gross")} value={formatKzt(summary.data.gross_kzt, lang)} />
             <StatCard
-              label={`${t("orgEvent.money.fees")} (${summary.data.fee_percent}\u00a0%)`}
+              label={`${t("orgEvent.money.fees")} (${formatPercent(summary.data.fee_percent, lang)})`}
               value={formatKzt(summary.data.fees_kzt, lang)}
             />
             <StatCard label={t("orgEvent.money.refunds")} value={formatKzt(summary.data.refunds_kzt, lang)} />

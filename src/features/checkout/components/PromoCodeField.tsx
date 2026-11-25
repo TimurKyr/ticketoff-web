@@ -83,7 +83,7 @@ export function PromoCodeField({ eventId, value, onChange, items, onDiscountChan
       </div>
       {shown?.ok && (
         <Alert tone="success">
-          {t("checkout.promoOk")} «{shown.ok.campaign_name}»:{" "}
+          {t("checkout.promoOk").replace("{campaign}", shown.ok.campaign_name)}:{" "}
           {shown.ok.discount_kzt != null
             ? // The server's discount on exactly the tickets picked (only the matching ones).
               `−${formatKzt(shown.ok.discount_kzt, lang)}. ${t("checkout.promoOnSelection")}`

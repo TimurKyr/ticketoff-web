@@ -3,7 +3,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { FormField, SelectField } from "@/components/ui/FormField";
 import { EmptyState, ErrorState, Loading } from "@/components/ui/States";
 import type { CampaignStatsOut, TicketTypeStatsOut } from "@/lib/api/types";
-import { formatKzt } from "@/lib/format";
+import { formatKzt, formatPercent } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 import { useCheckinStats, useEventAnalytics } from "../api";
@@ -75,7 +75,7 @@ function CampaignsTable({ campaigns }: { campaigns: CampaignStatsOut[] }) {
             <th scope="row" className="px-3 py-2 font-medium">
               {c.name}{" "}
               <span className="whitespace-nowrap text-xs font-normal text-gray-600">
-                {c.discount_type === "percent" ? `−${c.discount_value}\u00a0%` : `−${formatKzt(c.discount_value, lang)}`}
+                {c.discount_type === "percent" ? `−${formatPercent(c.discount_value, lang)}` : `−${formatKzt(c.discount_value, lang)}`}
               </span>
             </th>
             <td className="px-3 py-2 text-right tabular-nums">{c.redemptions}</td>
@@ -143,7 +143,7 @@ export function AnalyticsTab({ eventId, startAt }: { eventId: string; startAt?: 
         <StatGrid>
           <StatCard label={t("orgEvent.money.gross")} value={formatKzt(event.gross_kzt, lang)} hint={t("orgEvent.money.grossHint")} />
           <StatCard label={t("orgEvent.money.discounts")} value={formatKzt(event.discounts_kzt, lang)} />
-          <StatCard label={`${t("orgEvent.money.fees")} (${fee_percent}\u00a0%)`} value={formatKzt(event.fees_kzt, lang)} />
+          <StatCard label={`${t("orgEvent.money.fees")} (${formatPercent(fee_percent, lang)})`} value={formatKzt(event.fees_kzt, lang)} />
           <StatCard label={t("orgEvent.money.refunds")} value={formatKzt(event.refunds_kzt, lang)} />
           <StatCard label={t("orgEvent.money.payout")} value={formatKzt(event.estimated_payout_kzt, lang)} />
         </StatGrid>

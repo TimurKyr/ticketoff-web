@@ -3,30 +3,45 @@ import type { Language } from "@/lib/i18n";
 const NBSP = "\u00a0";
 
 /**
- * Whole tenge from the API → "15 000 ₸" in every language (non-breaking spaces).
- * `_lang` is accepted for call-site symmetry with the date helpers; the format is the same.
+ * Whole tenge from the API → "15 000 ₸" in ru and kk, "15,000 ₸" in en (thousands
+ * separator of that language; the sign stays after the number in all three).
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function formatKzt(amount: number, _lang?: Language): string {
+export function formatKzt(amount: number, lang?: Language): string {
   const sign = amount < 0 ? "−" : "";
   const digits = String(Math.round(Math.abs(amount)));
-  return `${sign}${digits.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP)}${NBSP}₸`;
+  const group = lang === "en" ? "," : NBSP;
+  return `${sign}${digits.replace(/\B(?=(\d{3})+(?!\d))/g, group)}${NBSP}₸`;
+}
+
+/** "3 %" in ru and kk (non-breaking space), "3%" in en. */
+export function formatPercent(value: number | string, lang: Language): string {
+  return lang === "en" ? `${value}%` : `${value}${NBSP}%`;
+}
+
+/** One decimal for the given language: "4,2" in ru and kk, "4.2" in en. */
+export function formatDecimal(value: number, lang: Language): string {
+  const text = value.toFixed(1);
+  return lang === "en" ? text : text.replace(".", ",");
 }
 
 // Own month and weekday names: Intl has no reliable "kk" data in every browser
-// (Chrome prints "2026 M12 7"), so dates never depend on it.
+// (Chrome prints "2026 M12 7"), so dates never depend on it. English follows en-GB:
+// day before month and a 24-hour clock, as in ru/kk and in the backend's English emails.
 const MONTHS: Record<Language, string[]> = {
   ru: ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
   kk: ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
 };
 const MONTHS_SHORT: Record<Language, string[]> = {
   ru: ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
   kk: ["қаң", "ақп", "нау", "сәу", "мам", "мау", "шіл", "там", "қыр", "қаз", "қар", "жел"],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 };
 // Sunday first, as Date.getUTCDay().
 const WEEKDAYS: Record<Language, string[]> = {
   ru: ["вс", "пн", "вт", "ср", "чт", "пт", "сб"],
   kk: ["жс", "дс", "сс", "ср", "бс", "жм", "сб"],
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
 };
 
 interface WallClock {
@@ -72,25 +87,33 @@ function wallClock(iso: string, timeZone: string = DEFAULT_TIME_ZONE): WallClock
 /**
  * Date and time in the venue's time zone (Kazakhstan time when none is given), with that
  * zone's offset so a buyer abroad does not read it as local time:
- * "7 декабря 2026, пн · 19:00 GMT+5", "7 желтоқсан 2026, дс · 19:00 GMT+5".
+ * "7 декабря 2026, пн · 19:00 GMT+5", "7 желтоқсан 2026, дс · 19:00 GMT+5",
+ * "Mon, 7 December 2026 · 19:00 GMT+5".
  */
 export function formatDateTime(iso: string, lang: Language, timeZone?: string): string {
   const w = wallClock(iso, timeZone);
+  if (lang === "en") {
+    return `${WEEKDAYS.en[w.weekday]}, ${w.day} ${MONTHS.en[w.month]} ${w.year} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
+  }
   return `${w.day} ${MONTHS[lang][w.month]} ${w.year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
 /**
- * Short form for cards, same zone label: "7 дек, пн · 19:00 GMT+5" (year only if not this one).
+ * Short form for cards, same zone label: "7 дек, пн · 19:00 GMT+5", "Mon, 7 Dec · 19:00 GMT+5"
+ * (year only if not this one).
  */
 export function formatShortDateTime(iso: string, lang: Language, timeZone?: string): string {
   const w = wallClock(iso, timeZone);
   const year = w.year !== wallClock(new Date().toISOString(), timeZone).year ? ` ${w.year}` : "";
+  if (lang === "en") {
+    return `${WEEKDAYS.en[w.weekday]}, ${w.day} ${MONTHS_SHORT.en[w.month]}${year} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
+  }
   return `${w.day} ${MONTHS_SHORT[lang][w.month]}${year}, ${WEEKDAYS[lang][w.weekday]} · ${w.hh}:${w.mm}${NBSP}${w.zone}`;
 }
 
 /**
  * A calendar day from the API ("2026-11-21", already in the venue's zone) → "21 ноя"
- * ("21 қар" in kk), with the year when it is not this year. No time-zone conversion.
+ * ("21 қар" in kk, "21 Nov" in en), with the year when it is not this year. No time-zone conversion.
  */
 export function formatDay(day: string, lang: Language): string {
   const [y, m, d] = day.split("-").map(Number);
